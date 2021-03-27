@@ -1,3 +1,7 @@
 /train_images/
 /test_images/
 /.idea/
+/venv/
+/train_tfrecords/
+/test_tfrecords/
+/train_tfrecords_decode_resize/
