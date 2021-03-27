@@ -12,22 +12,11 @@ import math
 
 Visualization = False
 NUMBER_IN_TFRECORD = 128
-SEED = 2021
 TRAIN_DATA_ROOT = "./train_images"
 TEST_DATA_ROOT = "./test_images"
 train_data = pd.read_csv("./train.csv", encoding='utf-8')
 test_data = os.listdir(TEST_DATA_ROOT)
 print("label type:", len(set(train_data["labels"])))
-
-
-def seed_everything(seed):
-    random.seed(seed)
-    os.environ['PYTHONHASHSEED'] = str(seed)
-    np.random.seed(seed)
-    tf.random.set_seed(seed)
-
-
-seed_everything(SEED)
 
 label2id = {
     'scab': 0,
@@ -43,6 +32,7 @@ label2id = {
     'rust complex': 10,
     'powdery_mildew complex': 11
 }
+
 # id2label用于输入0-11, 查找label原始名称
 id2label = dict([(value, key) for key, value in label2id.items()])
 # print(id2label)

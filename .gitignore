@@ -5,3 +5,4 @@
 /train_tfrecords/
 /test_tfrecords/
 /train_tfrecords_decode_resize/
+/mean_std_information/
