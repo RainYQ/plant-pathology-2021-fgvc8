@@ -5,14 +5,28 @@ import tensorflow as tf
 from PIL import Image
 import math
 import threading
+import pandas as pd
+import tensorflow_addons as tfa
+from GroupNormalization import GroupNormalization
+import tensorflow_model_analysis as tfma
+from sklearn.model_selection import StratifiedKFold
+from matplotlib import pyplot as plt
+from tqdm import tqdm
+from sklearn.metrics import f1_score
 
+
+gpus = tf.config.experimental.list_physical_devices('GPU')
+for gpu in gpus:
+    tf.config.experimental.set_memory_growth(gpu, True)
 # R G B
 mean = [124.23002308, 159.76066492, 104.05509866]
 std = [47.84116963, 41.94039282, 49.85093766]
 
+CLASS_N = 12
+
 cfg = {
     'data_params': {
-        'img_shape': (512, 512)
+        'img_shape': (256, 256)
     },
     'model_params': {
         'batchsize_per_gpu': 8,
@@ -144,23 +158,181 @@ def _decode_image_function(single_photo):
 
 
 def _preprocess_image_function(single_photo):
-    image = tf.expand_dims(single_photo['data'], axis=0)
-    image = tf.image.convert_image_dtype(image, tf.float32)
+    # image = tf.expand_dims(single_photo['data'], axis=0)
+    image = tf.image.convert_image_dtype(single_photo['data'], tf.float32)
     image = tf.image.resize(images=image, size=[HEIGHT, WIDTH])
-    i1 = (image[:, :, :, 0] - mean[0] / 255.0) / std[0] * 255.0
-    i2 = (image[:, :, :, 1] - mean[1] / 255.0) / std[1] * 255.0
-    i3 = (image[:, :, :, 2] - mean[2] / 255.0) / std[2] * 255.0
-    # use the train dataset data
-    image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=3)
+    i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
+    i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
+    i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
+    # use the all dataset data
+    image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
     # image = tf.image.per_image_standardization(image)
+    # 高斯噪声的标准差为0.3
+    gau = tf.keras.layers.GaussianNoise(0.3)
+    # 以50％的概率为图像添加高斯噪声
+    image = tf.cond(tf.random.uniform([]) < 0.5, lambda: gau(image), lambda: image)
+    # brightness随机调整
+    image = tf.image.random_brightness(image, 0.2)
+    # random left right flip
+    image = tf.image.random_flip_left_right(image)
     single_photo['data'] = image
     return single_photo
 
 
-parsed_image_dataset = (raw_image_dataset.map(_parse_image_function)
-                        .map(_decode_image_function)
-                        .map(_preprocess_image_function))
-for image_features in parsed_image_dataset:
-    image = image_features['data'].numpy()
-    image = Image.fromarray(np.uint8(image[0] * 255.0)).convert('RGB')
-    image.show()
+def _preprocess_image_val_function(single_photo):
+    # image = tf.expand_dims(single_photo['data'], axis=0)
+    image = tf.image.convert_image_dtype(single_photo['data'], tf.float32)
+    image = tf.image.resize(images=image, size=[HEIGHT, WIDTH])
+    i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
+    i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
+    i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
+    # use the all dataset data
+    image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
+    single_photo['data'] = image
+    return single_photo
+
+
+def create_idx_filter(indice):
+    def _filt(i, single_photo):
+        return tf.reduce_any(indice == i)
+
+    return _filt
+
+
+def _remove_idx(i, single_photo):
+    return single_photo
+
+
+def _create_annot(single_photo):
+    targ = tf.one_hot(single_photo["label"], CLASS_N, off_value=0)
+    targ = tf.cast(targ, tf.float32)
+    return single_photo["data"], targ
+
+
+indices = []
+name = []
+label = []
+preprocess_dataset = (raw_image_dataset.map(_parse_image_function, num_parallel_calls=AUTOTUNE)
+                      .prefetch(AUTOTUNE)
+                      .cache()
+                      .enumerate())
+for i, sample in tqdm(preprocess_dataset):
+    indices.append(i.numpy())
+    label.append(sample['label'].numpy())
+    name.append(sample['name'].numpy().decode())
+
+table = pd.DataFrame({'indices': indices, 'name': name, 'label': label})
+skf = StratifiedKFold(n_splits=5, random_state=SEED, shuffle=True)
+splits = list(skf.split(table.index, table.label))
+
+
+def create_train_dataset(batchsize, train_idx):
+    dataset = (preprocess_dataset
+               .filter(create_idx_filter(train_idx))
+               .map(_remove_idx))
+    dataset = (dataset.cache()
+               .shuffle(len(train_idx))
+               .repeat()
+               .map(_decode_image_function, num_parallel_calls=AUTOTUNE)
+               .map(_preprocess_image_function, num_parallel_calls=AUTOTUNE)
+               .map(_create_annot, num_parallel_calls=AUTOTUNE)
+               .batch(batchsize)
+               .prefetch(AUTOTUNE))
+    return dataset
+
+
+def create_val_dataset(batchsize, val_idx):
+    dataset = (preprocess_dataset
+               .filter(create_idx_filter(val_idx))
+               .map(_remove_idx))
+    dataset = (dataset.cache()
+               .shuffle(len(val_idx))
+               .map(_decode_image_function, num_parallel_calls=AUTOTUNE)
+               .map(_preprocess_image_val_function, num_parallel_calls=AUTOTUNE)
+               .map(_create_annot, num_parallel_calls=AUTOTUNE)
+               .batch(batchsize)
+               .prefetch(AUTOTUNE))
+    return dataset
+
+
+def create_model():
+    backbone = tf.keras.applications.EfficientNetB0(weights="imagenet", include_top=False,
+                                                    input_shape=(HEIGHT, WIDTH, 3), classes=CLASS_N)
+
+    model = tf.keras.Sequential([
+        backbone,
+        tf.keras.layers.GlobalAveragePooling2D(),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.Dense(1024, activation='relu', kernel_initializer=tf.keras.initializers.he_normal()),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.Dense(CLASS_N, bias_initializer=tf.keras.initializers.Constant(-2.))])
+    return model
+
+
+def plot_history(history, name):
+    plt.figure(figsize=(8, 3))
+    plt.subplot(1, 2, 1)
+    plt.plot(history.history["loss"])
+    plt.plot(history.history["val_loss"])
+    plt.legend(['Train', 'Test'], loc='upper left')
+    plt.title("loss")
+    # plt.yscale('log')
+    plt.subplot(1, 2, 2)
+    plt.plot(history.history["lwlrap"])
+    plt.plot(history.history["val_lwlrap"])
+    plt.legend(['Train', 'Test'], loc='upper left')
+    plt.title("metric")
+    plt.savefig(name)
+
+
+def f1_score_metrics(y_true, y_pred):
+    y_pred = tf.round(y_pred)
+    tp = tf.reduce_sum(tf.cast(y_true * y_pred, tf.float32), axis=0)
+    fp = tf.reduce_sum(tf.cast((1 - y_true) * y_pred, tf.float32), axis=0)
+    fn = tf.reduce_sum(tf.cast(y_true * (1 - y_pred), tf.float32), axis=0)
+    p = tp / (tp + fp + tf.keras.backend.epsilon())
+    r = tp / (tp + fn + tf.keras.backend.epsilon())
+    f1 = 2 * p * r / (p + r + tf.keras.backend.epsilon())
+    f1 = tf.where(tf.math.is_nan(f1), tf.zeros_like(f1), f1)
+    return tf.reduce_mean(f1)
+
+
+def train(splits, split_id):
+    batchsize = cfg['model_params']['batchsize_per_gpu']
+    print("batchsize", batchsize)
+    optimizer = tfa.optimizers.RectifiedAdam(lr=1e-4, total_steps=150 * 256, warmup_proportion=0.3, min_lr=1e-6)
+    model = create_model()
+    model.compile(optimizer=optimizer,
+                  loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=True),
+                  metrics=f1_score_metrics)
+    idx_train_tf = tf.cast(tf.constant(splits[split_id][0]), tf.int64)
+    idx_val_tf = tf.cast(tf.constant(splits[split_id][1]), tf.int64)
+    dataset = create_train_dataset(batchsize, idx_train_tf)
+    vdataset = create_val_dataset(batchsize, idx_val_tf)
+    history = model.fit(dataset,
+                        batch_size=cfg['model_params']['batchsize_per_gpu'],
+                        steps_per_epoch=cfg['model_params']['iteration_per_epoch'],
+                        epochs=cfg['model_params']['epoch'],
+                        validation_data=vdataset,
+                        callbacks=[
+                            tf.keras.callbacks.ModelCheckpoint(
+                                filepath='./model/model_best_%d.h5' % split_id,
+                                save_weights_only=True,
+                                monitor='val_f1_score_metrics',
+                                mode='max',
+                                save_best_only=True),
+                        ])
+    plot_history(history, 'history_%d.png' % split_id)
+
+
+for i in range(5):
+    train(splits, i)
+
+# for image_features in parsed_image_dataset:
+#     image = image_features['data'].numpy()
+#     image = Image.fromarray(np.uint8(image[0] * 255.0)).convert('RGB')
+#     image.show()
+#     filename, extension = os.path.splitext(image_features['name'].numpy().decode())
+#     image.save("./preprocess/" + filename + ".png")
