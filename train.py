@@ -22,7 +22,7 @@ mean = [124.23002308, 159.76066492, 104.05509866]
 std = [47.84116963, 41.94039282, 49.85093766]
 
 CLASS_N = 12
-1
+
 cfg = {
     'data_params': {
         'img_shape': (256, 256)
@@ -291,7 +291,7 @@ def create_model():
 
 
 def plot_history(history, name):
-    plt.figure(figsize=(8, 3))
+    plt.figure(figsize=(16, 3))
     plt.subplot(1, 3, 1)
     plt.plot(history.history["loss"])
     plt.plot(history.history["val_loss"])
@@ -302,7 +302,7 @@ def plot_history(history, name):
     plt.plot(history.history["f1_score"])
     plt.plot(history.history["val_f1_score"])
     plt.legend(['Train', 'Val'], loc='upper left')
-    plt.title("metric")
+    plt.title("F1-Score")
     plt.subplot(1, 3, 3)
     plt.plot(history.history["accuracy"])
     plt.plot(history.history["val_accuracy"])
@@ -367,11 +367,11 @@ def plot_history(history, name):
 def train(splits, split_id):
     batchsize = cfg['model_params']['batchsize_per_gpu']
     print("batchsize", batchsize)
-    optimizer = tfa.optimizers.RectifiedAdam(lr=1e-3,
+    optimizer = tfa.optimizers.RectifiedAdam(lr=2e-4,
                                              total_steps=cfg['model_params']['iteration_per_epoch'] *
                                                          cfg['model_params']['epoch'],
                                              warmup_proportion=0.3,
-                                             min_lr=1e-6)
+                                             min_lr=1e-7)
     model = create_model()
     # use tfa.metrics.F1Score and CategoricalAccuracy validate
     # metrics = [tf.keras.metrics.CategoricalAccuracy(), tfa.metrics.F1Score(num_classes=CLASS_N, average='macro')]
