@@ -14,7 +14,6 @@ from matplotlib import pyplot as plt
 from tqdm import tqdm
 from sklearn.metrics import f1_score
 
-
 gpus = tf.config.experimental.list_physical_devices('GPU')
 for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
@@ -23,13 +22,13 @@ mean = [124.23002308, 159.76066492, 104.05509866]
 std = [47.84116963, 41.94039282, 49.85093766]
 
 CLASS_N = 12
-
+1
 cfg = {
     'data_params': {
         'img_shape': (256, 256)
     },
     'model_params': {
-        'batchsize_per_gpu': 8,
+        'batchsize_per_gpu': 16,
         'iteration_per_epoch': 128,
         'epoch': 150
     }
@@ -206,8 +205,27 @@ def _remove_idx(i, single_photo):
 def _create_annot(single_photo):
     targ = tf.one_hot(single_photo["label"], CLASS_N, off_value=0)
     targ = tf.cast(targ, tf.float32)
-    return single_photo["data"], targ
+    return single_photo['data'], targ
 
+
+def _create_annot_test(single_photo):
+    targ = tf.one_hot(single_photo["label"], CLASS_N, off_value=0)
+    targ = tf.cast(targ, tf.float32)
+    return single_photo['data'], targ, single_photo['name']
+
+
+# parsed_image_dataset = (raw_image_dataset.map(_parse_image_function, num_parallel_calls=AUTOTUNE)
+#                         .map(_decode_image_function, num_parallel_calls=AUTOTUNE)
+#                         .map(_preprocess_image_function, num_parallel_calls=AUTOTUNE)
+#                         .map(_create_annot, num_parallel_calls=AUTOTUNE))
+# for image_features in parsed_image_dataset:
+#     # image = image_features['data'].numpy()
+#     # image = Image.fromarray(np.uint8(image[0] * 255.0)).convert('RGB')
+#     # image.show()
+#     print(image_features[0]['name'].numpy().decode())
+#     print(image_features[1].numpy())
+#     # filename, extension = os.path.splitext(image_features['name'].numpy().decode())
+#     # image.save("./preprocess/" + filename + ".png")
 
 indices = []
 name = []
@@ -227,10 +245,11 @@ splits = list(skf.split(table.index, table.label))
 
 
 def create_train_dataset(batchsize, train_idx):
-    dataset = (preprocess_dataset
-               .filter(create_idx_filter(train_idx))
-               .map(_remove_idx))
-    dataset = (dataset.cache()
+    global preprocess_dataset
+    parsed_train = (preprocess_dataset
+                    .filter(create_idx_filter(train_idx))
+                    .map(_remove_idx))
+    dataset = (parsed_train.cache()
                .shuffle(len(train_idx))
                .repeat()
                .map(_decode_image_function, num_parallel_calls=AUTOTUNE)
@@ -242,16 +261,16 @@ def create_train_dataset(batchsize, train_idx):
 
 
 def create_val_dataset(batchsize, val_idx):
-    dataset = (preprocess_dataset
-               .filter(create_idx_filter(val_idx))
-               .map(_remove_idx))
-    dataset = (dataset.cache()
-               .shuffle(len(val_idx))
+    global preprocess_dataset
+    parsed_val = (preprocess_dataset
+                  .filter(create_idx_filter(val_idx))
+                  .map(_remove_idx))
+    dataset = (parsed_val
                .map(_decode_image_function, num_parallel_calls=AUTOTUNE)
                .map(_preprocess_image_val_function, num_parallel_calls=AUTOTUNE)
                .map(_create_annot, num_parallel_calls=AUTOTUNE)
                .batch(batchsize)
-               .prefetch(AUTOTUNE))
+               .cache())
     return dataset
 
 
@@ -262,51 +281,103 @@ def create_model():
     model = tf.keras.Sequential([
         backbone,
         tf.keras.layers.GlobalAveragePooling2D(),
-        tf.keras.layers.BatchNormalization(),
+        GroupNormalization(group=32),
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(1024, activation='relu', kernel_initializer=tf.keras.initializers.he_normal()),
-        tf.keras.layers.BatchNormalization(),
+        GroupNormalization(group=32),
         tf.keras.layers.Dropout(0.5),
-        tf.keras.layers.Dense(CLASS_N, bias_initializer=tf.keras.initializers.Constant(-2.))])
+        tf.keras.layers.Dense(CLASS_N, bias_initializer=tf.keras.initializers.Constant(-2.), activation="softmax")])
     return model
 
 
 def plot_history(history, name):
     plt.figure(figsize=(8, 3))
-    plt.subplot(1, 2, 1)
+    plt.subplot(1, 3, 1)
     plt.plot(history.history["loss"])
     plt.plot(history.history["val_loss"])
-    plt.legend(['Train', 'Test'], loc='upper left')
+    plt.legend(['Train', 'Val'], loc='upper left')
     plt.title("loss")
     # plt.yscale('log')
-    plt.subplot(1, 2, 2)
-    plt.plot(history.history["lwlrap"])
-    plt.plot(history.history["val_lwlrap"])
-    plt.legend(['Train', 'Test'], loc='upper left')
+    plt.subplot(1, 3, 2)
+    plt.plot(history.history["f1_score"])
+    plt.plot(history.history["val_f1_score"])
+    plt.legend(['Train', 'Val'], loc='upper left')
+    plt.title("metric")
+    plt.subplot(1, 3, 3)
+    plt.plot(history.history["accuracy"])
+    plt.plot(history.history["val_accuracy"])
+    plt.legend(['Train', 'Val'], loc='upper left')
     plt.title("metric")
     plt.savefig(name)
 
 
-def f1_score_metrics(y_true, y_pred):
-    y_pred = tf.round(y_pred)
-    tp = tf.reduce_sum(tf.cast(y_true * y_pred, tf.float32), axis=0)
-    fp = tf.reduce_sum(tf.cast((1 - y_true) * y_pred, tf.float32), axis=0)
-    fn = tf.reduce_sum(tf.cast(y_true * (1 - y_pred), tf.float32), axis=0)
-    p = tp / (tp + fp + tf.keras.backend.epsilon())
-    r = tp / (tp + fn + tf.keras.backend.epsilon())
-    f1 = 2 * p * r / (p + r + tf.keras.backend.epsilon())
-    f1 = tf.where(tf.math.is_nan(f1), tf.zeros_like(f1), f1)
-    return tf.reduce_mean(f1)
+# 计算有问题
+# 初步估计是因为batchsize比较小，一次计算出来的f1-score中某些类没有出现过
+# def f1_score_metrics(y_true, y_pred):
+#     y_pred = tf.round(y_pred)
+#     tp = tf.reduce_sum(tf.cast(y_true * y_pred, tf.float32), axis=0)
+#     fp = tf.reduce_sum(tf.cast((1 - y_true) * y_pred, tf.float32), axis=0)
+#     fn = tf.reduce_sum(tf.cast(y_true * (1 - y_pred), tf.float32), axis=0)
+#     p = tp / (tp + fp + tf.keras.backend.epsilon())
+#     r = tp / (tp + fn + tf.keras.backend.epsilon())
+#     f1 = 2 * p * r / (p + r + tf.keras.backend.epsilon())
+#     f1 = tf.where(tf.math.is_nan(f1), tf.zeros_like(f1), f1)
+#     return tf.reduce_mean(f1)
+
+
+# def inference(model):
+#     model.load_weights('./model/EfficientNetB0-0328/model_best_0.h5')
+#     tdataset = (tf.data.TFRecordDataset('./train_tfrecords/train_0.tfrecords', num_parallel_reads=AUTOTUNE)
+#                 .map(_parse_image_function, num_parallel_calls=AUTOTUNE)
+#                 .map(_decode_image_function, num_parallel_calls=AUTOTUNE)
+#                 .map(_preprocess_image_val_function, num_parallel_calls=AUTOTUNE)
+#                 .map(_create_annot_test, num_parallel_calls=AUTOTUNE)
+#                 .batch(64).prefetch(AUTOTUNE))
+#     rec_ids = []
+#     probs = []
+#     for data, label, name in tqdm(tdataset):
+#         pred = model.predict_on_batch(tf.reshape(data, [-1, HEIGHT, WIDTH, 3]))
+#         prob = tf.reduce_max(tf.reshape(pred, [-1, 1, CLASS_N]), axis=1)
+#         rec_id_stack = tf.reshape(name, [-1, 1])
+#         for rec in name.numpy():
+#             assert len(np.unique(rec)) == 1
+#         rec_ids.append(rec_id_stack.numpy()[:, 0])
+#         probs.append(prob.numpy())
+#         print('scikit-learn', f1_score(label.numpy(), tf.round(prob.numpy()), average='macro'))
+#         metric = tfa.metrics.F1Score(num_classes=CLASS_N, threshold=0.5, average='macro')
+#         metric.update_state(label, prob)
+#         result = metric.result()
+#         print('tfa', result.numpy())
+#
+#     crec_ids = np.concatenate(rec_ids)
+#     cprobs = np.concatenate(probs)
+#
+#     sub = pd.DataFrame({
+#         'name': list(map(lambda x: x.decode(), crec_ids.tolist())),
+#         **{f's{i}': cprobs[:, i] / 5 for i in range(CLASS_N)}
+#     })
+#     sub = sub.sort_values('name')
+#     return sub
+#
+#
+# model = create_model()
+# inference(model)
 
 
 def train(splits, split_id):
     batchsize = cfg['model_params']['batchsize_per_gpu']
     print("batchsize", batchsize)
-    optimizer = tfa.optimizers.RectifiedAdam(lr=1e-4, total_steps=150 * 256, warmup_proportion=0.3, min_lr=1e-6)
+    optimizer = tfa.optimizers.RectifiedAdam(lr=1e-3,
+                                             total_steps=cfg['model_params']['iteration_per_epoch'] *
+                                                         cfg['model_params']['epoch'],
+                                             warmup_proportion=0.3,
+                                             min_lr=1e-6)
     model = create_model()
+    # use tfa.metrics.F1Score and CategoricalAccuracy validate
+    # metrics = [tf.keras.metrics.CategoricalAccuracy(), tfa.metrics.F1Score(num_classes=CLASS_N, average='macro')]
     model.compile(optimizer=optimizer,
-                  loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=True),
-                  metrics=f1_score_metrics)
+                  loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=False),
+                  metrics=['accuracy', tfa.metrics.F1Score(num_classes=CLASS_N, threshold=0.5, average='macro')])
     idx_train_tf = tf.cast(tf.constant(splits[split_id][0]), tf.int64)
     idx_val_tf = tf.cast(tf.constant(splits[split_id][1]), tf.int64)
     dataset = create_train_dataset(batchsize, idx_train_tf)
@@ -320,7 +391,7 @@ def train(splits, split_id):
                             tf.keras.callbacks.ModelCheckpoint(
                                 filepath='./model/model_best_%d.h5' % split_id,
                                 save_weights_only=True,
-                                monitor='val_f1_score_metrics',
+                                monitor='val_f1_score',
                                 mode='max',
                                 save_best_only=True),
                         ])
@@ -329,10 +400,3 @@ def train(splits, split_id):
 
 for i in range(5):
     train(splits, i)
-
-# for image_features in parsed_image_dataset:
-#     image = image_features['data'].numpy()
-#     image = Image.fromarray(np.uint8(image[0] * 255.0)).convert('RGB')
-#     image.show()
-#     filename, extension = os.path.splitext(image_features['name'].numpy().decode())
-#     image.save("./preprocess/" + filename + ".png")
