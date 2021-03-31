@@ -78,8 +78,9 @@ def create_dataset(train_data, i):
             writer.write(exam.SerializeToString())
 
 
-# Enable Multi-Thread
-for n in range(math.ceil(train_data.shape[0] / NUMBER_IN_TFRECORD)):
-    t1 = threading.Thread(target=create_dataset, args=(
-        train_data[n * NUMBER_IN_TFRECORD:min((n + 1) * NUMBER_IN_TFRECORD, train_data.shape[0])], n))
-    t1.start()
+if __name__ == "__main__":
+    # Enable Multi-Thread
+    for n in range(math.ceil(train_data.shape[0] / NUMBER_IN_TFRECORD)):
+        t1 = threading.Thread(target=create_dataset, args=(
+            train_data[n * NUMBER_IN_TFRECORD:min((n + 1) * NUMBER_IN_TFRECORD, train_data.shape[0])], n))
+        t1.start()
