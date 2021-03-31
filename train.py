@@ -12,7 +12,10 @@ import tensorflow_model_analysis as tfma
 from sklearn.model_selection import StratifiedKFold
 from matplotlib import pyplot as plt
 from tqdm import tqdm
+import efficientnet.tfkeras as efn
 from sklearn.metrics import f1_score
+from Preprocess import label2id
+from Preprocess import id2label
 
 gpus = tf.config.experimental.list_physical_devices('GPU')
 for gpu in gpus:
@@ -29,8 +32,8 @@ cfg = {
     },
     'model_params': {
         'batchsize_per_gpu': 16,
-        'iteration_per_epoch': 128,
-        'epoch': 150
+        'iteration_per_epoch': 1024,
+        'epoch': 30
     }
 }
 
@@ -39,7 +42,15 @@ HEIGHT = cfg['data_params']['img_shape'][1]
 SEED = 2021
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 TRAIN_DATA_ROOT = "./train_images"
+TEST_DATA_ROOT = "./test_images"
+train_data = pd.read_csv("./train.csv", encoding='utf-8')
+data_count = train_data["labels"].value_counts()
+prob = []
+for k in range(12):
+    prob.append(data_count[k] / 18362)
 train_img_lists = os.listdir(TRAIN_DATA_ROOT)
+test_img_lists = os.listdir(TEST_DATA_ROOT)
+test_img_path_lists = [os.path.join(TEST_DATA_ROOT, name) for name in test_img_lists]
 
 
 # result_mean_R = []
@@ -156,6 +167,18 @@ def _decode_image_function(single_photo):
     return single_photo
 
 
+def _preprocess_image_test_function(name, path):
+    image = tf.io.read_file(path, 'rb')
+    image = tf.image.decode_jpeg(image, channels=3)
+    image = tf.image.convert_image_dtype(image, tf.float32)
+    image = tf.image.resize(images=image, size=[HEIGHT, WIDTH])
+    i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
+    i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
+    i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
+    image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
+    return image, name
+
+
 def _preprocess_image_function(single_photo):
     # image = tf.expand_dims(single_photo['data'], axis=0)
     image = tf.image.convert_image_dtype(single_photo['data'], tf.float32)
@@ -174,6 +197,8 @@ def _preprocess_image_function(single_photo):
     image = tf.image.random_brightness(image, 0.2)
     # random left right flip
     image = tf.image.random_flip_left_right(image)
+    # random up down flip
+    image = tf.image.random_flip_up_down(image)
     single_photo['data'] = image
     return single_photo
 
@@ -208,10 +233,10 @@ def _create_annot(single_photo):
     return single_photo['data'], targ
 
 
-def _create_annot_test(single_photo):
-    targ = tf.one_hot(single_photo["label"], CLASS_N, off_value=0)
-    targ = tf.cast(targ, tf.float32)
-    return single_photo['data'], targ, single_photo['name']
+# def _create_annot_test(single_photo):
+#     targ = tf.one_hot(single_photo["label"], CLASS_N, off_value=0)
+#     targ = tf.cast(targ, tf.float32)
+#     return single_photo['data'], targ, single_photo['name']
 
 
 # parsed_image_dataset = (raw_image_dataset.map(_parse_image_function, num_parallel_calls=AUTOTUNE)
@@ -232,16 +257,28 @@ name = []
 label = []
 preprocess_dataset = (raw_image_dataset.map(_parse_image_function, num_parallel_calls=AUTOTUNE)
                       .prefetch(AUTOTUNE)
-                      .cache()
                       .enumerate())
+label_index = []
+for j in range(12):
+    label_index.append([])
 for i, sample in tqdm(preprocess_dataset):
     indices.append(i.numpy())
     label.append(sample['label'].numpy())
+    label_index[sample['label'].numpy()].append(i.numpy())
     name.append(sample['name'].numpy().decode())
 
 table = pd.DataFrame({'indices': indices, 'name': name, 'label': label})
 skf = StratifiedKFold(n_splits=5, random_state=SEED, shuffle=True)
 splits = list(skf.split(table.index, table.label))
+
+
+# Verify KFold. Pass...
+# data_count = table['label'][splits[0][1]].value_counts()
+# print(data_count)
+# plt.bar([i for i in range(12)], data_count)
+# plt.xlabel('label type')
+# plt.ylabel('count')
+# plt.show()
 
 
 def create_train_dataset(batchsize, train_idx):
@@ -275,18 +312,33 @@ def create_val_dataset(batchsize, val_idx):
 
 
 def create_model():
-    backbone = tf.keras.applications.EfficientNetB0(weights="imagenet", include_top=False,
-                                                    input_shape=(HEIGHT, WIDTH, 3), classes=CLASS_N)
+    # backbone = tf.keras.applications.ResNet50(weights="imagenet", include_top=False,
+    #                                           input_shape=(HEIGHT, WIDTH, 3), classes=CLASS_N)
+    backbone = efn.EfficientNetB0(
+        include_top=False,
+        input_shape=(HEIGHT, WIDTH, 3),
+        weights='noisy-student',
+        pooling='avg'
+    )
 
     model = tf.keras.Sequential([
         backbone,
-        tf.keras.layers.GlobalAveragePooling2D(),
+        # tf.keras.layers.GlobalAveragePooling2D(),
         GroupNormalization(group=32),
         tf.keras.layers.Dropout(0.5),
-        tf.keras.layers.Dense(1024, activation='relu', kernel_initializer=tf.keras.initializers.he_normal()),
+        tf.keras.layers.Dense(512, activation='relu', kernel_initializer=tf.keras.initializers.he_normal()),
         GroupNormalization(group=32),
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(CLASS_N, bias_initializer=tf.keras.initializers.Constant(-2.), activation="softmax")])
+    optimizer = tfa.optimizers.RectifiedAdam(lr=1e-3,
+                                             total_steps=cfg['model_params']['iteration_per_epoch'] *
+                                                         cfg['model_params']['epoch'],
+                                             warmup_proportion=0.1,
+                                             min_lr=1e-8)
+    # 使用FacalLoss和RectifiedAdam
+    model.compile(optimizer=optimizer,
+                  loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=False),
+                  metrics=['accuracy', tfa.metrics.F1Score(num_classes=CLASS_N, threshold=0.5, average='macro')])
     return model
 
 
@@ -324,65 +376,65 @@ def plot_history(history, name):
 #     f1 = tf.where(tf.math.is_nan(f1), tf.zeros_like(f1), f1)
 #     return tf.reduce_mean(f1)
 
+tdataset = (tf.data.Dataset.from_tensor_slices((test_img_lists, test_img_path_lists))
+            .map(_preprocess_image_test_function, num_parallel_calls=AUTOTUNE)
+            .batch(64).prefetch(AUTOTUNE))
 
-# def inference(model):
-#     model.load_weights('./model/EfficientNetB0-0328/model_best_0.h5')
-#     tdataset = (tf.data.TFRecordDataset('./train_tfrecords/train_0.tfrecords', num_parallel_reads=AUTOTUNE)
-#                 .map(_parse_image_function, num_parallel_calls=AUTOTUNE)
-#                 .map(_decode_image_function, num_parallel_calls=AUTOTUNE)
-#                 .map(_preprocess_image_val_function, num_parallel_calls=AUTOTUNE)
-#                 .map(_create_annot_test, num_parallel_calls=AUTOTUNE)
-#                 .batch(64).prefetch(AUTOTUNE))
-#     rec_ids = []
-#     probs = []
-#     for data, label, name in tqdm(tdataset):
-#         pred = model.predict_on_batch(tf.reshape(data, [-1, HEIGHT, WIDTH, 3]))
-#         prob = tf.reduce_max(tf.reshape(pred, [-1, 1, CLASS_N]), axis=1)
-#         rec_id_stack = tf.reshape(name, [-1, 1])
-#         for rec in name.numpy():
-#             assert len(np.unique(rec)) == 1
-#         rec_ids.append(rec_id_stack.numpy()[:, 0])
-#         probs.append(prob.numpy())
-#         print('scikit-learn', f1_score(label.numpy(), tf.round(prob.numpy()), average='macro'))
-#         metric = tfa.metrics.F1Score(num_classes=CLASS_N, threshold=0.5, average='macro')
-#         metric.update_state(label, prob)
-#         result = metric.result()
-#         print('tfa', result.numpy())
-#
-#     crec_ids = np.concatenate(rec_ids)
-#     cprobs = np.concatenate(probs)
-#
-#     sub = pd.DataFrame({
-#         'name': list(map(lambda x: x.decode(), crec_ids.tolist())),
-#         **{f's{i}': cprobs[:, i] / 5 for i in range(CLASS_N)}
-#     })
-#     sub = sub.sort_values('name')
-#     return sub
-#
-#
-# model = create_model()
-# inference(model)
+model = create_model()
+
+
+def inference(count):
+    global model
+    model.load_weights("./model/model_best_%d.h5" % count)
+    rec_ids = []
+    probs = []
+    for data, name in tqdm(tdataset):
+        pred = model.predict_on_batch(tf.reshape(data, [-1, HEIGHT, WIDTH, 3]))
+        prob = tf.reduce_max(tf.reshape(pred, [-1, 1, CLASS_N]), axis=1)
+        rec_id_stack = tf.reshape(name, [-1, 1])
+        for rec in name.numpy():
+            assert len(np.unique(rec)) == 1
+        rec_ids.append(rec_id_stack.numpy()[:, 0])
+        probs.append(prob.numpy())
+
+    crec_ids = np.concatenate(rec_ids)
+    cprobs = np.concatenate(probs)
+    sub_with_prob = pd.DataFrame({
+        'name': list(map(lambda x: x.decode(), crec_ids.tolist())),
+        **{id2label[i]: cprobs[:, i] / 5 for i in range(CLASS_N)}
+    })
+    sub_with_prob = sub_with_prob.sort_values('name')
+    return sub_with_prob
 
 
 def train(splits, split_id):
     batchsize = cfg['model_params']['batchsize_per_gpu']
     print("batchsize", batchsize)
-    optimizer = tfa.optimizers.RectifiedAdam(lr=2e-4,
-                                             total_steps=cfg['model_params']['iteration_per_epoch'] *
-                                                         cfg['model_params']['epoch'],
-                                             warmup_proportion=0.3,
-                                             min_lr=1e-7)
     model = create_model()
-    # use tfa.metrics.F1Score and CategoricalAccuracy validate
-    # metrics = [tf.keras.metrics.CategoricalAccuracy(), tfa.metrics.F1Score(num_classes=CLASS_N, average='macro')]
-    model.compile(optimizer=optimizer,
-                  loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=False),
-                  metrics=['accuracy', tfa.metrics.F1Score(num_classes=CLASS_N, threshold=0.5, average='macro')])
-    idx_train_tf = tf.cast(tf.constant(splits[split_id][0]), tf.int64)
+
+    # idx_train_tf = tf.cast(tf.constant(splits[split_id][0]), tf.int64)
+    label_list = []
+    for i in range(12):
+        label_list.append(tf.cast(tf.constant(list(set(splits[split_id][0]) & set(label_index[i]))), tf.int64))
     idx_val_tf = tf.cast(tf.constant(splits[split_id][1]), tf.int64)
-    dataset = create_train_dataset(batchsize, idx_train_tf)
+    # 生成训练集和验证集
+    dataset_filtered = []
+    for j in range(12):
+        dataset_filtered.append(create_train_dataset(batchsize, label_list[j]))
+    # dataset = create_train_dataset(batchsize, idx_train_tf)
     vdataset = create_val_dataset(batchsize, idx_val_tf)
-    history = model.fit(dataset,
+    # dataset_filtered = []
+    # 有非常严重的性能问题
+    # # 过滤器，使用tf.data.experimental.sample_from_datasets对各类进行重采样，确保每个batch各类样本数量类似
+    # for i in range(12):
+    #     def dataset_fn(data, targ):
+    #         return tf.reduce_all(tf.equal(targ, tf.cast(tf.one_hot(i, CLASS_N, off_value=0), dtype=tf.float32)))
+    #
+    #     dataset_filtered.append(dataset.filter(dataset_fn))
+    over_dataset = tf.data.experimental.sample_from_datasets(
+        dataset_filtered, weights=prob, seed=SEED
+    )
+    history = model.fit(over_dataset,
                         batch_size=cfg['model_params']['batchsize_per_gpu'],
                         steps_per_epoch=cfg['model_params']['iteration_per_epoch'],
                         epochs=cfg['model_params']['epoch'],
@@ -400,3 +452,14 @@ def train(splits, split_id):
 
 for i in range(5):
     train(splits, i)
+
+
+sub = sum(
+    map(
+        lambda j:
+        inference(j).set_index('name'), range(5)
+    )
+).reset_index()
+
+sub.describe()
+sub.to_csv("submission_with_prob.csv", index=False)
