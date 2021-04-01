@@ -16,6 +16,7 @@ import efficientnet.tfkeras as efn
 from sklearn.metrics import f1_score
 from Preprocess import label2id
 from Preprocess import id2label
+upsample = False
 
 gpus = tf.config.experimental.list_physical_devices('GPU')
 for gpu in gpus:
@@ -32,8 +33,8 @@ cfg = {
     },
     'model_params': {
         'batchsize_per_gpu': 16,
-        'iteration_per_epoch': 1024,
-        'epoch': 30
+        'iteration_per_epoch': 128,
+        'epoch': 150
     }
 }
 
@@ -47,7 +48,7 @@ train_data = pd.read_csv("./train.csv", encoding='utf-8')
 data_count = train_data["labels"].value_counts()
 prob = []
 for k in range(12):
-    prob.append(data_count[k] / 18362)
+    prob.append(data_count[k] / 18632)
 train_img_lists = os.listdir(TRAIN_DATA_ROOT)
 test_img_lists = os.listdir(TEST_DATA_ROOT)
 test_img_path_lists = [os.path.join(TEST_DATA_ROOT, name) for name in test_img_lists]
@@ -172,10 +173,11 @@ def _preprocess_image_test_function(name, path):
     image = tf.image.decode_jpeg(image, channels=3)
     image = tf.image.convert_image_dtype(image, tf.float32)
     image = tf.image.resize(images=image, size=[HEIGHT, WIDTH])
-    i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
-    i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
-    i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
-    image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
+    image = tf.image.per_image_standardization(image)
+    # i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
+    # i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
+    # i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
+    # image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
     return image, name
 
 
@@ -193,12 +195,17 @@ def _preprocess_image_function(single_photo):
     gau = tf.keras.layers.GaussianNoise(0.3)
     # 以50％的概率为图像添加高斯噪声
     image = tf.cond(tf.random.uniform([]) < 0.5, lambda: gau(image), lambda: image)
+    image = tf.image.random_contrast(image, lower=0.8, upper=1.2)
+    image = tf.image.random_saturation(image, lower=0.8, upper=1.2)
     # brightness随机调整
     image = tf.image.random_brightness(image, 0.2)
     # random left right flip
     image = tf.image.random_flip_left_right(image)
     # random up down flip
     image = tf.image.random_flip_up_down(image)
+    rand_k = tf.random.uniform([], minval=0, maxval=4, dtype=tf.int64, seed=SEED)
+    # 以50％的概率随机翻转图像
+    image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tf.image.rot90(image, k=rand_k), lambda: image)
     single_photo['data'] = image
     return single_photo
 
@@ -207,6 +214,7 @@ def _preprocess_image_val_function(single_photo):
     # image = tf.expand_dims(single_photo['data'], axis=0)
     image = tf.image.convert_image_dtype(single_photo['data'], tf.float32)
     image = tf.image.resize(images=image, size=[HEIGHT, WIDTH])
+    # image = tf.image.per_image_standardization(image)
     i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
     i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
     i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
@@ -330,11 +338,12 @@ def create_model():
         GroupNormalization(group=32),
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(CLASS_N, bias_initializer=tf.keras.initializers.Constant(-2.), activation="softmax")])
-    optimizer = tfa.optimizers.RectifiedAdam(lr=1e-3,
-                                             total_steps=cfg['model_params']['iteration_per_epoch'] *
-                                                         cfg['model_params']['epoch'],
-                                             warmup_proportion=0.1,
-                                             min_lr=1e-8)
+    # optimizer = tfa.optimizers.RectifiedAdam(lr=1e-4,
+    #                                          total_steps=cfg['model_params']['iteration_per_epoch'] *
+    #                                                      cfg['model_params']['epoch'],
+    #                                          warmup_proportion=0.1,
+    #                                          min_lr=1e-6)
+    optimizer = tf.keras.optimizers.Adam(lr=1e-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
     # 使用FacalLoss和RectifiedAdam
     model.compile(optimizer=optimizer,
                   loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=False),
@@ -364,7 +373,7 @@ def plot_history(history, name):
 
 
 # 计算有问题
-# 初步估计是因为batchsize比较小，一次计算出来的f1-score中某些类没有出现过
+# 初步估计是因为batchsize比较小，一次计算出来的f1-score中某些类没有出现过，没有出现过的类正确率按照0来算，0/0未定义
 # def f1_score_metrics(y_true, y_pred):
 #     y_pred = tf.round(y_pred)
 #     tp = tf.reduce_sum(tf.cast(y_true * y_pred, tf.float32), axis=0)
@@ -412,16 +421,22 @@ def train(splits, split_id):
     print("batchsize", batchsize)
     model = create_model()
 
-    # idx_train_tf = tf.cast(tf.constant(splits[split_id][0]), tf.int64)
-    label_list = []
-    for i in range(12):
-        label_list.append(tf.cast(tf.constant(list(set(splits[split_id][0]) & set(label_index[i]))), tf.int64))
+    idx_train_tf = tf.cast(tf.constant(splits[split_id][0]), tf.int64)
     idx_val_tf = tf.cast(tf.constant(splits[split_id][1]), tf.int64)
+    if upsample:
+        label_list = []
+        for i in range(12):
+            label_list.append(tf.cast(tf.constant(list(set(splits[split_id][0]) & set(label_index[i]))), tf.int64))
+        dataset_filtered = []
+        for j in range(12):
+            dataset_filtered.append(create_train_dataset(batchsize, label_list[j]))
+        over_dataset = tf.data.experimental.sample_from_datasets(
+            dataset_filtered, weights=prob, seed=SEED
+        )
+    else:
+        over_dataset = None
     # 生成训练集和验证集
-    dataset_filtered = []
-    for j in range(12):
-        dataset_filtered.append(create_train_dataset(batchsize, label_list[j]))
-    # dataset = create_train_dataset(batchsize, idx_train_tf)
+    dataset = create_train_dataset(batchsize, idx_train_tf)
     vdataset = create_val_dataset(batchsize, idx_val_tf)
     # dataset_filtered = []
     # 有非常严重的性能问题
@@ -431,10 +446,7 @@ def train(splits, split_id):
     #         return tf.reduce_all(tf.equal(targ, tf.cast(tf.one_hot(i, CLASS_N, off_value=0), dtype=tf.float32)))
     #
     #     dataset_filtered.append(dataset.filter(dataset_fn))
-    over_dataset = tf.data.experimental.sample_from_datasets(
-        dataset_filtered, weights=prob, seed=SEED
-    )
-    history = model.fit(over_dataset,
+    history = model.fit(dataset if upsample else over_dataset,
                         batch_size=cfg['model_params']['batchsize_per_gpu'],
                         steps_per_epoch=cfg['model_params']['iteration_per_epoch'],
                         epochs=cfg['model_params']['epoch'],
@@ -452,7 +464,6 @@ def train(splits, split_id):
 
 for i in range(5):
     train(splits, i)
-
 
 sub = sum(
     map(
