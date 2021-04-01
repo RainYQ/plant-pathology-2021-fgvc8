@@ -12,7 +12,6 @@
 10. ~~'rust frog_eye_leaf_spot'~~
 11. ~~'rust complex'~~
 12. ~~'powdery_mildew complex'~~
-<br/>
 ## See as a multi label problem
 * label:{<br/>
 &emsp;'scab': [1, 0, 0, 0, 0, 0],<br/>

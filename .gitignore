@@ -11,3 +11,5 @@
 /hash_images/
 /duplicates_images/
 *.rar
+*.pyc
+/__pycache__/
