@@ -44,11 +44,11 @@ SEED = 2021
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 TRAIN_DATA_ROOT = "./train_images"
 TEST_DATA_ROOT = "./test_images"
-train_data = pd.read_csv("./train.csv", encoding='utf-8')
+train_data = pd.read_csv("./train_without_rep.csv", encoding='utf-8')
 data_count = train_data["labels"].value_counts()
 prob = []
 for k in range(12):
-    prob.append(data_count[k] / 18632)
+    prob.append(data_count[k] / len(train_data))
 train_img_lists = os.listdir(TRAIN_DATA_ROOT)
 test_img_lists = os.listdir(TEST_DATA_ROOT)
 test_img_path_lists = [os.path.join(TEST_DATA_ROOT, name) for name in test_img_lists]
