@@ -46,7 +46,8 @@
 * 训练集上增加 随机遮挡 数据增强<br/>
 * 训练集上使用 MixUp 数据增强<br/>
 * 训练集上使用 labelsmooth<br/>
-* ~~TTA（测试时增强）~~<br/>
-* 清洗训练集中的标签错误标签数据（imagehash）<br/>
+* TTA（测试时增强）<br/>
+* ~~清洗训练集中的标签错误标签数据（imagehash）~~<br/>
+* 生成tfrecords的时候移除duplicates_compare_result中的
 * 不平衡数据处理 过采样/欠采样<br/>
 * 试 ResNet 系列<br/>

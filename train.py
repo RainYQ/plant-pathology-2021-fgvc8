@@ -25,7 +25,7 @@ for gpu in gpus:
 mean = [124.23002308, 159.76066492, 104.05509866]
 std = [47.84116963, 41.94039282, 49.85093766]
 
-CLASS_N = 12
+CLASS_N = 6
 
 cfg = {
     'data_params': {
@@ -34,7 +34,7 @@ cfg = {
     'model_params': {
         'batchsize_per_gpu': 16,
         'iteration_per_epoch': 128,
-        'epoch': 150
+        'epoch': 100
     }
 }
 
@@ -154,7 +154,9 @@ raw_image_dataset = tf.data.TFRecordDataset(tfrecs, num_parallel_reads=AUTOTUNE)
 image_feature_description = {
     'name': tf.io.FixedLenFeature([], tf.string),
     'data': tf.io.FixedLenFeature([], tf.string),
-    'label': tf.io.FixedLenFeature([], tf.int64)
+    'labels': tf.io.FixedLenFeature([], tf.string),
+    'label': tf.io.FixedLenFeature([], tf.int64),
+    'label_name':tf.io.FixedLenFeature([], tf.string)
 }
 
 
@@ -203,7 +205,7 @@ def _preprocess_image_function(single_photo):
     image = tf.image.random_flip_left_right(image)
     # random up down flip
     image = tf.image.random_flip_up_down(image)
-    rand_k = tf.random.uniform([], minval=0, maxval=4, dtype=tf.int64, seed=SEED)
+    rand_k = tf.random.uniform([], minval=0, maxval=4, dtype=tf.int32, seed=SEED)
     # 以50％的概率随机翻转图像
     image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tf.image.rot90(image, k=rand_k), lambda: image)
     single_photo['data'] = image
@@ -236,8 +238,9 @@ def _remove_idx(i, single_photo):
 
 
 def _create_annot(single_photo):
-    targ = tf.one_hot(single_photo["label"], CLASS_N, off_value=0)
-    targ = tf.cast(targ, tf.float32)
+    # targ = tf.one_hot(single_photo["label"], CLASS_N, off_value=0)
+    # targ = tf.cast(targ, tf.float32)
+    targ = tf.io.decode_raw(single_photo['labels'], tf.float32)
     return single_photo['data'], targ
 
 
@@ -446,7 +449,7 @@ def train(splits, split_id):
     #         return tf.reduce_all(tf.equal(targ, tf.cast(tf.one_hot(i, CLASS_N, off_value=0), dtype=tf.float32)))
     #
     #     dataset_filtered.append(dataset.filter(dataset_fn))
-    history = model.fit(dataset if upsample else over_dataset,
+    history = model.fit(over_dataset if upsample else dataset,
                         batch_size=cfg['model_params']['batchsize_per_gpu'],
                         steps_per_epoch=cfg['model_params']['iteration_per_epoch'],
                         epochs=cfg['model_params']['epoch'],
@@ -458,6 +461,11 @@ def train(splits, split_id):
                                 monitor='val_f1_score',
                                 mode='max',
                                 save_best_only=True),
+                            tf.keras.callbacks.ReduceLROnPlateau(monitor='val_f1_score',
+                                                                 mode='max',
+                                                                 patience=5,
+                                                                 factor=0.2,
+                                                                 min_lr=1e-6)
                         ])
     plot_history(history, 'history_%d.png' % split_id)
 
