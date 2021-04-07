@@ -51,7 +51,7 @@
 * ~~生成tfrecords的时候移除重复图片~~<br/>
 * 不平衡数据处理 过采样/欠采样<br/>
 * 试 ResNet 系列<br/>
-* tfa.metrics.F1Score 只支持 { 'none' 'macro' 'micro' 'weighted' } 
-  , 不支持{ 'sample' }, 需要重写或者使用scikit-learn中的F1-Score<br/>
+* ~~tfa.metrics.F1Score 只支持 { 'none' 'macro' 'micro' 'weighted' } 
+  , 不支持{ 'sample' }, 需要重写或者使用scikit-learn中的F1-Score~~<br/>
 * Adam优化器在训练快结束的时候效果不是很好，看看有没有更合适的优化器<br/>
 * 默认的F1-Score计算方法是每个Batch计算一次然后取均值, 应该改成每个Epoch结束时计算一次更合适, reference: https://zhuanlan.zhihu.com/p/51356820 <br/>
