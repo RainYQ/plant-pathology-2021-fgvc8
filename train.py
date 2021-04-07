@@ -1,45 +1,75 @@
+"""
+Train:
+Modify:
+    - Line 35-47 cfg
+    - Line 366 create_test_model
+    - Line 512 model location
+    - Line 337 create_model
+    - Line 355 lr
+    - Line 342 Model struct
+    - Line 365 Loss
+"""
+
 import random
 import os
+import math
 import numpy as np
 import tensorflow as tf
-from PIL import Image
-import math
-import threading
 import pandas as pd
+import threading
 import tensorflow_addons as tfa
 from GroupNormalization import GroupNormalization
-import tensorflow_model_analysis as tfma
 from sklearn.model_selection import StratifiedKFold
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 import efficientnet.tfkeras as efn
+from PIL import Image
 from sklearn.metrics import f1_score
-from Preprocess import label2id
 from Preprocess import id2label
+
+# 是否仅测试
+test_only = True
+# 是否对数据集进行过采样
+# !效果非常不好
 upsample = False
 
 gpus = tf.config.experimental.list_physical_devices('GPU')
 for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
-# R G B
+
+# R G B 在测试集上的均值、标准差
+# range 0 - 255
 mean = [124.23002308, 159.76066492, 104.05509866]
 std = [47.84116963, 41.94039282, 49.85093766]
 
-CLASS_N = 6
-
 cfg = {
     'data_params': {
-        'img_shape': (256, 256)
+        'img_shape': (256, 256),
+        'test_img_shape': (512, 512),
+        'class_type': 6
     },
     'model_params': {
         'batchsize_per_gpu': 16,
         'iteration_per_epoch': 128,
+        'batchsize_in_test': 16,
         'epoch': 100
     }
 }
 
-WIDTH = cfg['data_params']['img_shape'][0]
-HEIGHT = cfg['data_params']['img_shape'][1]
+classes = np.array([
+    'scab',
+    'healthy',
+    'frog_eye_leaf_spot',
+    'rust',
+    'complex',
+    'powdery_mildew'])
+
+CLASS_N = cfg['data_params']['class_type']
+
+HEIGHT = cfg['data_params']['img_shape'][0]
+WIDTH = cfg['data_params']['img_shape'][1]
+HEIGHT_T = cfg['data_params']['test_img_shape'][0]
+WIDTH_T = cfg['data_params']['test_img_shape'][1]
 SEED = 2021
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 TRAIN_DATA_ROOT = "./train_images"
@@ -54,54 +84,53 @@ test_img_lists = os.listdir(TEST_DATA_ROOT)
 test_img_path_lists = [os.path.join(TEST_DATA_ROOT, name) for name in test_img_lists]
 
 
-# result_mean_R = []
-# result_mean_G = []
-# result_mean_B = []
-# result_std_R = []
-# result_std_G = []
-# result_std_B = []
-#
-# for i in range(math.ceil(len(train_img_lists) / 128)):
-#     result_mean_R.append([])
-#     result_mean_G.append([])
-#     result_mean_B.append([])
-#     result_std_R.append([])
-#     result_std_G.append([])
-#     result_std_B.append([])
-#
-#
-# def get_train_set_norm(imglist):
-#     for img in imglist:
-#         image = Image.open(os.path.join(TRAIN_DATA_ROOT, img))
-#         image = image.resize((WIDTH, HEIGHT), Image.ANTIALIAS)
-#         r, g, b = image.split()
-#         mean_r = np.mean(np.asarray(r).flatten())
-#         mean_g = np.mean(np.asarray(g).flatten())
-#         mean_b = np.mean(np.asarray(b).flatten())
-#         std_r = np.std(np.asarray(r).flatten())
-#         std_g = np.std(np.asarray(g).flatten())
-#         std_b = np.std(np.asarray(b).flatten())
-#         file_name, _ = os.path.splitext(img)
-#         with open("./mean_std_information/" + file_name + ".txt", 'w') as writer:
-#             writer.write(str(mean_r) + '\n')
-#             writer.write(str(mean_g) + '\n')
-#             writer.write(str(mean_b) + '\n')
-#             writer.write(str(std_r) + '\n')
-#             writer.write(str(std_g) + '\n')
-#             writer.write(str(std_b) + '\n')
-#
-#
-# # 每次更新WIDTH HEIGHT的时候需要重新运行该函数
-# # Enable Multi-Thread
-# thread_list = []
-# for n in range(math.ceil(len(train_img_lists) / 128)):
-#     t1 = threading.Thread(target=get_train_set_norm, args=(
-#         train_img_lists[n * 128:min((n + 1) * 128, len(train_img_lists))],))
-#     thread_list.append(t1)
-# for t in thread_list:
-#     t.start()
-# for t in thread_list:
-#     t.join()
+def get_train_set_norm(imglist):
+    result_mean_R = []
+    result_mean_G = []
+    result_mean_B = []
+    result_std_R = []
+    result_std_G = []
+    result_std_B = []
+
+    for i in range(math.ceil(len(train_img_lists) / 128)):
+        result_mean_R.append([])
+        result_mean_G.append([])
+        result_mean_B.append([])
+        result_std_R.append([])
+        result_std_G.append([])
+        result_std_B.append([])
+    for img in imglist:
+        image = Image.open(os.path.join(TRAIN_DATA_ROOT, img))
+        image = image.resize((WIDTH, HEIGHT), Image.ANTIALIAS)
+        r, g, b = image.split()
+        mean_r = np.mean(np.asarray(r).flatten())
+        mean_g = np.mean(np.asarray(g).flatten())
+        mean_b = np.mean(np.asarray(b).flatten())
+        std_r = np.std(np.asarray(r).flatten())
+        std_g = np.std(np.asarray(g).flatten())
+        std_b = np.std(np.asarray(b).flatten())
+        file_name, _ = os.path.splitext(img)
+        with open("./mean_std_information/" + file_name + ".txt", 'w') as writer:
+            writer.write(str(mean_r) + '\n')
+            writer.write(str(mean_g) + '\n')
+            writer.write(str(mean_b) + '\n')
+            writer.write(str(std_r) + '\n')
+            writer.write(str(std_g) + '\n')
+            writer.write(str(std_b) + '\n')
+
+
+# 每次更新WIDTH HEIGHT的时候需要重新运行该函数
+# Enable Multi-Thread
+def meann_std_generator():
+    thread_list = []
+    for n in range(math.ceil(len(train_img_lists) / 128)):
+        t1 = threading.Thread(target=get_train_set_norm, args=(
+            train_img_lists[n * 128:min((n + 1) * 128, len(train_img_lists))],))
+        thread_list.append(t1)
+    for t in thread_list:
+        t.start()
+    for t in thread_list:
+        t.join()
 
 
 # 已知各组标准差，求总体标准差
@@ -110,30 +139,30 @@ test_img_path_lists = [os.path.join(TEST_DATA_ROOT, name) for name in test_img_l
 # / len(train_img_lists))
 
 
-# def read_mean_std():
-#     file_list = os.listdir(r"./mean_std_information")
-#     data = [[], [], [], [], [], []]
-#     for file in file_list:
-#         with open('./mean_std_information/' + file) as reader:
-#             for i in range(6):
-#                 line = reader.readline()
-#                 data[i].append(float(line))
-#     return data
-#
-#
+def read_mean_std():
+    file_list = os.listdir(r"./mean_std_information")
+    data = [[], [], [], [], [], []]
+    for file in file_list:
+        with open('./mean_std_information/' + file) as reader:
+            for i in range(6):
+                line = reader.readline()
+                data[i].append(float(line))
+    return data
+
+
 # data = read_mean_std()
-#
-#
-# def cal_mean_std(data):
-#     mean = np.mean(np.array(data[0:3]), axis=1)
-#     std = np.sqrt(
-#         (np.sum(np.array(data[3:6]) ** 2, axis=1) + np.array([np.sum((data[0] - mean[0]) ** 2),
-#                                                               (np.sum((data[1] - mean[1]) ** 2)),
-#                                                               np.sum((data[2] - mean[2]) ** 2)])) / len(
-#             train_img_lists))
-#     return mean, std
-#
-#
+
+
+def cal_mean_std(data):
+    mean = np.mean(np.array(data[0:3]), axis=1)
+    std = np.sqrt(
+        (np.sum(np.array(data[3:6]) ** 2, axis=1) + np.array([np.sum((data[0] - mean[0]) ** 2),
+                                                              (np.sum((data[1] - mean[1]) ** 2)),
+                                                              np.sum((data[2] - mean[2]) ** 2)])) / len(
+            train_img_lists))
+    return mean, std
+
+
 # mean, std = cal_mean_std(data)
 # print(mean)
 # print(std)
@@ -156,7 +185,7 @@ image_feature_description = {
     'data': tf.io.FixedLenFeature([], tf.string),
     'labels': tf.io.FixedLenFeature([], tf.string),
     'label': tf.io.FixedLenFeature([], tf.int64),
-    'label_name':tf.io.FixedLenFeature([], tf.string)
+    'label_name': tf.io.FixedLenFeature([], tf.string)
 }
 
 
@@ -174,17 +203,16 @@ def _preprocess_image_test_function(name, path):
     image = tf.io.read_file(path, 'rb')
     image = tf.image.decode_jpeg(image, channels=3)
     image = tf.image.convert_image_dtype(image, tf.float32)
-    image = tf.image.resize(images=image, size=[HEIGHT, WIDTH])
-    image = tf.image.per_image_standardization(image)
-    # i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
-    # i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
-    # i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
-    # image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
+    image = tf.image.resize(images=image, size=[HEIGHT_T, WIDTH_T])
+    # image = tf.image.per_image_standardization(image)
+    i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
+    i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
+    i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
+    image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
     return image, name
 
 
 def _preprocess_image_function(single_photo):
-    # image = tf.expand_dims(single_photo['data'], axis=0)
     image = tf.image.convert_image_dtype(single_photo['data'], tf.float32)
     image = tf.image.resize(images=image, size=[HEIGHT, WIDTH])
     i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
@@ -242,12 +270,6 @@ def _create_annot(single_photo):
     # targ = tf.cast(targ, tf.float32)
     targ = tf.io.decode_raw(single_photo['labels'], tf.float32)
     return single_photo['data'], targ
-
-
-# def _create_annot_test(single_photo):
-#     targ = tf.one_hot(single_photo["label"], CLASS_N, off_value=0)
-#     targ = tf.cast(targ, tf.float32)
-#     return single_photo['data'], targ, single_photo['name']
 
 
 # parsed_image_dataset = (raw_image_dataset.map(_parse_image_function, num_parallel_calls=AUTOTUNE)
@@ -334,7 +356,6 @@ def create_model():
 
     model = tf.keras.Sequential([
         backbone,
-        # tf.keras.layers.GlobalAveragePooling2D(),
         GroupNormalization(group=32),
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(512, activation='relu', kernel_initializer=tf.keras.initializers.he_normal()),
@@ -348,6 +369,29 @@ def create_model():
     #                                          min_lr=1e-6)
     optimizer = tf.keras.optimizers.Adam(lr=1e-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
     # 使用FacalLoss和RectifiedAdam
+    model.compile(optimizer=optimizer,
+                  loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=True),
+                  metrics=['accuracy', tfa.metrics.F1Score(num_classes=CLASS_N, threshold=0.5, average='macro')])
+    return model
+
+
+def create_test_model():
+    backbone = efn.EfficientNetB4(
+        include_top=False,
+        input_shape=(HEIGHT_T, WIDTH_T, 3),
+        weights=None,
+        pooling='avg'
+    )
+
+    model = tf.keras.Sequential([
+        backbone,
+        GroupNormalization(group=32),
+        tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.Dense(512, activation='relu', kernel_initializer=tf.keras.initializers.he_normal()),
+        GroupNormalization(group=32),
+        tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.Dense(CLASS_N, bias_initializer=tf.keras.initializers.Constant(-2.))])
+    optimizer = tf.keras.optimizers.Adam(lr=1e-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
     model.compile(optimizer=optimizer,
                   loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=True),
                   metrics=['accuracy', tfa.metrics.F1Score(num_classes=CLASS_N, threshold=0.5, average='macro')])
@@ -375,40 +419,27 @@ def plot_history(history, name):
     plt.savefig(name)
 
 
-# 计算有问题
-# 初步估计是因为batchsize比较小，一次计算出来的f1-score中某些类没有出现过，没有出现过的类正确率按照0来算，0/0未定义
-# def f1_score_metrics(y_true, y_pred):
-#     y_pred = tf.round(y_pred)
-#     tp = tf.reduce_sum(tf.cast(y_true * y_pred, tf.float32), axis=0)
-#     fp = tf.reduce_sum(tf.cast((1 - y_true) * y_pred, tf.float32), axis=0)
-#     fn = tf.reduce_sum(tf.cast(y_true * (1 - y_pred), tf.float32), axis=0)
-#     p = tp / (tp + fp + tf.keras.backend.epsilon())
-#     r = tp / (tp + fn + tf.keras.backend.epsilon())
-#     f1 = 2 * p * r / (p + r + tf.keras.backend.epsilon())
-#     f1 = tf.where(tf.math.is_nan(f1), tf.zeros_like(f1), f1)
-#     return tf.reduce_mean(f1)
-
 tdataset = (tf.data.Dataset.from_tensor_slices((test_img_lists, test_img_path_lists))
             .map(_preprocess_image_test_function, num_parallel_calls=AUTOTUNE)
-            .batch(64).prefetch(AUTOTUNE))
+            .batch(cfg['model_params']['batchsize_in_test']).prefetch(AUTOTUNE))
+if test_only:
+    model = create_test_model()
+else:
+    model = create_model()
 
-model = create_model()
 
-
-def inference(count):
-    global model
-    model.load_weights("./model/model_best_%d.h5" % count)
+def inference(count, path):
+    model.load_weights(path + "/model_best_%d.h5" % count)
     rec_ids = []
     probs = []
     for data, name in tqdm(tdataset):
-        pred = model.predict_on_batch(tf.reshape(data, [-1, HEIGHT, WIDTH, 3]))
-        prob = tf.reduce_max(tf.reshape(pred, [-1, 1, CLASS_N]), axis=1)
+        pred = model.predict_on_batch(tf.reshape(data, [-1, HEIGHT_T, WIDTH_T, 3]))
+        prob = tf.sigmoid(pred)
         rec_id_stack = tf.reshape(name, [-1, 1])
         for rec in name.numpy():
             assert len(np.unique(rec)) == 1
         rec_ids.append(rec_id_stack.numpy()[:, 0])
         probs.append(prob.numpy())
-
     crec_ids = np.concatenate(rec_ids)
     cprobs = np.concatenate(probs)
     sub_with_prob = pd.DataFrame({
@@ -417,6 +448,29 @@ def inference(count):
     })
     sub_with_prob = sub_with_prob.sort_values('name')
     return sub_with_prob
+
+
+def submission_writer(path):
+    sub_with_prob = sum(
+        map(
+            lambda j:
+            inference(j, path).set_index('name'), range(5)
+        )
+    ).reset_index()
+
+    labels = []
+    names = []
+    for index, row in sub_with_prob.iterrows():
+        names.append(row[0])
+        prob = np.around(np.array(row[1:7], dtype=np.float32))
+        prob = prob.astype('bool')
+        labels.append(' '.join(classes[prob]))
+    sub = pd.DataFrame({
+        'image': names,
+        'labels': labels})
+    sub.to_csv('submission.csv', index=False)
+    sub_with_prob.describe()
+    sub_with_prob.to_csv("submission_with_prob.csv", index=False)
 
 
 def train(splits, split_id):
@@ -441,14 +495,6 @@ def train(splits, split_id):
     # 生成训练集和验证集
     dataset = create_train_dataset(batchsize, idx_train_tf)
     vdataset = create_val_dataset(batchsize, idx_val_tf)
-    # dataset_filtered = []
-    # 有非常严重的性能问题
-    # # 过滤器，使用tf.data.experimental.sample_from_datasets对各类进行重采样，确保每个batch各类样本数量类似
-    # for i in range(12):
-    #     def dataset_fn(data, targ):
-    #         return tf.reduce_all(tf.equal(targ, tf.cast(tf.one_hot(i, CLASS_N, off_value=0), dtype=tf.float32)))
-    #
-    #     dataset_filtered.append(dataset.filter(dataset_fn))
     history = model.fit(over_dataset if upsample else dataset,
                         batch_size=cfg['model_params']['batchsize_per_gpu'],
                         steps_per_epoch=cfg['model_params']['iteration_per_epoch'],
@@ -470,15 +516,8 @@ def train(splits, split_id):
     plot_history(history, 'history_%d.png' % split_id)
 
 
-for i in range(5):
-    train(splits, i)
+if not test_only:
+    for i in range(5):
+        train(splits, i)
 
-sub = sum(
-    map(
-        lambda j:
-        inference(j).set_index('name'), range(5)
-    )
-).reset_index()
-
-sub.describe()
-sub.to_csv("submission_with_prob.csv", index=False)
+submission_writer("./model/EfficientNetB4-0407-Noisy-student-kaggle")
