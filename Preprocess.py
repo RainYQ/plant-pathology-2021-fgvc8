@@ -1,4 +1,11 @@
 # -*- coding: utf-8 -*-
+
+"""
+TFRecords Generator:
+Modify:
+    - Line 113-116 可能需要限制多线程并发数量
+"""
+
 import os
 import numpy as np
 import tensorflow as tf

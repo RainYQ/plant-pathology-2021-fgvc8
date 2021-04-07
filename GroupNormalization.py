@@ -4,6 +4,7 @@ from tensorflow.keras import regularizers
 from tensorflow.keras import backend as K
 from tensorflow.python.keras.utils import conv_utils
 
+
 def to_list(x):
     if type(x) not in [list, tuple]:
         return [x]
