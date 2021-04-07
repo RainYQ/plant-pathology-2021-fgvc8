@@ -340,7 +340,7 @@ def create_model():
         tf.keras.layers.Dense(512, activation='relu', kernel_initializer=tf.keras.initializers.he_normal()),
         GroupNormalization(group=32),
         tf.keras.layers.Dropout(0.5),
-        tf.keras.layers.Dense(CLASS_N, bias_initializer=tf.keras.initializers.Constant(-2.), activation="softmax")])
+        tf.keras.layers.Dense(CLASS_N, bias_initializer=tf.keras.initializers.Constant(-2.))])
     # optimizer = tfa.optimizers.RectifiedAdam(lr=1e-4,
     #                                          total_steps=cfg['model_params']['iteration_per_epoch'] *
     #                                                      cfg['model_params']['epoch'],
@@ -349,7 +349,7 @@ def create_model():
     optimizer = tf.keras.optimizers.Adam(lr=1e-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
     # 使用FacalLoss和RectifiedAdam
     model.compile(optimizer=optimizer,
-                  loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=False),
+                  loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=True),
                   metrics=['accuracy', tfa.metrics.F1Score(num_classes=CLASS_N, threshold=0.5, average='macro')])
     return model
 
@@ -461,11 +461,11 @@ def train(splits, split_id):
                                 monitor='val_f1_score',
                                 mode='max',
                                 save_best_only=True),
-                            tf.keras.callbacks.ReduceLROnPlateau(monitor='val_f1_score',
-                                                                 mode='max',
-                                                                 patience=5,
-                                                                 factor=0.2,
-                                                                 min_lr=1e-6)
+                            # tf.keras.callbacks.ReduceLROnPlateau(monitor='val_f1_score',
+                            #                                      mode='max',
+                            #                                      patience=5,
+                            #                                      factor=0.2,
+                            #                                      min_lr=1e-6)
                         ])
     plot_history(history, 'history_%d.png' % split_id)
 
