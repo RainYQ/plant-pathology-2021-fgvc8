@@ -24,11 +24,11 @@ from matplotlib import pyplot as plt
 from tqdm import tqdm
 import efficientnet.tfkeras as efn
 from PIL import Image
-from sklearn.metrics import f1_score
 from Preprocess import id2label
+from sklearn.metrics import f1_score
 
 # 是否仅测试
-test_only = True
+test_only = False
 # 是否对数据集进行过采样
 # !效果非常不好
 upsample = False
@@ -344,6 +344,15 @@ def create_val_dataset(batchsize, val_idx):
     return dataset
 
 
+def cal_f1_score(y_true, y_pred):
+    y_pred = np.around(y_pred)
+    return f1_score(y_true, y_pred, average='samples')
+
+
+def f1_score_sk(y_true, y_pred):
+    return tf.py_function(cal_f1_score, [y_true, y_pred], tf.float32)
+
+
 def create_model():
     # backbone = tf.keras.applications.ResNet50(weights="imagenet", include_top=False,
     #                                           input_shape=(HEIGHT, WIDTH, 3), classes=CLASS_N)
@@ -361,17 +370,22 @@ def create_model():
         tf.keras.layers.Dense(512, activation='relu', kernel_initializer=tf.keras.initializers.he_normal()),
         GroupNormalization(group=32),
         tf.keras.layers.Dropout(0.5),
-        tf.keras.layers.Dense(CLASS_N, bias_initializer=tf.keras.initializers.Constant(-2.))])
+        tf.keras.layers.Dense(CLASS_N, bias_initializer=tf.keras.initializers.Constant(-2.), activation='sigmoid')])
     # optimizer = tfa.optimizers.RectifiedAdam(lr=1e-4,
     #                                          total_steps=cfg['model_params']['iteration_per_epoch'] *
     #                                                      cfg['model_params']['epoch'],
     #                                          warmup_proportion=0.1,
     #                                          min_lr=1e-6)
     optimizer = tf.keras.optimizers.Adam(lr=1e-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
-    # 使用FacalLoss和RectifiedAdam
+    # 使用FacalLoss
+    # tfa.metrics.F1Score计算F1-Score时依据本epoch见过的所有数据, 与batch_size无关
+    # TODO
+    # sklearn.metrics.f1_score根据每个batch计算F1-Score, 需要修改
     model.compile(optimizer=optimizer,
-                  loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=True),
-                  metrics=['accuracy', tfa.metrics.F1Score(num_classes=CLASS_N, threshold=0.5, average='macro')])
+                  loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=False),
+                  metrics=['accuracy',
+                           tfa.metrics.F1Score(num_classes=CLASS_N, threshold=0.5, average='macro'),
+                           f1_score_sk])
     return model
 
 
@@ -390,28 +404,34 @@ def create_test_model():
         tf.keras.layers.Dense(512, activation='relu', kernel_initializer=tf.keras.initializers.he_normal()),
         GroupNormalization(group=32),
         tf.keras.layers.Dropout(0.5),
-        tf.keras.layers.Dense(CLASS_N, bias_initializer=tf.keras.initializers.Constant(-2.))])
+        tf.keras.layers.Dense(CLASS_N, bias_initializer=tf.keras.initializers.Constant(-2.), activation='sigmoid')])
     optimizer = tf.keras.optimizers.Adam(lr=1e-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+
     model.compile(optimizer=optimizer,
-                  loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=True),
-                  metrics=['accuracy', tfa.metrics.F1Score(num_classes=CLASS_N, threshold=0.5, average='macro')])
+                  loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=False),
+                  metrics=['accuracy', tfa.metrics.F1Score(num_classes=CLASS_N, threshold=0.5, average='macro'),
+                           f1_score_sk])
     return model
 
 
 def plot_history(history, name):
-    plt.figure(figsize=(16, 3))
-    plt.subplot(1, 3, 1)
+    plt.figure(figsize=(24, 4))
+    plt.subplot(1, 4, 1)
     plt.plot(history.history["loss"])
     plt.plot(history.history["val_loss"])
     plt.legend(['Train', 'Val'], loc='upper left')
     plt.title("loss")
-    # plt.yscale('log')
-    plt.subplot(1, 3, 2)
+    plt.subplot(1, 4, 2)
     plt.plot(history.history["f1_score"])
     plt.plot(history.history["val_f1_score"])
     plt.legend(['Train', 'Val'], loc='upper left')
     plt.title("F1-Score")
-    plt.subplot(1, 3, 3)
+    plt.subplot(1, 4, 3)
+    plt.plot(history.history["f1_score_sk"])
+    plt.plot(history.history["val_f1_score_sk"])
+    plt.legend(['Train', 'Val'], loc='upper left')
+    plt.title("F1-Score-Sklearn")
+    plt.subplot(1, 4, 4)
     plt.plot(history.history["accuracy"])
     plt.plot(history.history["val_accuracy"])
     plt.legend(['Train', 'Val'], loc='upper left')
@@ -504,14 +524,15 @@ def train(splits, split_id):
                             tf.keras.callbacks.ModelCheckpoint(
                                 filepath='./model/model_best_%d.h5' % split_id,
                                 save_weights_only=True,
-                                monitor='val_f1_score',
+                                monitor='val_f1_score_sk',
                                 mode='max',
                                 save_best_only=True),
-                            # tf.keras.callbacks.ReduceLROnPlateau(monitor='val_f1_score',
-                            #                                      mode='max',
-                            #                                      patience=5,
-                            #                                      factor=0.2,
-                            #                                      min_lr=1e-6)
+                            tf.keras.callbacks.ReduceLROnPlateau(monitor='val_f1_score',
+                                                                 mode='max',
+                                                                 verbose=1,
+                                                                 patience=5,
+                                                                 factor=0.2,
+                                                                 min_lr=1e-6)
                         ])
     plot_history(history, 'history_%d.png' % split_id)
 
@@ -520,4 +541,4 @@ if not test_only:
     for i in range(5):
         train(splits, i)
 
-submission_writer("./model/EfficientNetB4-0407-Noisy-student-kaggle")
+submission_writer("./model")
