@@ -1,12 +1,12 @@
 """
 Train:
 Modify:
-    - Line 35-47 cfg
-    - Line 366 create_test_model
-    - Line 512 model location
-    - Line 337 create_model
-    - Line 355 lr
-    - Line 342 Model struct
+    - Line 44-56 cfg
+    - Line 397 create_test_model
+    - Line 549 model location
+    - Line 361 create_model
+    - Line 379 lr
+    - Line 371 Model struct
     - Line 365 Loss
 """
 
@@ -25,8 +25,8 @@ from tqdm import tqdm
 import efficientnet.tfkeras as efn
 from PIL import Image
 from Preprocess import id2label
-from sklearn.metrics import f1_score
 from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
+from sklearn.metrics import f1_score
 
 # 是否仅测试
 test_only = False
@@ -44,7 +44,7 @@ cfg = {
     'data_params': {
         'img_shape': (256, 256),
         'test_img_shape': (256, 256),
-        'class_type': 6
+        'class_type': 5
     },
     'model_params': {
         'batchsize_per_gpu': 16,
@@ -56,7 +56,7 @@ cfg = {
 
 classes = np.array([
     'scab',
-    'healthy',
+    # 'healthy',
     'frog_eye_leaf_spot',
     'rust',
     'complex',
@@ -74,9 +74,6 @@ TRAIN_DATA_ROOT = "./train_images"
 TEST_DATA_ROOT = "./test_images"
 train_data = pd.read_csv("./train_without_rep.csv", encoding='utf-8')
 data_count = train_data["labels"].value_counts()
-prob = []
-for k in range(12):
-    prob.append(data_count[k] / len(train_data))
 train_img_lists = os.listdir(TRAIN_DATA_ROOT)
 test_img_lists = os.listdir(TEST_DATA_ROOT)
 test_img_path_lists = [os.path.join(TEST_DATA_ROOT, name) for name in test_img_lists]
@@ -299,7 +296,7 @@ if not test_only:
     table = pd.DataFrame({'indices': indices, 'name': name, 'label': label})
     skf = MultilabelStratifiedKFold(n_splits=5, random_state=SEED, shuffle=True)
     X = np.array(table.index)
-    Y = np.array(list(table.label.values), dtype=np.uint8).reshape(len(train_data), 6)
+    Y = np.array(list(table.label.values), dtype=np.uint8).reshape(len(train_data), CLASS_N)
     splits = list(skf.split(X, Y))
     print("DataSet Split Successful.")
     print("origin: ", np.sum(np.array(list(table["label"].values), dtype=np.uint8), axis=0))
@@ -350,7 +347,7 @@ def create_val_dataset(batchsize, val_idx):
 
 def cal_f1_score(y_true, y_pred):
     y_pred = np.around(y_pred)
-    return f1_score(y_true, y_pred, average='samples')
+    return f1_score(y_true, y_pred, average='samples', zero_division=0)
 
 
 def f1_score_sk(y_true, y_pred):
@@ -360,10 +357,10 @@ def f1_score_sk(y_true, y_pred):
 def create_model():
     # backbone = tf.keras.applications.ResNet50(weights="imagenet", include_top=False,
     #                                           input_shape=(HEIGHT, WIDTH, 3), classes=CLASS_N)
-    backbone = tf.keras.applications.ResNet50(
+    backbone = efn.EfficientNetB0(
         include_top=False,
         input_shape=(HEIGHT, WIDTH, 3),
-        weights='imagenet',
+        weights='noisy-student',
         pooling='avg'
     )
 
@@ -375,12 +372,12 @@ def create_model():
         GroupNormalization(group=32),
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(CLASS_N, bias_initializer=tf.keras.initializers.Constant(-2.), activation='sigmoid')])
-    # optimizer = tfa.optimizers.RectifiedAdam(lr=1e-4,
-    #                                          total_steps=cfg['model_params']['iteration_per_epoch'] *
-    #                                                      cfg['model_params']['epoch'],
-    #                                          warmup_proportion=0.1,
-    #                                          min_lr=1e-6)
-    optimizer = tf.keras.optimizers.Adam(lr=5e-5, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+    optimizer = tfa.optimizers.RectifiedAdam(lr=2e-4,
+                                             total_steps=cfg['model_params']['iteration_per_epoch'] *
+                                                         cfg['model_params']['epoch'],
+                                             warmup_proportion=0.1,
+                                             min_lr=1e-6)
+    # optimizer = tf.keras.optimizers.Adam(lr=5e-5, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
     # 使用FacalLoss
     # tfa.metrics.F1Score计算F1-Score时依据本epoch见过的所有数据, 与batch_size无关
     # TODO
@@ -494,10 +491,10 @@ def submission_writer(path):
     names = []
     for index, row in sub_with_prob.iterrows():
         names.append(row[0])
-        prob = np.around(np.array(row[1:7], dtype=np.float32))
+        prob = np.around(np.array(row[1:CLASS_N + 1], dtype=np.float32))
         prob = prob.astype('bool')
         label = ' '.join(classes[prob])
-        # 很重要，视为疾病检测模型，没有检测到疾病但由没有很大把握为健康时仍视为健康
+        # 很重要，视为疾病检测模型，没有检测到疾病但又没有很大把握为健康时仍视为健康
         if label == '':
             label = 'healthy'
         labels.append(label)
@@ -535,7 +532,7 @@ def train(splits, split_id):
                                                                  mode='max',
                                                                  verbose=1,
                                                                  patience=5,
-                                                                 factor=0.2,
+                                                                 factor=0.5,
                                                                  min_lr=1e-6)
                         ])
     plot_history(history, 'history_%d.png' % split_id)

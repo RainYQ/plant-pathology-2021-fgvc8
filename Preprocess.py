@@ -41,18 +41,18 @@ label2id = {
 }
 
 label2array = {
-    0: np.array([1, 0, 0, 0, 0, 0], dtype=np.float32),
-    1: np.array([0, 1, 0, 0, 0, 0], dtype=np.float32),
-    2: np.array([0, 0, 1, 0, 0, 0], dtype=np.float32),
-    3: np.array([0, 0, 0, 1, 0, 0], dtype=np.float32),
-    4: np.array([0, 0, 0, 0, 1, 0], dtype=np.float32),
-    5: np.array([0, 0, 0, 0, 0, 1], dtype=np.float32),
-    6: np.array([1, 0, 1, 0, 0, 0], dtype=np.float32),
-    7: np.array([1, 0, 1, 0, 1, 0], dtype=np.float32),
-    8: np.array([0, 0, 1, 0, 1, 0], dtype=np.float32),
-    9: np.array([0, 0, 1, 1, 0, 0], dtype=np.float32),
-    10: np.array([0, 0, 0, 1, 1, 0], dtype=np.float32),
-    11: np.array([0, 0, 0, 0, 1, 1], dtype=np.float32)
+    0: np.array([1, 0, 0, 0, 0], dtype=np.float32),
+    1: np.array([0, 0, 0, 0, 0], dtype=np.float32),
+    2: np.array([0, 1, 0, 0, 0], dtype=np.float32),
+    3: np.array([0, 0, 1, 0, 0], dtype=np.float32),
+    4: np.array([0, 0, 0, 1, 0], dtype=np.float32),
+    5: np.array([0, 0, 0, 0, 1], dtype=np.float32),
+    6: np.array([1, 1, 0, 0, 0], dtype=np.float32),
+    7: np.array([1, 1, 0, 1, 0], dtype=np.float32),
+    8: np.array([0, 1, 0, 1, 0], dtype=np.float32),
+    9: np.array([0, 1, 1, 0, 0], dtype=np.float32),
+    10: np.array([0, 0, 1, 1, 0], dtype=np.float32),
+    11: np.array([0, 0, 0, 1, 1], dtype=np.float32)
 }
 
 # id2label用于输入0-11, 查找label原始名称
@@ -95,7 +95,8 @@ def create_dataset(train_data, i):
                         'data': tf.train.Feature(bytes_list=tf.train.BytesList(value=[raw])),
                         'labels': tf.train.Feature(bytes_list=tf.train.BytesList(value=[labels])),
                         'label': tf.train.Feature(int64_list=tf.train.Int64List(value=[int(label)])),
-                        'label_name':tf.train.Feature(bytes_list=tf.train.BytesList(value=[label_name.encode('utf-8')]))
+                        'label_name': tf.train.Feature(
+                            bytes_list=tf.train.BytesList(value=[label_name.encode('utf-8')]))
                     }
                 )
             )
