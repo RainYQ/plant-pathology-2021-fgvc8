@@ -29,12 +29,25 @@
 }<br/>
 * F1-Score的计算应该基于'scab'、'healthy'、'frog_eye_leaf_spot‘等而非'rust complex'<br/>
 * 所以之前的训练集上的F1-Score都只能达到~50％<br/>
+
 ## EfficientNetB0 Train
+
 * 学习率lr ∈ [1e-4, 2e-4] for batch_size = 16<br/>
 * 学习率lr = 1e-3 for batch_size = 128 or 64<br/>
 * 应用学习率衰减，val_f1_score连续5个epoch不下降就降低学习率<br/>
 * EfficientNetB0 - EfficientNetB7均采用相同参数，使用 noisy-student 权重<br/>
+* metric = ~86％ for batch_size = 128<br/>
+* F1-Score = ~82％ for batch_size = 128<br/>
+
+## ResNet50 Train
+
+* 学习率lr = 5e-5 for batch_size = 16<br/>
+* 应用学习率衰减，val_f1_score连续5个epoch不下降就降低学习率<br/>
+* metric = ~78％ for batch_size = 16<br/>
+* F1-Score = ~62％ for batch_size = 16<br/>
+
 ## 训练集上采用的图像增强方法
+
 * tf.keras.layers.GaussianNoise()<br/>
 * tf.image.random_contrast()<br/>
 * tf.image.random_saturation()<br/>
@@ -42,16 +55,19 @@
 * tf.image.random_flip_left_right()<br/>
 * tf.image.random_flip_up_down()<br/>
 * tf.image.rot90()<br/>
+
 ## TODO
+
 * 训练集上增加 随机遮挡 数据增强<br/>
 * 训练集上使用 MixUp 数据增强<br/>
 * 训练集上使用 labelsmooth<br/>
 * TTA（测试时增强）<br/>
+* 试试余弦学习率衰减？<br/>
 * ~~清洗训练集中的标签错误标签数据（imagehash）~~<br/>
 * ~~生成tfrecords的时候移除重复图片~~<br/>
 * 不平衡数据处理 过采样/欠采样<br/>
-* 试 ResNet 系列<br/>
-* ~~tfa.metrics.F1Score 只支持 { 'none' 'macro' 'micro' 'weighted' } 
-  , 不支持{ 'sample' }, 需要重写或者使用scikit-learn中的F1-Score~~<br/>
+* ~~试 ResNet 系列~~<br/>
+* ~~tfa.metrics.F1Score 只支持 { 'none' 'macro' 'micro' 'weighted' } , 不支持{ 'sample' },
+  需要重写或者使用scikit-learn中的F1-Score~~<br/>
 * Adam优化器在训练快结束的时候效果不是很好，看看有没有更合适的优化器<br/>
 * 默认的F1-Score计算方法是每个Batch计算一次然后取均值, 应该改成每个Epoch结束时计算一次更合适, reference: https://zhuanlan.zhihu.com/p/51356820 <br/>
