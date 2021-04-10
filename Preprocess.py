@@ -3,7 +3,7 @@
 """
 TFRecords Generator:
 Modify:
-    - Line 113-116 可能需要限制多线程并发数量
+    - Line 106-111 可能需要限制多线程并发数量
 """
 
 import os

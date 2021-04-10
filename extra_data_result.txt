@@ -1,0 +1,49 @@
+-Extra Dataset Label
+rust                 622
+scab                 592
+healthy              516
+multiple_diseases     91
+
+-EfficientNet-B7 1-fold without 'healthy'
+--USE_PROBABILITY OFF
+
+T    1160
+F     555
+M      70
+P      36
+
+scab                 343
+healthy              157
+rust                  34
+multiple_diseases     21
+
+-EfficientNet-B7 1-fold without 'healthy'
+--USE_PROBABILITY ON
+
+T    601
+F    598
+P    532
+M     90
+
+healthy              343
+scab                 248
+rust                   6
+multiple_diseases      1
+
+LB 0.601
+
+-EfficientNet-B4 5-fold with 'healthy'
+--USE_PROBABILITY OFF
+
+T    973
+F    635
+P    124
+M     89
+
+scab                 412
+healthy              213
+rust                   8
+multiple_diseases      2
+
+LB 0.573
+
