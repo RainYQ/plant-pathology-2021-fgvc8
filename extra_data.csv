@@ -1,0 +1,1822 @@
+image,labels_predict,label_true,flag
+Train_0.jpg,rust,scab,F
+Train_1.jpg,frog_eye_leaf_spot,multiple_diseases,M
+Train_2.jpg,healthy rust,healthy,P
+Train_3.jpg,rust,rust,T
+Train_4.jpg,healthy rust,healthy,P
+Train_5.jpg,complex,healthy,F
+Train_6.jpg,complex,multiple_diseases,M
+Train_7.jpg,powdery_mildew,scab,F
+Train_8.jpg,healthy,scab,F
+Train_9.jpg,rust,healthy,F
+Train_10.jpg,rust,rust,T
+Train_11.jpg,scab,scab,T
+Train_12.jpg,scab,scab,T
+Train_13.jpg,healthy,healthy,T
+Train_14.jpg,rust,rust,T
+Train_15.jpg,rust,rust,T
+Train_16.jpg,complex,scab,F
+Train_17.jpg,rust complex,scab,F
+Train_18.jpg,scab,healthy,F
+Train_19.jpg,scab,scab,T
+Train_20.jpg,scab,scab,T
+Train_21.jpg,rust,rust,T
+Train_22.jpg,scab frog_eye_leaf_spot,scab,P
+Train_23.jpg,rust,rust,T
+Train_24.jpg,healthy,healthy,T
+Train_25.jpg,frog_eye_leaf_spot complex,multiple_diseases,M
+Train_26.jpg,rust,rust,T
+Train_27.jpg,powdery_mildew,scab,F
+Train_28.jpg,rust powdery_mildew,scab,F
+Train_29.jpg,healthy,scab,F
+Train_30.jpg,rust,scab,F
+Train_31.jpg,rust,rust,T
+Train_32.jpg,rust,scab,F
+Train_33.jpg,healthy,healthy,T
+Train_34.jpg,rust,rust,T
+Train_35.jpg,rust,rust,T
+Train_36.jpg,complex,multiple_diseases,M
+Train_37.jpg,rust,rust,T
+Train_38.jpg,rust,rust,T
+Train_39.jpg,rust,rust,T
+Train_40.jpg,rust,scab,F
+Train_41.jpg,scab,scab,T
+Train_42.jpg,rust,scab,F
+Train_43.jpg,healthy,healthy,T
+Train_44.jpg,complex,scab,F
+Train_45.jpg,rust,rust,T
+Train_46.jpg,scab,healthy,F
+Train_47.jpg,rust,rust,T
+Train_48.jpg,complex,scab,F
+Train_49.jpg,rust,scab,F
+Train_50.jpg,rust,rust,T
+Train_51.jpg,scab complex,scab,P
+Train_52.jpg,healthy,scab,F
+Train_53.jpg,healthy,healthy,T
+Train_54.jpg,powdery_mildew,healthy,F
+Train_55.jpg,scab,healthy,F
+Train_56.jpg,scab,scab,T
+Train_57.jpg,rust,rust,T
+Train_58.jpg,rust,rust,T
+Train_59.jpg,rust,rust,T
+Train_60.jpg,rust,rust,T
+Train_61.jpg,healthy,scab,F
+Train_62.jpg,scab frog_eye_leaf_spot,multiple_diseases,M
+Train_63.jpg,healthy,healthy,T
+Train_64.jpg,rust,rust,T
+Train_65.jpg,rust,scab,F
+Train_66.jpg,healthy,healthy,T
+Train_67.jpg,frog_eye_leaf_spot powdery_mildew,healthy,F
+Train_68.jpg,powdery_mildew,healthy,F
+Train_69.jpg,rust,rust,T
+Train_70.jpg,healthy,healthy,T
+Train_71.jpg,rust,rust,T
+Train_72.jpg,healthy,healthy,T
+Train_73.jpg,healthy,scab,F
+Train_74.jpg,complex,multiple_diseases,M
+Train_75.jpg,rust,rust,T
+Train_76.jpg,scab complex,scab,P
+Train_77.jpg,healthy,healthy,T
+Train_78.jpg,rust,scab,F
+Train_79.jpg,frog_eye_leaf_spot complex,scab,F
+Train_80.jpg,rust,scab,F
+Train_81.jpg,rust,rust,T
+Train_82.jpg,rust,rust,T
+Train_83.jpg,scab,scab,T
+Train_84.jpg,rust,scab,F
+Train_85.jpg,complex,scab,F
+Train_86.jpg,rust,healthy,F
+Train_87.jpg,rust,rust,T
+Train_88.jpg,frog_eye_leaf_spot,healthy,F
+Train_89.jpg,rust,rust,T
+Train_90.jpg,healthy,healthy,T
+Train_91.jpg,rust,scab,F
+Train_92.jpg,rust,rust,T
+Train_93.jpg,rust,rust,T
+Train_94.jpg,healthy,healthy,T
+Train_95.jpg,frog_eye_leaf_spot rust,multiple_diseases,M
+Train_96.jpg,rust,rust,T
+Train_97.jpg,frog_eye_leaf_spot rust,rust,P
+Train_98.jpg,rust,rust,T
+Train_99.jpg,healthy,healthy,T
+Train_100.jpg,healthy,healthy,T
+Train_101.jpg,complex,scab,F
+Train_102.jpg,rust,rust,T
+Train_103.jpg,rust,healthy,F
+Train_104.jpg,rust,multiple_diseases,M
+Train_105.jpg,healthy,healthy,T
+Train_106.jpg,complex,scab,F
+Train_107.jpg,rust,scab,F
+Train_108.jpg,rust,rust,T
+Train_109.jpg,frog_eye_leaf_spot rust,rust,P
+Train_110.jpg,rust complex,scab,F
+Train_111.jpg,complex,healthy,F
+Train_112.jpg,scab,scab,T
+Train_113.jpg,complex,multiple_diseases,M
+Train_114.jpg,rust,rust,T
+Train_115.jpg,rust,rust,T
+Train_116.jpg,healthy,scab,F
+Train_117.jpg,rust,rust,T
+Train_118.jpg,frog_eye_leaf_spot rust,rust,P
+Train_119.jpg,healthy,scab,F
+Train_120.jpg,rust,rust,T
+Train_121.jpg,frog_eye_leaf_spot rust,rust,P
+Train_122.jpg,rust complex,multiple_diseases,M
+Train_123.jpg,powdery_mildew,healthy,F
+Train_124.jpg,frog_eye_leaf_spot rust,rust,P
+Train_125.jpg,rust,scab,F
+Train_126.jpg,frog_eye_leaf_spot rust,rust,P
+Train_127.jpg,rust,scab,F
+Train_128.jpg,frog_eye_leaf_spot,multiple_diseases,M
+Train_129.jpg,rust,rust,T
+Train_130.jpg,scab,scab,T
+Train_131.jpg,rust,rust,T
+Train_132.jpg,rust,rust,T
+Train_133.jpg,rust,rust,T
+Train_134.jpg,healthy,healthy,T
+Train_135.jpg,powdery_mildew,healthy,F
+Train_136.jpg,healthy,healthy,T
+Train_137.jpg,healthy,healthy,T
+Train_138.jpg,scab,scab,T
+Train_139.jpg,rust,rust,T
+Train_140.jpg,rust complex,scab,F
+Train_141.jpg,rust,rust,T
+Train_142.jpg,complex,scab,F
+Train_143.jpg,rust,scab,F
+Train_144.jpg,healthy,healthy,T
+Train_145.jpg,rust,scab,F
+Train_146.jpg,healthy,healthy,T
+Train_147.jpg,scab,scab,T
+Train_148.jpg,rust,rust,T
+Train_149.jpg,rust complex,scab,F
+Train_150.jpg,powdery_mildew,scab,F
+Train_151.jpg,healthy,healthy,T
+Train_152.jpg,complex,scab,F
+Train_153.jpg,rust,scab,F
+Train_154.jpg,scab,scab,T
+Train_155.jpg,scab,scab,T
+Train_156.jpg,frog_eye_leaf_spot rust,rust,P
+Train_157.jpg,rust,rust,T
+Train_158.jpg,scab,scab,T
+Train_159.jpg,rust,rust,T
+Train_160.jpg,rust,scab,F
+Train_161.jpg,complex,scab,F
+Train_162.jpg,healthy,healthy,T
+Train_163.jpg,healthy,scab,F
+Train_164.jpg,frog_eye_leaf_spot rust,rust,P
+Train_165.jpg,rust,rust,T
+Train_166.jpg,complex,scab,F
+Train_167.jpg,healthy,healthy,T
+Train_168.jpg,rust,scab,F
+Train_169.jpg,complex,scab,F
+Train_170.jpg,frog_eye_leaf_spot rust,multiple_diseases,M
+Train_171.jpg,frog_eye_leaf_spot,rust,F
+Train_172.jpg,complex,scab,F
+Train_173.jpg,complex,scab,F
+Train_174.jpg,scab,healthy,F
+Train_175.jpg,frog_eye_leaf_spot,healthy,F
+Train_176.jpg,healthy,scab,F
+Train_177.jpg,rust,scab,F
+Train_178.jpg,frog_eye_leaf_spot rust,rust,P
+Train_179.jpg,scab,healthy,F
+Train_180.jpg,complex,multiple_diseases,M
+Train_181.jpg,rust,rust,T
+Train_182.jpg,rust,scab,F
+Train_183.jpg,rust,rust,T
+Train_184.jpg,frog_eye_leaf_spot rust,rust,P
+Train_185.jpg,powdery_mildew,scab,F
+Train_186.jpg,complex,scab,F
+Train_187.jpg,rust,rust,T
+Train_188.jpg,frog_eye_leaf_spot rust,rust,P
+Train_189.jpg,rust,scab,F
+Train_190.jpg,rust,scab,F
+Train_191.jpg,rust,scab,F
+Train_192.jpg,scab,scab,T
+Train_193.jpg,frog_eye_leaf_spot rust,rust,P
+Train_194.jpg,frog_eye_leaf_spot rust,rust,P
+Train_195.jpg,rust,healthy,F
+Train_196.jpg,scab frog_eye_leaf_spot,scab,P
+Train_197.jpg,healthy,scab,F
+Train_198.jpg,powdery_mildew,healthy,F
+Train_199.jpg,healthy,healthy,T
+Train_200.jpg,scab complex,scab,P
+Train_201.jpg,powdery_mildew,healthy,F
+Train_202.jpg,rust complex,rust,P
+Train_203.jpg,frog_eye_leaf_spot rust,scab,F
+Train_204.jpg,scab frog_eye_leaf_spot,scab,P
+Train_205.jpg,rust,rust,T
+Train_206.jpg,rust,rust,T
+Train_207.jpg,scab,scab,T
+Train_208.jpg,rust,rust,T
+Train_209.jpg,rust complex,scab,F
+Train_210.jpg,scab,scab,T
+Train_211.jpg,healthy,scab,F
+Train_212.jpg,frog_eye_leaf_spot rust,rust,P
+Train_213.jpg,healthy,healthy,T
+Train_214.jpg,scab,scab,T
+Train_215.jpg,healthy,healthy,T
+Train_216.jpg,scab,scab,T
+Train_217.jpg,healthy,scab,F
+Train_218.jpg,rust,rust,T
+Train_219.jpg,healthy,healthy,T
+Train_220.jpg,rust,healthy,F
+Train_221.jpg,powdery_mildew,healthy,F
+Train_222.jpg,powdery_mildew,scab,F
+Train_223.jpg,frog_eye_leaf_spot rust,rust,P
+Train_224.jpg,powdery_mildew,healthy,F
+Train_225.jpg,rust,rust,T
+Train_226.jpg,rust,rust,T
+Train_227.jpg,scab,healthy,F
+Train_228.jpg,rust,rust,T
+Train_229.jpg,complex,scab,F
+Train_230.jpg,complex,scab,F
+Train_231.jpg,frog_eye_leaf_spot complex,multiple_diseases,M
+Train_232.jpg,rust,scab,F
+Train_233.jpg,rust,rust,T
+Train_234.jpg,scab,scab,T
+Train_235.jpg,healthy,scab,F
+Train_236.jpg,rust,rust,T
+Train_237.jpg,complex,multiple_diseases,M
+Train_238.jpg,healthy,healthy,T
+Train_239.jpg,complex,scab,F
+Train_240.jpg,rust,rust,T
+Train_241.jpg,rust,rust,T
+Train_242.jpg,rust powdery_mildew,scab,F
+Train_243.jpg,scab,scab,T
+Train_244.jpg,rust,rust,T
+Train_245.jpg,complex,multiple_diseases,M
+Train_246.jpg,rust,healthy,F
+Train_247.jpg,healthy,healthy,T
+Train_248.jpg,healthy,healthy,T
+Train_249.jpg,healthy,healthy,T
+Train_250.jpg,complex,scab,F
+Train_251.jpg,scab,scab,T
+Train_252.jpg,healthy,scab,F
+Train_253.jpg,rust,scab,F
+Train_254.jpg,rust,rust,T
+Train_255.jpg,scab complex,scab,P
+Train_256.jpg,scab,scab,T
+Train_257.jpg,healthy,healthy,T
+Train_258.jpg,rust complex,scab,F
+Train_259.jpg,rust,rust,T
+Train_260.jpg,powdery_mildew,scab,F
+Train_261.jpg,healthy,healthy,T
+Train_262.jpg,rust,scab,F
+Train_263.jpg,scab,healthy,F
+Train_264.jpg,healthy,healthy,T
+Train_265.jpg,rust,healthy,F
+Train_266.jpg,powdery_mildew,healthy,F
+Train_267.jpg,complex,scab,F
+Train_268.jpg,scab,scab,T
+Train_269.jpg,rust,rust,T
+Train_270.jpg,rust,scab,F
+Train_271.jpg,scab,healthy,F
+Train_272.jpg,scab,scab,T
+Train_273.jpg,healthy,healthy,T
+Train_274.jpg,rust,rust,T
+Train_275.jpg,rust,rust,T
+Train_276.jpg,rust,scab,F
+Train_277.jpg,rust,rust,T
+Train_278.jpg,powdery_mildew,healthy,F
+Train_279.jpg,rust,rust,T
+Train_280.jpg,scab,scab,T
+Train_281.jpg,scab,scab,T
+Train_282.jpg,healthy rust,healthy,P
+Train_283.jpg,healthy,scab,F
+Train_284.jpg,rust,rust,T
+Train_285.jpg,rust,rust,T
+Train_286.jpg,rust,rust,T
+Train_287.jpg,healthy,healthy,T
+Train_288.jpg,rust,rust,T
+Train_289.jpg,frog_eye_leaf_spot rust,rust,P
+Train_290.jpg,rust,scab,F
+Train_291.jpg,healthy rust,healthy,P
+Train_292.jpg,scab,scab,T
+Train_293.jpg,rust,scab,F
+Train_294.jpg,rust complex,rust,P
+Train_295.jpg,healthy,healthy,T
+Train_296.jpg,rust,scab,F
+Train_297.jpg,scab,scab,T
+Train_298.jpg,frog_eye_leaf_spot rust complex,healthy,F
+Train_299.jpg,rust,rust,T
+Train_300.jpg,healthy,healthy,T
+Train_301.jpg,rust,rust,T
+Train_302.jpg,rust,rust,T
+Train_303.jpg,scab,scab,T
+Train_304.jpg,healthy,healthy,T
+Train_305.jpg,healthy,scab,F
+Train_306.jpg,rust complex,multiple_diseases,M
+Train_307.jpg,healthy powdery_mildew,healthy,P
+Train_308.jpg,scab,scab,T
+Train_309.jpg,rust,scab,F
+Train_310.jpg,rust,scab,F
+Train_311.jpg,rust,healthy,F
+Train_312.jpg,scab,scab,T
+Train_313.jpg,rust,rust,T
+Train_314.jpg,rust,rust,T
+Train_315.jpg,rust complex,scab,F
+Train_316.jpg,scab,scab,T
+Train_317.jpg,healthy,healthy,T
+Train_318.jpg,rust,rust,T
+Train_319.jpg,complex,scab,F
+Train_320.jpg,rust powdery_mildew,healthy,F
+Train_321.jpg,rust,rust,T
+Train_322.jpg,rust,rust,T
+Train_323.jpg,rust,rust,T
+Train_324.jpg,rust,scab,F
+Train_325.jpg,rust,scab,F
+Train_326.jpg,scab,scab,T
+Train_327.jpg,rust,rust,T
+Train_328.jpg,rust,rust,T
+Train_329.jpg,healthy,healthy,T
+Train_330.jpg,healthy,healthy,T
+Train_331.jpg,rust,rust,T
+Train_332.jpg,rust,scab,F
+Train_333.jpg,rust,rust,T
+Train_334.jpg,rust,rust,T
+Train_335.jpg,healthy,healthy,T
+Train_336.jpg,complex,multiple_diseases,M
+Train_337.jpg,rust powdery_mildew,healthy,F
+Train_338.jpg,rust complex,multiple_diseases,M
+Train_339.jpg,healthy,healthy,T
+Train_340.jpg,rust,rust,T
+Train_341.jpg,rust,rust,T
+Train_342.jpg,frog_eye_leaf_spot rust,rust,P
+Train_343.jpg,healthy,scab,F
+Train_344.jpg,frog_eye_leaf_spot rust,rust,P
+Train_345.jpg,rust,rust,T
+Train_346.jpg,rust,rust,T
+Train_347.jpg,rust,rust,T
+Train_348.jpg,healthy,healthy,T
+Train_349.jpg,complex,scab,F
+Train_350.jpg,rust,rust,T
+Train_351.jpg,rust,rust,T
+Train_352.jpg,scab,scab,T
+Train_353.jpg,complex,scab,F
+Train_354.jpg,healthy,scab,F
+Train_355.jpg,complex,scab,F
+Train_356.jpg,healthy,healthy,T
+Train_357.jpg,healthy,healthy,T
+Train_358.jpg,scab,scab,T
+Train_359.jpg,rust,healthy,F
+Train_360.jpg,healthy,healthy,T
+Train_361.jpg,healthy,scab,F
+Train_362.jpg,rust,scab,F
+Train_363.jpg,complex,multiple_diseases,M
+Train_364.jpg,scab rust,scab,P
+Train_365.jpg,powdery_mildew,healthy,F
+Train_366.jpg,healthy,healthy,T
+Train_367.jpg,healthy,healthy,T
+Train_368.jpg,rust,rust,T
+Train_369.jpg,rust,rust,T
+Train_370.jpg,rust,scab,F
+Train_371.jpg,rust,rust,T
+Train_372.jpg,healthy,scab,F
+Train_373.jpg,scab,healthy,F
+Train_374.jpg,scab,scab,T
+Train_375.jpg,complex,healthy,F
+Train_376.jpg,rust,healthy,F
+Train_377.jpg,complex,scab,F
+Train_378.jpg,healthy,healthy,T
+Train_379.jpg,scab,scab,T
+Train_380.jpg,scab,healthy,F
+Train_381.jpg,healthy,scab,F
+Train_382.jpg,scab,scab,T
+Train_383.jpg,healthy,healthy,T
+Train_384.jpg,rust,rust,T
+Train_385.jpg,rust,rust,T
+Train_386.jpg,rust,rust,T
+Train_387.jpg,rust,rust,T
+Train_388.jpg,scab,scab,T
+Train_389.jpg,frog_eye_leaf_spot,healthy,F
+Train_390.jpg,rust,rust,T
+Train_391.jpg,frog_eye_leaf_spot rust,multiple_diseases,M
+Train_392.jpg,healthy rust,healthy,P
+Train_393.jpg,healthy,healthy,T
+Train_394.jpg,rust,rust,T
+Train_395.jpg,rust complex,multiple_diseases,M
+Train_396.jpg,healthy,healthy,T
+Train_397.jpg,healthy,healthy,T
+Train_398.jpg,rust,scab,F
+Train_399.jpg,complex,multiple_diseases,M
+Train_400.jpg,rust,scab,F
+Train_401.jpg,complex,scab,F
+Train_402.jpg,rust,rust,T
+Train_403.jpg,frog_eye_leaf_spot rust,rust,P
+Train_404.jpg,healthy,healthy,T
+Train_405.jpg,healthy,healthy,T
+Train_406.jpg,healthy,healthy,T
+Train_407.jpg,powdery_mildew,healthy,F
+Train_408.jpg,rust,rust,T
+Train_409.jpg,rust complex,scab,F
+Train_410.jpg,rust,rust,T
+Train_411.jpg,rust,rust,T
+Train_412.jpg,healthy,healthy,T
+Train_413.jpg,rust,rust,T
+Train_414.jpg,scab,scab,T
+Train_415.jpg,healthy,healthy,T
+Train_416.jpg,rust,rust,T
+Train_417.jpg,scab,healthy,F
+Train_418.jpg,complex,multiple_diseases,M
+Train_419.jpg,scab,scab,T
+Train_420.jpg,healthy,healthy,T
+Train_421.jpg,healthy,healthy,T
+Train_422.jpg,rust,rust,T
+Train_423.jpg,rust,scab,F
+Train_424.jpg,scab,scab,T
+Train_425.jpg,rust,healthy,F
+Train_426.jpg,rust,rust,T
+Train_427.jpg,rust,healthy,F
+Train_428.jpg,complex,multiple_diseases,M
+Train_429.jpg,rust,scab,F
+Train_430.jpg,healthy,healthy,T
+Train_431.jpg,rust,scab,F
+Train_432.jpg,healthy,healthy,T
+Train_433.jpg,powdery_mildew,healthy,F
+Train_434.jpg,rust,rust,T
+Train_435.jpg,rust,rust,T
+Train_436.jpg,frog_eye_leaf_spot complex,multiple_diseases,M
+Train_437.jpg,scab,scab,T
+Train_438.jpg,scab,healthy,F
+Train_439.jpg,healthy,healthy,T
+Train_440.jpg,rust,rust,T
+Train_441.jpg,rust,rust,T
+Train_442.jpg,complex,scab,F
+Train_443.jpg,rust,healthy,F
+Train_444.jpg,rust,healthy,F
+Train_445.jpg,rust,rust,T
+Train_446.jpg,powdery_mildew,healthy,F
+Train_447.jpg,rust,rust,T
+Train_448.jpg,healthy,healthy,T
+Train_449.jpg,complex,scab,F
+Train_450.jpg,healthy rust,healthy,P
+Train_451.jpg,rust,rust,T
+Train_452.jpg,healthy,healthy,T
+Train_453.jpg,rust,rust,T
+Train_454.jpg,healthy,scab,F
+Train_455.jpg,rust,rust,T
+Train_456.jpg,rust,rust,T
+Train_457.jpg,rust,scab,F
+Train_458.jpg,rust,rust,T
+Train_459.jpg,complex,scab,F
+Train_460.jpg,complex,healthy,F
+Train_461.jpg,frog_eye_leaf_spot rust,rust,P
+Train_462.jpg,rust,rust,T
+Train_463.jpg,healthy,scab,F
+Train_464.jpg,rust,rust,T
+Train_465.jpg,rust,rust,T
+Train_466.jpg,healthy rust,healthy,P
+Train_467.jpg,rust,rust,T
+Train_468.jpg,rust,rust,T
+Train_469.jpg,rust,rust,T
+Train_470.jpg,scab,scab,T
+Train_471.jpg,healthy,scab,F
+Train_472.jpg,rust,rust,T
+Train_473.jpg,complex,scab,F
+Train_474.jpg,healthy,healthy,T
+Train_475.jpg,healthy,healthy,T
+Train_476.jpg,healthy,healthy,T
+Train_477.jpg,rust,scab,F
+Train_478.jpg,healthy,healthy,T
+Train_479.jpg,frog_eye_leaf_spot rust,rust,P
+Train_480.jpg,complex,multiple_diseases,M
+Train_481.jpg,rust,rust,T
+Train_482.jpg,rust,rust,T
+Train_483.jpg,rust,rust,T
+Train_484.jpg,frog_eye_leaf_spot rust,multiple_diseases,M
+Train_485.jpg,rust,rust,T
+Train_486.jpg,frog_eye_leaf_spot rust,rust,P
+Train_487.jpg,rust,rust,T
+Train_488.jpg,scab,healthy,F
+Train_489.jpg,rust,scab,F
+Train_490.jpg,complex,scab,F
+Train_491.jpg,scab,healthy,F
+Train_492.jpg,rust,rust,T
+Train_493.jpg,complex,multiple_diseases,M
+Train_494.jpg,frog_eye_leaf_spot,scab,F
+Train_495.jpg,frog_eye_leaf_spot rust,rust,P
+Train_496.jpg,complex powdery_mildew,healthy,F
+Train_497.jpg,rust,rust,T
+Train_498.jpg,complex,scab,F
+Train_499.jpg,rust complex,rust,P
+Train_500.jpg,rust,rust,T
+Train_501.jpg,frog_eye_leaf_spot rust,rust,P
+Train_502.jpg,scab frog_eye_leaf_spot,healthy,F
+Train_503.jpg,healthy,scab,F
+Train_504.jpg,rust,rust,T
+Train_505.jpg,rust,scab,F
+Train_506.jpg,rust,rust,T
+Train_507.jpg,rust,rust,T
+Train_508.jpg,frog_eye_leaf_spot rust,rust,P
+Train_509.jpg,rust,rust,T
+Train_510.jpg,rust,rust,T
+Train_511.jpg,rust,rust,T
+Train_512.jpg,rust,rust,T
+Train_513.jpg,rust,rust,T
+Train_514.jpg,rust,rust,T
+Train_515.jpg,rust,rust,T
+Train_516.jpg,rust,rust,T
+Train_517.jpg,frog_eye_leaf_spot,multiple_diseases,M
+Train_518.jpg,rust,rust,T
+Train_519.jpg,rust,rust,T
+Train_520.jpg,complex,scab,F
+Train_521.jpg,scab,scab,T
+Train_522.jpg,rust,rust,T
+Train_523.jpg,rust,rust,T
+Train_524.jpg,healthy,scab,F
+Train_525.jpg,healthy,healthy,T
+Train_526.jpg,healthy,healthy,T
+Train_527.jpg,healthy,scab,F
+Train_528.jpg,rust complex,scab,F
+Train_529.jpg,scab,healthy,F
+Train_530.jpg,healthy,scab,F
+Train_531.jpg,powdery_mildew,healthy,F
+Train_532.jpg,rust,healthy,F
+Train_533.jpg,rust,rust,T
+Train_534.jpg,rust,rust,T
+Train_535.jpg,frog_eye_leaf_spot rust,multiple_diseases,M
+Train_536.jpg,rust,rust,T
+Train_537.jpg,healthy,healthy,T
+Train_538.jpg,complex,scab,F
+Train_539.jpg,rust,rust,T
+Train_540.jpg,healthy,scab,F
+Train_541.jpg,rust,rust,T
+Train_542.jpg,rust,rust,T
+Train_543.jpg,scab frog_eye_leaf_spot,multiple_diseases,M
+Train_544.jpg,rust,healthy,F
+Train_545.jpg,healthy,healthy,T
+Train_546.jpg,rust,healthy,F
+Train_547.jpg,healthy,healthy,T
+Train_548.jpg,healthy,scab,F
+Train_549.jpg,rust,rust,T
+Train_550.jpg,healthy,healthy,T
+Train_551.jpg,scab,healthy,F
+Train_552.jpg,scab,scab,T
+Train_553.jpg,rust,rust,T
+Train_554.jpg,rust,rust,T
+Train_555.jpg,rust,scab,F
+Train_556.jpg,scab,scab,T
+Train_557.jpg,rust,rust,T
+Train_558.jpg,healthy,healthy,T
+Train_559.jpg,rust complex,scab,F
+Train_560.jpg,rust,rust,T
+Train_561.jpg,rust,scab,F
+Train_562.jpg,rust,healthy,F
+Train_563.jpg,frog_eye_leaf_spot,multiple_diseases,M
+Train_564.jpg,rust,rust,T
+Train_565.jpg,scab,scab,T
+Train_566.jpg,rust,healthy,F
+Train_567.jpg,rust,rust,T
+Train_568.jpg,scab,scab,T
+Train_569.jpg,healthy,healthy,T
+Train_570.jpg,complex,scab,F
+Train_571.jpg,rust,rust,T
+Train_572.jpg,healthy,healthy,T
+Train_573.jpg,healthy rust,healthy,P
+Train_574.jpg,rust,rust,T
+Train_575.jpg,rust,rust,T
+Train_576.jpg,complex,scab,F
+Train_577.jpg,rust,rust,T
+Train_578.jpg,rust,rust,T
+Train_579.jpg,rust,healthy,F
+Train_580.jpg,rust,rust,T
+Train_581.jpg,scab complex,scab,P
+Train_582.jpg,rust,rust,T
+Train_583.jpg,rust,scab,F
+Train_584.jpg,rust,rust,T
+Train_585.jpg,rust,rust,T
+Train_586.jpg,rust,rust,T
+Train_587.jpg,healthy,healthy,T
+Train_588.jpg,rust,rust,T
+Train_589.jpg,scab,scab,T
+Train_590.jpg,rust,rust,T
+Train_591.jpg,scab,healthy,F
+Train_592.jpg,healthy,healthy,T
+Train_593.jpg,scab,scab,T
+Train_594.jpg,rust,rust,T
+Train_595.jpg,healthy,healthy,T
+Train_596.jpg,rust,rust,T
+Train_597.jpg,powdery_mildew,healthy,F
+Train_598.jpg,rust,rust,T
+Train_599.jpg,rust,scab,F
+Train_600.jpg,scab,scab,T
+Train_601.jpg,healthy,healthy,T
+Train_602.jpg,scab frog_eye_leaf_spot complex,multiple_diseases,M
+Train_603.jpg,healthy,healthy,T
+Train_604.jpg,rust complex,scab,F
+Train_605.jpg,frog_eye_leaf_spot complex,healthy,F
+Train_606.jpg,rust,rust,T
+Train_607.jpg,rust,rust,T
+Train_608.jpg,rust,rust,T
+Train_609.jpg,rust,rust,T
+Train_610.jpg,frog_eye_leaf_spot rust,rust,P
+Train_611.jpg,rust,rust,T
+Train_612.jpg,rust,rust,T
+Train_613.jpg,rust,rust,T
+Train_614.jpg,rust complex,scab,F
+Train_615.jpg,rust,rust,T
+Train_616.jpg,scab,healthy,F
+Train_617.jpg,scab,scab,T
+Train_618.jpg,scab,healthy,F
+Train_619.jpg,healthy,healthy,T
+Train_620.jpg,rust,rust,T
+Train_621.jpg,rust,healthy,F
+Train_622.jpg,powdery_mildew,healthy,F
+Train_623.jpg,rust,rust,T
+Train_624.jpg,healthy,scab,F
+Train_625.jpg,scab frog_eye_leaf_spot complex,scab,P
+Train_626.jpg,healthy rust,healthy,P
+Train_627.jpg,rust,rust,T
+Train_628.jpg,scab,scab,T
+Train_629.jpg,frog_eye_leaf_spot rust,multiple_diseases,M
+Train_630.jpg,scab,healthy,F
+Train_631.jpg,rust,scab,F
+Train_632.jpg,rust,rust,T
+Train_633.jpg,rust,rust,T
+Train_634.jpg,rust,rust,T
+Train_635.jpg,rust,healthy,F
+Train_636.jpg,rust,scab,F
+Train_637.jpg,scab,healthy,F
+Train_638.jpg,rust complex,scab,F
+Train_639.jpg,rust,rust,T
+Train_640.jpg,frog_eye_leaf_spot rust,rust,P
+Train_641.jpg,healthy,scab,F
+Train_642.jpg,healthy,healthy,T
+Train_643.jpg,rust,rust,T
+Train_644.jpg,healthy,healthy,T
+Train_645.jpg,frog_eye_leaf_spot rust,multiple_diseases,M
+Train_646.jpg,healthy powdery_mildew,healthy,P
+Train_647.jpg,rust,rust,T
+Train_648.jpg,healthy,healthy,T
+Train_649.jpg,rust,scab,F
+Train_650.jpg,healthy,healthy,T
+Train_651.jpg,complex,scab,F
+Train_652.jpg,rust,rust,T
+Train_653.jpg,rust,scab,F
+Train_654.jpg,frog_eye_leaf_spot rust,rust,P
+Train_655.jpg,scab,scab,T
+Train_656.jpg,rust,rust,T
+Train_657.jpg,healthy,healthy,T
+Train_658.jpg,rust complex powdery_mildew,scab,F
+Train_659.jpg,complex powdery_mildew,scab,F
+Train_660.jpg,healthy,healthy,T
+Train_661.jpg,rust,scab,F
+Train_662.jpg,complex,scab,F
+Train_663.jpg,scab,scab,T
+Train_664.jpg,scab frog_eye_leaf_spot complex,scab,P
+Train_665.jpg,healthy,healthy,T
+Train_666.jpg,rust,rust,T
+Train_667.jpg,rust,rust,T
+Train_668.jpg,rust,rust,T
+Train_669.jpg,powdery_mildew,scab,F
+Train_670.jpg,rust,rust,T
+Train_671.jpg,powdery_mildew,healthy,F
+Train_672.jpg,rust,rust,T
+Train_673.jpg,scab,scab,T
+Train_674.jpg,powdery_mildew,scab,F
+Train_675.jpg,powdery_mildew,healthy,F
+Train_676.jpg,scab,healthy,F
+Train_677.jpg,complex,scab,F
+Train_678.jpg,healthy,healthy,T
+Train_679.jpg,healthy,healthy,T
+Train_680.jpg,scab,scab,T
+Train_681.jpg,complex,scab,F
+Train_682.jpg,frog_eye_leaf_spot complex,multiple_diseases,M
+Train_683.jpg,rust,rust,T
+Train_684.jpg,healthy,healthy,T
+Train_685.jpg,healthy,healthy,T
+Train_686.jpg,complex,scab,F
+Train_687.jpg,rust complex,rust,P
+Train_688.jpg,rust,scab,F
+Train_689.jpg,rust,rust,T
+Train_690.jpg,rust,rust,T
+Train_691.jpg,healthy,healthy,T
+Train_692.jpg,scab,scab,T
+Train_693.jpg,rust,rust,T
+Train_694.jpg,healthy powdery_mildew,healthy,P
+Train_695.jpg,rust,rust,T
+Train_696.jpg,complex,scab,F
+Train_697.jpg,rust,rust,T
+Train_698.jpg,complex,scab,F
+Train_699.jpg,healthy,scab,F
+Train_700.jpg,rust,rust,T
+Train_701.jpg,healthy,healthy,T
+Train_702.jpg,frog_eye_leaf_spot complex,multiple_diseases,M
+Train_703.jpg,healthy,healthy,T
+Train_704.jpg,healthy,healthy,T
+Train_705.jpg,rust,rust,T
+Train_706.jpg,rust,rust,T
+Train_707.jpg,rust,rust,T
+Train_708.jpg,scab,scab,T
+Train_709.jpg,healthy,scab,F
+Train_710.jpg,healthy,healthy,T
+Train_711.jpg,rust,healthy,F
+Train_712.jpg,rust,rust,T
+Train_713.jpg,rust,scab,F
+Train_714.jpg,rust,rust,T
+Train_715.jpg,rust,rust,T
+Train_716.jpg,scab,scab,T
+Train_717.jpg,scab,scab,T
+Train_718.jpg,rust,rust,T
+Train_719.jpg,rust,rust,T
+Train_720.jpg,healthy,healthy,T
+Train_721.jpg,healthy,scab,F
+Train_722.jpg,rust,rust,T
+Train_723.jpg,rust,scab,F
+Train_724.jpg,rust,rust,T
+Train_725.jpg,scab,healthy,F
+Train_726.jpg,frog_eye_leaf_spot rust,rust,P
+Train_727.jpg,rust,scab,F
+Train_728.jpg,frog_eye_leaf_spot rust,rust,P
+Train_729.jpg,complex,scab,F
+Train_730.jpg,healthy,healthy,T
+Train_731.jpg,complex,healthy,F
+Train_732.jpg,complex,multiple_diseases,M
+Train_733.jpg,rust,scab,F
+Train_734.jpg,rust,rust,T
+Train_735.jpg,frog_eye_leaf_spot,rust,F
+Train_736.jpg,rust complex,scab,F
+Train_737.jpg,rust,healthy,F
+Train_738.jpg,rust,rust,T
+Train_739.jpg,rust,rust,T
+Train_740.jpg,scab rust,scab,P
+Train_741.jpg,rust,rust,T
+Train_742.jpg,rust,rust,T
+Train_743.jpg,rust,rust,T
+Train_744.jpg,rust,rust,T
+Train_745.jpg,frog_eye_leaf_spot rust,rust,P
+Train_746.jpg,rust,healthy,F
+Train_747.jpg,healthy powdery_mildew,healthy,P
+Train_748.jpg,scab,scab,T
+Train_749.jpg,rust,rust,T
+Train_750.jpg,rust,rust,T
+Train_751.jpg,scab,scab,T
+Train_752.jpg,healthy,healthy,T
+Train_753.jpg,healthy,healthy,T
+Train_754.jpg,complex,multiple_diseases,M
+Train_755.jpg,healthy,healthy,T
+Train_756.jpg,powdery_mildew,scab,F
+Train_757.jpg,rust,scab,F
+Train_758.jpg,complex,scab,F
+Train_759.jpg,rust,rust,T
+Train_760.jpg,rust,rust,T
+Train_761.jpg,complex,healthy,F
+Train_762.jpg,frog_eye_leaf_spot,multiple_diseases,M
+Train_763.jpg,rust,rust,T
+Train_764.jpg,rust,rust,T
+Train_765.jpg,scab,scab,T
+Train_766.jpg,rust,rust,T
+Train_767.jpg,frog_eye_leaf_spot rust,rust,P
+Train_768.jpg,frog_eye_leaf_spot complex,healthy,F
+Train_769.jpg,rust powdery_mildew,healthy,F
+Train_770.jpg,rust,scab,F
+Train_771.jpg,healthy,scab,F
+Train_772.jpg,healthy,healthy,T
+Train_773.jpg,powdery_mildew,healthy,F
+Train_774.jpg,scab,healthy,F
+Train_775.jpg,rust,scab,F
+Train_776.jpg,powdery_mildew,healthy,F
+Train_777.jpg,powdery_mildew,healthy,F
+Train_778.jpg,rust,rust,T
+Train_779.jpg,rust,rust,T
+Train_780.jpg,rust,scab,F
+Train_781.jpg,powdery_mildew,healthy,F
+Train_782.jpg,healthy,healthy,T
+Train_783.jpg,complex,scab,F
+Train_784.jpg,rust,rust,T
+Train_785.jpg,complex,scab,F
+Train_786.jpg,rust,healthy,F
+Train_787.jpg,rust,scab,F
+Train_788.jpg,scab,healthy,F
+Train_789.jpg,rust,rust,T
+Train_790.jpg,rust,rust,T
+Train_791.jpg,scab,healthy,F
+Train_792.jpg,rust complex,scab,F
+Train_793.jpg,rust,scab,F
+Train_794.jpg,rust powdery_mildew,healthy,F
+Train_795.jpg,rust,scab,F
+Train_796.jpg,rust,rust,T
+Train_797.jpg,healthy,scab,F
+Train_798.jpg,rust,rust,T
+Train_799.jpg,rust,rust,T
+Train_800.jpg,frog_eye_leaf_spot rust,healthy,F
+Train_801.jpg,rust,healthy,F
+Train_802.jpg,rust,healthy,F
+Train_803.jpg,scab,scab,T
+Train_804.jpg,frog_eye_leaf_spot rust,rust,P
+Train_805.jpg,powdery_mildew,healthy,F
+Train_806.jpg,rust,scab,F
+Train_807.jpg,healthy rust,healthy,P
+Train_808.jpg,scab,scab,T
+Train_809.jpg,healthy,healthy,T
+Train_810.jpg,rust,scab,F
+Train_811.jpg,healthy,healthy,T
+Train_812.jpg,healthy,healthy,T
+Train_813.jpg,frog_eye_leaf_spot complex,scab,F
+Train_814.jpg,rust,rust,T
+Train_815.jpg,healthy,healthy,T
+Train_816.jpg,frog_eye_leaf_spot rust,rust,P
+Train_817.jpg,healthy,healthy,T
+Train_818.jpg,powdery_mildew,scab,F
+Train_819.jpg,complex,scab,F
+Train_820.jpg,complex,scab,F
+Train_821.jpg,rust,rust,T
+Train_822.jpg,rust,rust,T
+Train_823.jpg,rust,scab,F
+Train_824.jpg,scab,scab,T
+Train_825.jpg,rust,rust,T
+Train_826.jpg,healthy,healthy,T
+Train_827.jpg,rust,rust,T
+Train_828.jpg,rust,rust,T
+Train_829.jpg,rust,rust,T
+Train_830.jpg,rust,rust,T
+Train_831.jpg,rust complex,scab,F
+Train_832.jpg,frog_eye_leaf_spot rust,rust,P
+Train_833.jpg,complex,healthy,F
+Train_834.jpg,healthy,healthy,T
+Train_835.jpg,healthy,healthy,T
+Train_836.jpg,rust,rust,T
+Train_837.jpg,rust,rust,T
+Train_838.jpg,scab,scab,T
+Train_839.jpg,healthy,healthy,T
+Train_840.jpg,rust,rust,T
+Train_841.jpg,rust,rust,T
+Train_842.jpg,rust powdery_mildew,scab,F
+Train_843.jpg,rust,rust,T
+Train_844.jpg,rust,scab,F
+Train_845.jpg,powdery_mildew,scab,F
+Train_846.jpg,rust,scab,F
+Train_847.jpg,rust,rust,T
+Train_848.jpg,rust,rust,T
+Train_849.jpg,rust,healthy,F
+Train_850.jpg,rust,healthy,F
+Train_851.jpg,scab,scab,T
+Train_852.jpg,rust,rust,T
+Train_853.jpg,rust,rust,T
+Train_854.jpg,scab,scab,T
+Train_855.jpg,rust,rust,T
+Train_856.jpg,scab complex,scab,P
+Train_857.jpg,rust complex,multiple_diseases,M
+Train_858.jpg,rust,scab,F
+Train_859.jpg,complex,scab,F
+Train_860.jpg,rust,rust,T
+Train_861.jpg,powdery_mildew,scab,F
+Train_862.jpg,scab,scab,T
+Train_863.jpg,healthy,healthy,T
+Train_864.jpg,scab,healthy,F
+Train_865.jpg,rust,rust,T
+Train_866.jpg,healthy,healthy,T
+Train_867.jpg,rust,rust,T
+Train_868.jpg,complex,scab,F
+Train_869.jpg,scab,scab,T
+Train_870.jpg,rust,scab,F
+Train_871.jpg,rust,scab,F
+Train_872.jpg,healthy,healthy,T
+Train_873.jpg,rust,rust,T
+Train_874.jpg,rust,rust,T
+Train_875.jpg,rust,rust,T
+Train_876.jpg,rust,rust,T
+Train_877.jpg,healthy,healthy,T
+Train_878.jpg,healthy,scab,F
+Train_879.jpg,healthy,scab,F
+Train_880.jpg,rust,healthy,F
+Train_881.jpg,healthy,healthy,T
+Train_882.jpg,healthy,healthy,T
+Train_883.jpg,complex,scab,F
+Train_884.jpg,rust,rust,T
+Train_885.jpg,healthy,healthy,T
+Train_886.jpg,frog_eye_leaf_spot,multiple_diseases,M
+Train_887.jpg,healthy,healthy,T
+Train_888.jpg,rust,rust,T
+Train_889.jpg,rust,rust,T
+Train_890.jpg,healthy,healthy,T
+Train_891.jpg,complex,scab,F
+Train_892.jpg,rust,rust,T
+Train_893.jpg,healthy,healthy,T
+Train_894.jpg,healthy,scab,F
+Train_895.jpg,healthy,healthy,T
+Train_896.jpg,healthy,healthy,T
+Train_897.jpg,healthy,healthy,T
+Train_898.jpg,healthy,scab,F
+Train_899.jpg,healthy,scab,F
+Train_900.jpg,rust,rust,T
+Train_901.jpg,rust,healthy,F
+Train_902.jpg,complex,scab,F
+Train_903.jpg,healthy,healthy,T
+Train_904.jpg,scab frog_eye_leaf_spot,scab,P
+Train_905.jpg,scab,multiple_diseases,M
+Train_906.jpg,complex,scab,F
+Train_907.jpg,rust,healthy,F
+Train_908.jpg,healthy,healthy,T
+Train_909.jpg,scab,healthy,F
+Train_910.jpg,frog_eye_leaf_spot,rust,F
+Train_911.jpg,rust,rust,T
+Train_912.jpg,frog_eye_leaf_spot rust,rust,P
+Train_913.jpg,frog_eye_leaf_spot rust,rust,P
+Train_914.jpg,healthy,healthy,T
+Train_915.jpg,healthy,healthy,T
+Train_916.jpg,rust,rust,T
+Train_917.jpg,complex,scab,F
+Train_918.jpg,healthy,healthy,T
+Train_919.jpg,scab,healthy,F
+Train_920.jpg,rust,rust,T
+Train_921.jpg,healthy,healthy,T
+Train_922.jpg,rust,scab,F
+Train_923.jpg,healthy,healthy,T
+Train_924.jpg,healthy,healthy,T
+Train_925.jpg,rust complex,rust,P
+Train_926.jpg,scab frog_eye_leaf_spot,scab,P
+Train_927.jpg,scab,scab,T
+Train_928.jpg,rust,rust,T
+Train_929.jpg,powdery_mildew,healthy,F
+Train_930.jpg,complex,scab,F
+Train_931.jpg,rust,rust,T
+Train_932.jpg,complex,scab,F
+Train_933.jpg,rust,scab,F
+Train_934.jpg,healthy,healthy,T
+Train_935.jpg,healthy,healthy,T
+Train_936.jpg,healthy,multiple_diseases,F
+Train_937.jpg,healthy,healthy,T
+Train_938.jpg,rust,rust,T
+Train_939.jpg,healthy,healthy,T
+Train_940.jpg,rust,rust,T
+Train_941.jpg,healthy,scab,F
+Train_942.jpg,healthy,healthy,T
+Train_943.jpg,complex,scab,F
+Train_944.jpg,rust,rust,T
+Train_945.jpg,rust,rust,T
+Train_946.jpg,complex,scab,F
+Train_947.jpg,healthy,healthy,T
+Train_948.jpg,frog_eye_leaf_spot,healthy,F
+Train_949.jpg,frog_eye_leaf_spot complex,multiple_diseases,M
+Train_950.jpg,rust,rust,T
+Train_951.jpg,rust,healthy,F
+Train_952.jpg,healthy,healthy,T
+Train_953.jpg,healthy,healthy,T
+Train_954.jpg,complex,scab,F
+Train_955.jpg,rust,scab,F
+Train_956.jpg,frog_eye_leaf_spot rust,healthy,F
+Train_957.jpg,rust,rust,T
+Train_958.jpg,healthy,healthy,T
+Train_959.jpg,healthy,healthy,T
+Train_960.jpg,healthy,healthy,T
+Train_961.jpg,healthy,healthy,T
+Train_962.jpg,rust,rust,T
+Train_963.jpg,frog_eye_leaf_spot,healthy,F
+Train_964.jpg,healthy,scab,F
+Train_965.jpg,rust,rust,T
+Train_966.jpg,scab,healthy,F
+Train_967.jpg,powdery_mildew,scab,F
+Train_968.jpg,rust,healthy,F
+Train_969.jpg,healthy,healthy,T
+Train_970.jpg,healthy,scab,F
+Train_971.jpg,rust,rust,T
+Train_972.jpg,rust,scab,F
+Train_973.jpg,rust complex,scab,F
+Train_974.jpg,scab,scab,T
+Train_975.jpg,rust,rust,T
+Train_976.jpg,rust,rust,T
+Train_977.jpg,scab,healthy,F
+Train_978.jpg,frog_eye_leaf_spot rust,rust,P
+Train_979.jpg,healthy,healthy,T
+Train_980.jpg,healthy,healthy,T
+Train_981.jpg,scab complex,healthy,F
+Train_982.jpg,rust,rust,T
+Train_983.jpg,healthy,healthy,T
+Train_984.jpg,rust,scab,F
+Train_985.jpg,rust,rust,T
+Train_986.jpg,frog_eye_leaf_spot powdery_mildew,scab,F
+Train_987.jpg,rust,rust,T
+Train_988.jpg,complex,scab,F
+Train_989.jpg,healthy,healthy,T
+Train_990.jpg,healthy,scab,F
+Train_991.jpg,rust,scab,F
+Train_992.jpg,complex,scab,F
+Train_993.jpg,powdery_mildew,scab,F
+Train_994.jpg,rust,scab,F
+Train_995.jpg,rust,rust,T
+Train_996.jpg,rust,rust,T
+Train_997.jpg,healthy,scab,F
+Train_998.jpg,rust powdery_mildew,scab,F
+Train_999.jpg,rust,rust,T
+Train_1000.jpg,rust,rust,T
+Train_1001.jpg,powdery_mildew,healthy,F
+Train_1002.jpg,healthy,healthy,T
+Train_1003.jpg,rust,scab,F
+Train_1004.jpg,healthy,healthy,T
+Train_1005.jpg,rust,healthy,F
+Train_1006.jpg,rust,scab,F
+Train_1007.jpg,healthy,healthy,T
+Train_1008.jpg,scab,scab,T
+Train_1009.jpg,rust,scab,F
+Train_1010.jpg,scab,scab,T
+Train_1011.jpg,rust,rust,T
+Train_1012.jpg,healthy,healthy,T
+Train_1013.jpg,scab,multiple_diseases,M
+Train_1014.jpg,rust,healthy,F
+Train_1015.jpg,healthy,scab,F
+Train_1016.jpg,complex,scab,F
+Train_1017.jpg,healthy,healthy,T
+Train_1018.jpg,complex,multiple_diseases,M
+Train_1019.jpg,frog_eye_leaf_spot rust,rust,P
+Train_1020.jpg,healthy,healthy,T
+Train_1021.jpg,rust,rust,T
+Train_1022.jpg,rust,rust,T
+Train_1023.jpg,rust,rust,T
+Train_1024.jpg,scab,scab,T
+Train_1025.jpg,healthy,scab,F
+Train_1026.jpg,rust,scab,F
+Train_1027.jpg,healthy,scab,F
+Train_1028.jpg,complex,multiple_diseases,M
+Train_1029.jpg,rust,rust,T
+Train_1030.jpg,rust,rust,T
+Train_1031.jpg,healthy,healthy,T
+Train_1032.jpg,scab frog_eye_leaf_spot,scab,P
+Train_1033.jpg,scab,scab,T
+Train_1034.jpg,healthy,healthy,T
+Train_1035.jpg,frog_eye_leaf_spot,multiple_diseases,M
+Train_1036.jpg,healthy,scab,F
+Train_1037.jpg,rust,rust,T
+Train_1038.jpg,complex,scab,F
+Train_1039.jpg,powdery_mildew,healthy,F
+Train_1040.jpg,rust,rust,T
+Train_1041.jpg,rust,rust,T
+Train_1042.jpg,complex,scab,F
+Train_1043.jpg,healthy,healthy,T
+Train_1044.jpg,healthy,healthy,T
+Train_1045.jpg,complex,scab,F
+Train_1046.jpg,frog_eye_leaf_spot rust complex,multiple_diseases,M
+Train_1047.jpg,rust,healthy,F
+Train_1048.jpg,rust,rust,T
+Train_1049.jpg,rust,scab,F
+Train_1050.jpg,scab frog_eye_leaf_spot,multiple_diseases,M
+Train_1051.jpg,rust,rust,T
+Train_1052.jpg,scab,scab,T
+Train_1053.jpg,rust,rust,T
+Train_1054.jpg,healthy rust,healthy,P
+Train_1055.jpg,rust,healthy,F
+Train_1056.jpg,rust,scab,F
+Train_1057.jpg,rust,rust,T
+Train_1058.jpg,healthy,healthy,T
+Train_1059.jpg,powdery_mildew,scab,F
+Train_1060.jpg,rust,rust,T
+Train_1061.jpg,rust,scab,F
+Train_1062.jpg,scab,scab,T
+Train_1063.jpg,rust,rust,T
+Train_1064.jpg,rust,rust,T
+Train_1065.jpg,scab,scab,T
+Train_1066.jpg,frog_eye_leaf_spot,healthy,F
+Train_1067.jpg,rust,healthy,F
+Train_1068.jpg,rust,rust,T
+Train_1069.jpg,frog_eye_leaf_spot rust,rust,P
+Train_1070.jpg,rust,rust,T
+Train_1071.jpg,rust,rust,T
+Train_1072.jpg,powdery_mildew,healthy,F
+Train_1073.jpg,rust,rust,T
+Train_1074.jpg,scab,scab,T
+Train_1075.jpg,scab,scab,T
+Train_1076.jpg,complex,scab,F
+Train_1077.jpg,scab,scab,T
+Train_1078.jpg,rust,rust,T
+Train_1079.jpg,healthy,healthy,T
+Train_1080.jpg,healthy,healthy,T
+Train_1081.jpg,rust,rust,T
+Train_1082.jpg,healthy,healthy,T
+Train_1083.jpg,scab powdery_mildew,scab,P
+Train_1084.jpg,rust,rust,T
+Train_1085.jpg,rust,healthy,F
+Train_1086.jpg,frog_eye_leaf_spot,healthy,F
+Train_1087.jpg,rust,rust,T
+Train_1088.jpg,rust complex,scab,F
+Train_1089.jpg,healthy,scab,F
+Train_1090.jpg,scab,scab,T
+Train_1091.jpg,healthy,healthy,T
+Train_1092.jpg,frog_eye_leaf_spot,healthy,F
+Train_1093.jpg,rust,rust,T
+Train_1094.jpg,healthy,scab,F
+Train_1095.jpg,rust,scab,F
+Train_1096.jpg,rust,rust,T
+Train_1097.jpg,healthy,healthy,T
+Train_1098.jpg,rust,scab,F
+Train_1099.jpg,scab,scab,T
+Train_1100.jpg,scab,scab,T
+Train_1101.jpg,healthy,healthy,T
+Train_1102.jpg,rust,rust,T
+Train_1103.jpg,healthy,healthy,T
+Train_1104.jpg,rust,scab,F
+Train_1105.jpg,rust,rust,T
+Train_1106.jpg,rust,rust,T
+Train_1107.jpg,frog_eye_leaf_spot rust,scab,F
+Train_1108.jpg,rust,rust,T
+Train_1109.jpg,scab,scab,T
+Train_1110.jpg,healthy,healthy,T
+Train_1111.jpg,rust,rust,T
+Train_1112.jpg,rust,rust,T
+Train_1113.jpg,rust,rust,T
+Train_1114.jpg,healthy,healthy,T
+Train_1115.jpg,healthy,healthy,T
+Train_1116.jpg,rust,rust,T
+Train_1117.jpg,healthy,healthy,T
+Train_1118.jpg,rust,rust,T
+Train_1119.jpg,complex,multiple_diseases,M
+Train_1120.jpg,healthy,scab,F
+Train_1121.jpg,rust,rust,T
+Train_1122.jpg,rust,rust,T
+Train_1123.jpg,healthy,healthy,T
+Train_1124.jpg,rust complex,scab,F
+Train_1125.jpg,rust,rust,T
+Train_1126.jpg,rust,rust,T
+Train_1127.jpg,rust,scab,F
+Train_1128.jpg,complex,scab,F
+Train_1129.jpg,scab frog_eye_leaf_spot complex,multiple_diseases,M
+Train_1130.jpg,frog_eye_leaf_spot rust,scab,F
+Train_1131.jpg,scab,healthy,F
+Train_1132.jpg,healthy,scab,F
+Train_1133.jpg,frog_eye_leaf_spot,healthy,F
+Train_1134.jpg,frog_eye_leaf_spot rust,multiple_diseases,M
+Train_1135.jpg,complex,scab,F
+Train_1136.jpg,scab,scab,T
+Train_1137.jpg,rust,scab,F
+Train_1138.jpg,rust,rust,T
+Train_1139.jpg,healthy,healthy,T
+Train_1140.jpg,rust,scab,F
+Train_1141.jpg,rust,healthy,F
+Train_1142.jpg,rust,rust,T
+Train_1143.jpg,complex,scab,F
+Train_1144.jpg,rust,rust,T
+Train_1145.jpg,rust,rust,T
+Train_1146.jpg,healthy,healthy,T
+Train_1147.jpg,rust,rust,T
+Train_1148.jpg,rust,rust,T
+Train_1149.jpg,frog_eye_leaf_spot rust,rust,P
+Train_1150.jpg,rust,rust,T
+Train_1151.jpg,healthy,healthy,T
+Train_1152.jpg,rust,scab,F
+Train_1153.jpg,healthy,healthy,T
+Train_1154.jpg,rust,rust,T
+Train_1155.jpg,complex,scab,F
+Train_1156.jpg,scab,scab,T
+Train_1157.jpg,powdery_mildew,scab,F
+Train_1158.jpg,rust,rust,T
+Train_1159.jpg,scab,healthy,F
+Train_1160.jpg,healthy,healthy,T
+Train_1161.jpg,rust,multiple_diseases,M
+Train_1162.jpg,rust,scab,F
+Train_1163.jpg,rust,rust,T
+Train_1164.jpg,healthy,healthy,T
+Train_1165.jpg,rust,rust,T
+Train_1166.jpg,complex,scab,F
+Train_1167.jpg,healthy,scab,F
+Train_1168.jpg,complex,scab,F
+Train_1169.jpg,rust,rust,T
+Train_1170.jpg,scab,scab,T
+Train_1171.jpg,healthy,healthy,T
+Train_1172.jpg,rust,scab,F
+Train_1173.jpg,scab,multiple_diseases,M
+Train_1174.jpg,scab,scab,T
+Train_1175.jpg,rust,rust,T
+Train_1176.jpg,powdery_mildew,healthy,F
+Train_1177.jpg,rust,rust,T
+Train_1178.jpg,rust complex,scab,F
+Train_1179.jpg,frog_eye_leaf_spot rust,rust,P
+Train_1180.jpg,healthy,healthy,T
+Train_1181.jpg,rust complex,scab,F
+Train_1182.jpg,complex,scab,F
+Train_1183.jpg,scab frog_eye_leaf_spot complex,scab,P
+Train_1184.jpg,rust,rust,T
+Train_1185.jpg,rust,rust,T
+Train_1186.jpg,powdery_mildew,healthy,F
+Train_1187.jpg,rust,rust,T
+Train_1188.jpg,complex,scab,F
+Train_1189.jpg,rust complex,rust,P
+Train_1190.jpg,healthy,scab,F
+Train_1191.jpg,rust,rust,T
+Train_1192.jpg,healthy,scab,F
+Train_1193.jpg,scab,healthy,F
+Train_1194.jpg,rust,rust,T
+Train_1195.jpg,healthy,healthy,T
+Train_1196.jpg,rust,rust,T
+Train_1197.jpg,frog_eye_leaf_spot,multiple_diseases,M
+Train_1198.jpg,healthy,healthy,T
+Train_1199.jpg,scab powdery_mildew,healthy,F
+Train_1200.jpg,rust,rust,T
+Train_1201.jpg,scab complex,scab,P
+Train_1202.jpg,complex,scab,F
+Train_1203.jpg,scab frog_eye_leaf_spot complex,scab,P
+Train_1204.jpg,rust,rust,T
+Train_1205.jpg,rust,rust,T
+Train_1206.jpg,frog_eye_leaf_spot rust,rust,P
+Train_1207.jpg,scab frog_eye_leaf_spot rust,rust,P
+Train_1208.jpg,rust,scab,F
+Train_1209.jpg,rust,scab,F
+Train_1210.jpg,healthy,healthy,T
+Train_1211.jpg,rust,scab,F
+Train_1212.jpg,rust,scab,F
+Train_1213.jpg,rust,rust,T
+Train_1214.jpg,powdery_mildew,healthy,F
+Train_1215.jpg,rust,rust,T
+Train_1216.jpg,rust complex,multiple_diseases,M
+Train_1217.jpg,rust,scab,F
+Train_1218.jpg,scab,scab,T
+Train_1219.jpg,rust,rust,T
+Train_1220.jpg,rust,rust,T
+Train_1221.jpg,scab,scab,T
+Train_1222.jpg,rust,rust,T
+Train_1223.jpg,healthy,healthy,T
+Train_1224.jpg,healthy,healthy,T
+Train_1225.jpg,rust,rust,T
+Train_1226.jpg,scab,scab,T
+Train_1227.jpg,powdery_mildew,healthy,F
+Train_1228.jpg,scab frog_eye_leaf_spot,scab,P
+Train_1229.jpg,rust,rust,T
+Train_1230.jpg,healthy,healthy,T
+Train_1231.jpg,rust,rust,T
+Train_1232.jpg,rust,scab,F
+Train_1233.jpg,rust,rust,T
+Train_1234.jpg,frog_eye_leaf_spot,multiple_diseases,M
+Train_1235.jpg,frog_eye_leaf_spot rust,rust,P
+Train_1236.jpg,rust,multiple_diseases,M
+Train_1237.jpg,healthy,healthy,T
+Train_1238.jpg,healthy,scab,F
+Train_1239.jpg,rust,healthy,F
+Train_1240.jpg,healthy,healthy,T
+Train_1241.jpg,scab,scab,T
+Train_1242.jpg,rust,scab,F
+Train_1243.jpg,healthy,scab,F
+Train_1244.jpg,rust,rust,T
+Train_1245.jpg,powdery_mildew,healthy,F
+Train_1246.jpg,scab frog_eye_leaf_spot,scab,P
+Train_1247.jpg,powdery_mildew,healthy,F
+Train_1248.jpg,healthy,healthy,T
+Train_1249.jpg,healthy,scab,F
+Train_1250.jpg,powdery_mildew,scab,F
+Train_1251.jpg,healthy,healthy,T
+Train_1252.jpg,healthy,scab,F
+Train_1253.jpg,frog_eye_leaf_spot,rust,F
+Train_1254.jpg,healthy,healthy,T
+Train_1255.jpg,rust,rust,T
+Train_1256.jpg,rust,rust,T
+Train_1257.jpg,rust powdery_mildew,healthy,F
+Train_1258.jpg,rust,scab,F
+Train_1259.jpg,frog_eye_leaf_spot rust,scab,F
+Train_1260.jpg,rust,rust,T
+Train_1261.jpg,complex,healthy,F
+Train_1262.jpg,rust,rust,T
+Train_1263.jpg,frog_eye_leaf_spot rust,rust,P
+Train_1264.jpg,healthy,multiple_diseases,F
+Train_1265.jpg,healthy,healthy,T
+Train_1266.jpg,rust,rust,T
+Train_1267.jpg,rust,rust,T
+Train_1268.jpg,frog_eye_leaf_spot rust,rust,P
+Train_1269.jpg,rust,scab,F
+Train_1270.jpg,frog_eye_leaf_spot,multiple_diseases,M
+Train_1271.jpg,complex,healthy,F
+Train_1272.jpg,rust,rust,T
+Train_1273.jpg,scab,scab,T
+Train_1274.jpg,complex,scab,F
+Train_1275.jpg,rust,rust,T
+Train_1276.jpg,complex,scab,F
+Train_1277.jpg,healthy,healthy,T
+Train_1278.jpg,complex,scab,F
+Train_1279.jpg,scab,scab,T
+Train_1280.jpg,complex,multiple_diseases,M
+Train_1281.jpg,scab,scab,T
+Train_1282.jpg,scab,healthy,F
+Train_1283.jpg,frog_eye_leaf_spot,rust,F
+Train_1284.jpg,rust,rust,T
+Train_1285.jpg,frog_eye_leaf_spot complex,healthy,F
+Train_1286.jpg,rust powdery_mildew,healthy,F
+Train_1287.jpg,healthy,healthy,T
+Train_1288.jpg,healthy,scab,F
+Train_1289.jpg,rust,healthy,F
+Train_1290.jpg,rust,rust,T
+Train_1291.jpg,frog_eye_leaf_spot rust complex,rust,P
+Train_1292.jpg,rust,rust,T
+Train_1293.jpg,scab,scab,T
+Train_1294.jpg,scab,scab,T
+Train_1295.jpg,scab,scab,T
+Train_1296.jpg,rust powdery_mildew,scab,F
+Train_1297.jpg,healthy,healthy,T
+Train_1298.jpg,scab,scab,T
+Train_1299.jpg,rust,rust,T
+Train_1300.jpg,rust,rust,T
+Train_1301.jpg,rust,scab,F
+Train_1302.jpg,frog_eye_leaf_spot rust,rust,P
+Train_1303.jpg,rust complex,scab,F
+Train_1304.jpg,healthy,healthy,T
+Train_1305.jpg,scab,scab,T
+Train_1306.jpg,scab complex,healthy,F
+Train_1307.jpg,rust,rust,T
+Train_1308.jpg,rust complex,scab,F
+Train_1309.jpg,scab,healthy,F
+Train_1310.jpg,frog_eye_leaf_spot,multiple_diseases,M
+Train_1311.jpg,rust,rust,T
+Train_1312.jpg,complex,scab,F
+Train_1313.jpg,healthy,healthy,T
+Train_1314.jpg,rust,rust,T
+Train_1315.jpg,complex,scab,F
+Train_1316.jpg,rust,rust,T
+Train_1317.jpg,scab,scab,T
+Train_1318.jpg,rust,rust,T
+Train_1319.jpg,rust,rust,T
+Train_1320.jpg,rust,rust,T
+Train_1321.jpg,rust,rust,T
+Train_1322.jpg,rust,rust,T
+Train_1323.jpg,rust complex,scab,F
+Train_1324.jpg,rust,rust,T
+Train_1325.jpg,rust,healthy,F
+Train_1326.jpg,rust,rust,T
+Train_1327.jpg,rust,rust,T
+Train_1328.jpg,scab,healthy,F
+Train_1329.jpg,scab,scab,T
+Train_1330.jpg,rust,rust,T
+Train_1331.jpg,rust,scab,F
+Train_1332.jpg,rust,rust,T
+Train_1333.jpg,scab,scab,T
+Train_1334.jpg,complex,scab,F
+Train_1335.jpg,healthy,healthy,T
+Train_1336.jpg,rust,scab,F
+Train_1337.jpg,rust,scab,F
+Train_1338.jpg,rust,scab,F
+Train_1339.jpg,scab rust,scab,P
+Train_1340.jpg,rust,rust,T
+Train_1341.jpg,complex powdery_mildew,healthy,F
+Train_1342.jpg,rust,rust,T
+Train_1343.jpg,scab,scab,T
+Train_1344.jpg,rust,rust,T
+Train_1345.jpg,healthy,scab,F
+Train_1346.jpg,complex,scab,F
+Train_1347.jpg,healthy,healthy,T
+Train_1348.jpg,healthy,healthy,T
+Train_1349.jpg,healthy,healthy,T
+Train_1350.jpg,healthy,scab,F
+Train_1351.jpg,rust,rust,T
+Train_1352.jpg,rust,rust,T
+Train_1353.jpg,rust,scab,F
+Train_1354.jpg,healthy,healthy,T
+Train_1355.jpg,rust powdery_mildew,healthy,F
+Train_1356.jpg,healthy,healthy,T
+Train_1357.jpg,healthy,healthy,T
+Train_1358.jpg,rust,multiple_diseases,M
+Train_1359.jpg,rust,rust,T
+Train_1360.jpg,complex,scab,F
+Train_1361.jpg,scab frog_eye_leaf_spot,scab,P
+Train_1362.jpg,powdery_mildew,scab,F
+Train_1363.jpg,complex,scab,F
+Train_1364.jpg,frog_eye_leaf_spot rust,rust,P
+Train_1365.jpg,rust,rust,T
+Train_1366.jpg,rust powdery_mildew,healthy,F
+Train_1367.jpg,scab,scab,T
+Train_1368.jpg,frog_eye_leaf_spot,healthy,F
+Train_1369.jpg,frog_eye_leaf_spot complex,multiple_diseases,M
+Train_1370.jpg,rust,rust,T
+Train_1371.jpg,rust,healthy,F
+Train_1372.jpg,healthy,healthy,T
+Train_1373.jpg,rust,rust,T
+Train_1374.jpg,rust,rust,T
+Train_1375.jpg,healthy,scab,F
+Train_1376.jpg,rust,rust,T
+Train_1377.jpg,scab,healthy,F
+Train_1378.jpg,rust,rust,T
+Train_1379.jpg,rust,rust,T
+Train_1380.jpg,healthy,healthy,T
+Train_1381.jpg,healthy,healthy,T
+Train_1382.jpg,scab,scab,T
+Train_1383.jpg,scab,scab,T
+Train_1384.jpg,complex,scab,F
+Train_1385.jpg,scab,scab,T
+Train_1386.jpg,healthy,healthy,T
+Train_1387.jpg,rust,rust,T
+Train_1388.jpg,scab,healthy,F
+Train_1389.jpg,healthy,healthy,T
+Train_1390.jpg,complex,multiple_diseases,M
+Train_1391.jpg,healthy,healthy,T
+Train_1392.jpg,scab,healthy,F
+Train_1393.jpg,rust,scab,F
+Train_1394.jpg,rust,rust,T
+Train_1395.jpg,scab,scab,T
+Train_1396.jpg,healthy rust,healthy,P
+Train_1397.jpg,powdery_mildew,healthy,F
+Train_1398.jpg,frog_eye_leaf_spot,rust,F
+Train_1399.jpg,rust,rust,T
+Train_1400.jpg,rust,rust,T
+Train_1401.jpg,healthy,scab,F
+Train_1402.jpg,rust,rust,T
+Train_1403.jpg,scab,scab,T
+Train_1404.jpg,rust,rust,T
+Train_1405.jpg,scab,scab,T
+Train_1406.jpg,rust,rust,T
+Train_1407.jpg,rust,rust,T
+Train_1408.jpg,healthy,healthy,T
+Train_1409.jpg,rust,rust,T
+Train_1410.jpg,rust complex,scab,F
+Train_1411.jpg,complex,scab,F
+Train_1412.jpg,frog_eye_leaf_spot rust,rust,P
+Train_1413.jpg,rust,rust,T
+Train_1414.jpg,powdery_mildew,healthy,F
+Train_1415.jpg,scab,healthy,F
+Train_1416.jpg,scab,scab,T
+Train_1417.jpg,scab,healthy,F
+Train_1418.jpg,rust,rust,T
+Train_1419.jpg,scab,scab,T
+Train_1420.jpg,healthy,healthy,T
+Train_1421.jpg,scab,scab,T
+Train_1422.jpg,rust,rust,T
+Train_1423.jpg,rust,rust,T
+Train_1424.jpg,healthy,healthy,T
+Train_1425.jpg,rust,rust,T
+Train_1426.jpg,healthy,healthy,T
+Train_1427.jpg,rust,rust,T
+Train_1428.jpg,rust,rust,T
+Train_1429.jpg,healthy,scab,F
+Train_1430.jpg,complex,scab,F
+Train_1431.jpg,frog_eye_leaf_spot complex,scab,F
+Train_1432.jpg,healthy,healthy,T
+Train_1433.jpg,rust,multiple_diseases,M
+Train_1434.jpg,rust,rust,T
+Train_1435.jpg,scab,scab,T
+Train_1436.jpg,rust,scab,F
+Train_1437.jpg,rust,rust,T
+Train_1438.jpg,healthy,healthy,T
+Train_1439.jpg,rust,rust,T
+Train_1440.jpg,healthy,healthy,T
+Train_1441.jpg,rust,rust,T
+Train_1442.jpg,healthy,healthy,T
+Train_1443.jpg,rust,rust,T
+Train_1444.jpg,rust,scab,F
+Train_1445.jpg,complex,scab,F
+Train_1446.jpg,rust,rust,T
+Train_1447.jpg,frog_eye_leaf_spot,healthy,F
+Train_1448.jpg,scab,scab,T
+Train_1449.jpg,healthy,healthy,T
+Train_1450.jpg,scab complex,scab,P
+Train_1451.jpg,rust,rust,T
+Train_1452.jpg,powdery_mildew,scab,F
+Train_1453.jpg,rust,rust,T
+Train_1454.jpg,rust complex,multiple_diseases,M
+Train_1455.jpg,frog_eye_leaf_spot,rust,F
+Train_1456.jpg,powdery_mildew,scab,F
+Train_1457.jpg,rust complex,healthy,F
+Train_1458.jpg,rust,rust,T
+Train_1459.jpg,healthy,healthy,T
+Train_1460.jpg,complex,scab,F
+Train_1461.jpg,rust,rust,T
+Train_1462.jpg,rust,rust,T
+Train_1463.jpg,healthy,healthy,T
+Train_1464.jpg,healthy,scab,F
+Train_1465.jpg,rust,rust,T
+Train_1466.jpg,healthy,healthy,T
+Train_1467.jpg,scab frog_eye_leaf_spot,scab,P
+Train_1468.jpg,frog_eye_leaf_spot complex,multiple_diseases,M
+Train_1469.jpg,rust,rust,T
+Train_1470.jpg,complex,scab,F
+Train_1471.jpg,rust,rust,T
+Train_1472.jpg,rust,rust,T
+Train_1473.jpg,scab,scab,T
+Train_1474.jpg,healthy,healthy,T
+Train_1475.jpg,rust,rust,T
+Train_1476.jpg,frog_eye_leaf_spot,healthy,F
+Train_1477.jpg,healthy,healthy,T
+Train_1478.jpg,healthy,healthy,T
+Train_1479.jpg,rust,healthy,F
+Train_1480.jpg,rust,rust,T
+Train_1481.jpg,scab complex,scab,P
+Train_1482.jpg,powdery_mildew,healthy,F
+Train_1483.jpg,complex,scab,F
+Train_1484.jpg,rust,scab,F
+Train_1485.jpg,rust,rust,T
+Train_1486.jpg,rust,rust,T
+Train_1487.jpg,rust,rust,T
+Train_1488.jpg,complex,scab,F
+Train_1489.jpg,rust,healthy,F
+Train_1490.jpg,rust,rust,T
+Train_1491.jpg,rust,rust,T
+Train_1492.jpg,rust,rust,T
+Train_1493.jpg,complex,scab,F
+Train_1494.jpg,rust powdery_mildew,multiple_diseases,M
+Train_1495.jpg,scab frog_eye_leaf_spot complex,scab,P
+Train_1496.jpg,scab,healthy,F
+Train_1497.jpg,frog_eye_leaf_spot,healthy,F
+Train_1498.jpg,complex,scab,F
+Train_1499.jpg,rust,rust,T
+Train_1500.jpg,scab,scab,T
+Train_1501.jpg,scab frog_eye_leaf_spot,scab,P
+Train_1502.jpg,rust,rust,T
+Train_1503.jpg,rust,scab,F
+Train_1504.jpg,powdery_mildew,healthy,F
+Train_1505.jpg,complex,scab,F
+Train_1506.jpg,complex,scab,F
+Train_1507.jpg,rust,scab,F
+Train_1508.jpg,healthy,healthy,T
+Train_1509.jpg,rust,rust,T
+Train_1510.jpg,rust,rust,T
+Train_1511.jpg,rust,rust,T
+Train_1512.jpg,rust,rust,T
+Train_1513.jpg,powdery_mildew,healthy,F
+Train_1514.jpg,complex,multiple_diseases,M
+Train_1515.jpg,rust,rust,T
+Train_1516.jpg,rust,rust,T
+Train_1517.jpg,healthy,healthy,T
+Train_1518.jpg,complex,scab,F
+Train_1519.jpg,complex,scab,F
+Train_1520.jpg,scab frog_eye_leaf_spot complex,scab,P
+Train_1521.jpg,rust,scab,F
+Train_1522.jpg,scab,scab,T
+Train_1523.jpg,healthy,scab,F
+Train_1524.jpg,rust,rust,T
+Train_1525.jpg,rust,rust,T
+Train_1526.jpg,rust,multiple_diseases,M
+Train_1527.jpg,rust,rust,T
+Train_1528.jpg,healthy,healthy,T
+Train_1529.jpg,rust,scab,F
+Train_1530.jpg,healthy,healthy,T
+Train_1531.jpg,complex,multiple_diseases,M
+Train_1532.jpg,rust,scab,F
+Train_1533.jpg,healthy,healthy,T
+Train_1534.jpg,rust powdery_mildew,scab,F
+Train_1535.jpg,rust,rust,T
+Train_1536.jpg,rust,multiple_diseases,M
+Train_1537.jpg,complex,scab,F
+Train_1538.jpg,healthy,healthy,T
+Train_1539.jpg,healthy,healthy,T
+Train_1540.jpg,rust,rust,T
+Train_1541.jpg,healthy,healthy,T
+Train_1542.jpg,healthy,scab,F
+Train_1543.jpg,scab,scab,T
+Train_1544.jpg,healthy,scab,F
+Train_1545.jpg,frog_eye_leaf_spot rust,rust,P
+Train_1546.jpg,frog_eye_leaf_spot,healthy,F
+Train_1547.jpg,rust,rust,T
+Train_1548.jpg,healthy,healthy,T
+Train_1549.jpg,powdery_mildew,healthy,F
+Train_1550.jpg,rust,scab,F
+Train_1551.jpg,rust,rust,T
+Train_1552.jpg,powdery_mildew,healthy,F
+Train_1553.jpg,complex,scab,F
+Train_1554.jpg,complex,multiple_diseases,M
+Train_1555.jpg,healthy,healthy,T
+Train_1556.jpg,healthy,healthy,T
+Train_1557.jpg,healthy,healthy,T
+Train_1558.jpg,scab frog_eye_leaf_spot,multiple_diseases,M
+Train_1559.jpg,rust,healthy,F
+Train_1560.jpg,rust complex,rust,P
+Train_1561.jpg,rust,rust,T
+Train_1562.jpg,healthy frog_eye_leaf_spot,healthy,P
+Train_1563.jpg,healthy,healthy,T
+Train_1564.jpg,healthy,healthy,T
+Train_1565.jpg,rust,rust,T
+Train_1566.jpg,rust,rust,T
+Train_1567.jpg,rust,rust,T
+Train_1568.jpg,rust,scab,F
+Train_1569.jpg,rust,rust,T
+Train_1570.jpg,rust,scab,F
+Train_1571.jpg,rust,rust,T
+Train_1572.jpg,scab,scab,T
+Train_1573.jpg,scab frog_eye_leaf_spot,multiple_diseases,M
+Train_1574.jpg,rust,rust,T
+Train_1575.jpg,scab,healthy,F
+Train_1576.jpg,rust,rust,T
+Train_1577.jpg,frog_eye_leaf_spot complex,multiple_diseases,M
+Train_1578.jpg,rust,rust,T
+Train_1579.jpg,rust,rust,T
+Train_1580.jpg,powdery_mildew,scab,F
+Train_1581.jpg,rust,rust,T
+Train_1582.jpg,scab,scab,T
+Train_1583.jpg,powdery_mildew,healthy,F
+Train_1584.jpg,rust,rust,T
+Train_1585.jpg,scab,healthy,F
+Train_1586.jpg,complex,scab,F
+Train_1587.jpg,scab,healthy,F
+Train_1588.jpg,complex,scab,F
+Train_1589.jpg,scab frog_eye_leaf_spot,scab,P
+Train_1590.jpg,healthy,healthy,T
+Train_1591.jpg,rust,rust,T
+Train_1592.jpg,rust,rust,T
+Train_1593.jpg,scab,healthy,F
+Train_1594.jpg,rust,rust,T
+Train_1595.jpg,rust,rust,T
+Train_1596.jpg,rust,rust,T
+Train_1597.jpg,complex,healthy,F
+Train_1598.jpg,scab,healthy,F
+Train_1599.jpg,rust,rust,T
+Train_1600.jpg,healthy,healthy,T
+Train_1601.jpg,scab,healthy,F
+Train_1602.jpg,rust,rust,T
+Train_1603.jpg,frog_eye_leaf_spot rust,rust,P
+Train_1604.jpg,healthy,healthy,T
+Train_1605.jpg,healthy rust,healthy,P
+Train_1606.jpg,rust,rust,T
+Train_1607.jpg,rust,rust,T
+Train_1608.jpg,powdery_mildew,healthy,F
+Train_1609.jpg,rust complex,multiple_diseases,M
+Train_1610.jpg,powdery_mildew,healthy,F
+Train_1611.jpg,healthy,healthy,T
+Train_1612.jpg,scab,healthy,F
+Train_1613.jpg,rust,rust,T
+Train_1614.jpg,healthy,healthy,T
+Train_1615.jpg,scab,healthy,F
+Train_1616.jpg,healthy,healthy,T
+Train_1617.jpg,healthy,healthy,T
+Train_1618.jpg,frog_eye_leaf_spot rust,multiple_diseases,M
+Train_1619.jpg,rust,scab,F
+Train_1620.jpg,complex,scab,F
+Train_1621.jpg,complex,healthy,F
+Train_1622.jpg,complex,scab,F
+Train_1623.jpg,healthy,scab,F
+Train_1624.jpg,rust,rust,T
+Train_1625.jpg,frog_eye_leaf_spot rust,rust,P
+Train_1626.jpg,frog_eye_leaf_spot rust,rust,P
+Train_1627.jpg,rust complex,scab,F
+Train_1628.jpg,healthy,scab,F
+Train_1629.jpg,rust,rust,T
+Train_1630.jpg,rust complex,rust,P
+Train_1631.jpg,healthy,healthy,T
+Train_1632.jpg,powdery_mildew,scab,F
+Train_1633.jpg,healthy,healthy,T
+Train_1634.jpg,healthy,healthy,T
+Train_1635.jpg,powdery_mildew,healthy,F
+Train_1636.jpg,scab,scab,T
+Train_1637.jpg,scab frog_eye_leaf_spot complex,scab,P
+Train_1638.jpg,rust,scab,F
+Train_1639.jpg,scab,scab,T
+Train_1640.jpg,rust,rust,T
+Train_1641.jpg,scab frog_eye_leaf_spot,multiple_diseases,M
+Train_1642.jpg,rust,rust,T
+Train_1643.jpg,healthy,scab,F
+Train_1644.jpg,rust,rust,T
+Train_1645.jpg,scab frog_eye_leaf_spot,scab,P
+Train_1646.jpg,healthy,healthy,T
+Train_1647.jpg,complex,scab,F
+Train_1648.jpg,frog_eye_leaf_spot rust,multiple_diseases,M
+Train_1649.jpg,rust,rust,T
+Train_1650.jpg,rust,scab,F
+Train_1651.jpg,frog_eye_leaf_spot rust,rust,P
+Train_1652.jpg,frog_eye_leaf_spot complex,scab,F
+Train_1653.jpg,healthy,healthy,T
+Train_1654.jpg,healthy,healthy,T
+Train_1655.jpg,rust,rust,T
+Train_1656.jpg,healthy,healthy,T
+Train_1657.jpg,rust,rust,T
+Train_1658.jpg,frog_eye_leaf_spot rust,scab,F
+Train_1659.jpg,complex,scab,F
+Train_1660.jpg,healthy,scab,F
+Train_1661.jpg,healthy,healthy,T
+Train_1662.jpg,frog_eye_leaf_spot rust,multiple_diseases,M
+Train_1663.jpg,healthy rust,healthy,P
+Train_1664.jpg,powdery_mildew,multiple_diseases,M
+Train_1665.jpg,rust,rust,T
+Train_1666.jpg,healthy,healthy,T
+Train_1667.jpg,healthy,healthy,T
+Train_1668.jpg,rust,rust,T
+Train_1669.jpg,rust,healthy,F
+Train_1670.jpg,rust powdery_mildew,healthy,F
+Train_1671.jpg,rust,rust,T
+Train_1672.jpg,rust,healthy,F
+Train_1673.jpg,rust,scab,F
+Train_1674.jpg,frog_eye_leaf_spot rust,rust,P
+Train_1675.jpg,healthy,healthy,T
+Train_1676.jpg,scab,healthy,F
+Train_1677.jpg,rust,rust,T
+Train_1678.jpg,rust,rust,T
+Train_1679.jpg,rust,rust,T
+Train_1680.jpg,rust,scab,F
+Train_1681.jpg,healthy,healthy,T
+Train_1682.jpg,rust powdery_mildew,healthy,F
+Train_1683.jpg,healthy,healthy,T
+Train_1684.jpg,rust,rust,T
+Train_1685.jpg,scab,scab,T
+Train_1686.jpg,rust,rust,T
+Train_1687.jpg,healthy,healthy,T
+Train_1688.jpg,scab,scab,T
+Train_1689.jpg,rust,rust,T
+Train_1690.jpg,scab,scab,T
+Train_1691.jpg,healthy,healthy,T
+Train_1692.jpg,complex,scab,F
+Train_1693.jpg,healthy,healthy,T
+Train_1694.jpg,healthy rust,healthy,P
+Train_1695.jpg,rust,rust,T
+Train_1696.jpg,healthy,scab,F
+Train_1697.jpg,rust,healthy,F
+Train_1698.jpg,healthy,healthy,T
+Train_1699.jpg,rust,rust,T
+Train_1700.jpg,scab,scab,T
+Train_1701.jpg,scab,scab,T
+Train_1702.jpg,powdery_mildew,scab,F
+Train_1703.jpg,rust complex,scab,F
+Train_1704.jpg,complex,scab,F
+Train_1705.jpg,rust,scab,F
+Train_1706.jpg,healthy,healthy,T
+Train_1707.jpg,frog_eye_leaf_spot rust,rust,P
+Train_1708.jpg,scab frog_eye_leaf_spot,multiple_diseases,M
+Train_1709.jpg,rust,rust,T
+Train_1710.jpg,frog_eye_leaf_spot rust,rust,P
+Train_1711.jpg,rust,scab,F
+Train_1712.jpg,rust,rust,T
+Train_1713.jpg,scab,scab,T
+Train_1714.jpg,rust,rust,T
+Train_1715.jpg,rust,scab,F
+Train_1716.jpg,rust,scab,F
+Train_1717.jpg,rust,scab,F
+Train_1718.jpg,rust,rust,T
+Train_1719.jpg,rust,scab,F
+Train_1720.jpg,rust,rust,T
+Train_1721.jpg,scab frog_eye_leaf_spot,scab,P
+Train_1722.jpg,rust,rust,T
+Train_1723.jpg,healthy,healthy,T
+Train_1724.jpg,rust,healthy,F
+Train_1725.jpg,rust,rust,T
+Train_1726.jpg,rust,rust,T
+Train_1727.jpg,scab,scab,T
+Train_1728.jpg,rust powdery_mildew,scab,F
+Train_1729.jpg,rust,rust,T
+Train_1730.jpg,rust,scab,F
+Train_1731.jpg,healthy,healthy,T
+Train_1732.jpg,rust,rust,T
+Train_1733.jpg,scab,healthy,F
+Train_1734.jpg,rust,healthy,F
+Train_1735.jpg,frog_eye_leaf_spot,healthy,F
+Train_1736.jpg,rust,rust,T
+Train_1737.jpg,rust,scab,F
+Train_1738.jpg,rust,rust,T
+Train_1739.jpg,scab,scab,T
+Train_1740.jpg,rust,rust,T
+Train_1741.jpg,healthy,healthy,T
+Train_1742.jpg,scab,scab,T
+Train_1743.jpg,rust,rust,T
+Train_1744.jpg,healthy,scab,F
+Train_1745.jpg,rust,rust,T
+Train_1746.jpg,rust,rust,T
+Train_1747.jpg,complex,scab,F
+Train_1748.jpg,healthy,healthy,T
+Train_1749.jpg,rust,rust,T
+Train_1750.jpg,complex,healthy,F
+Train_1751.jpg,scab,scab,T
+Train_1752.jpg,rust,rust,T
+Train_1753.jpg,rust,rust,T
+Train_1754.jpg,scab frog_eye_leaf_spot,scab,P
+Train_1755.jpg,rust,rust,T
+Train_1756.jpg,healthy,scab,F
+Train_1757.jpg,rust,rust,T
+Train_1758.jpg,rust,scab,F
+Train_1759.jpg,healthy,scab,F
+Train_1760.jpg,healthy,healthy,T
+Train_1761.jpg,scab,scab,T
+Train_1762.jpg,complex,scab,F
+Train_1763.jpg,rust,rust,T
+Train_1764.jpg,rust,rust,T
+Train_1765.jpg,rust,scab,F
+Train_1766.jpg,rust,rust,T
+Train_1767.jpg,rust,scab,F
+Train_1768.jpg,healthy,scab,F
+Train_1769.jpg,healthy,scab,F
+Train_1770.jpg,healthy,healthy,T
+Train_1771.jpg,rust,rust,T
+Train_1772.jpg,rust,rust,T
+Train_1773.jpg,rust,rust,T
+Train_1774.jpg,healthy,healthy,T
+Train_1775.jpg,rust,rust,T
+Train_1776.jpg,rust,healthy,F
+Train_1777.jpg,scab,healthy,F
+Train_1778.jpg,powdery_mildew,healthy,F
+Train_1779.jpg,frog_eye_leaf_spot,multiple_diseases,M
+Train_1780.jpg,complex,multiple_diseases,M
+Train_1781.jpg,healthy,healthy,T
+Train_1782.jpg,scab,healthy,F
+Train_1783.jpg,frog_eye_leaf_spot,rust,F
+Train_1784.jpg,frog_eye_leaf_spot rust,multiple_diseases,M
+Train_1785.jpg,rust,rust,T
+Train_1786.jpg,rust,rust,T
+Train_1787.jpg,scab,scab,T
+Train_1788.jpg,rust,rust,T
+Train_1789.jpg,scab healthy,healthy,P
+Train_1790.jpg,frog_eye_leaf_spot rust,rust,P
+Train_1791.jpg,rust,rust,T
+Train_1792.jpg,rust,rust,T
+Train_1793.jpg,complex,scab,F
+Train_1794.jpg,healthy,healthy,T
+Train_1795.jpg,rust,rust,T
+Train_1796.jpg,rust,rust,T
+Train_1797.jpg,rust,rust,T
+Train_1798.jpg,rust,rust,T
+Train_1799.jpg,complex,healthy,F
+Train_1800.jpg,complex,scab,F
+Train_1801.jpg,scab,scab,T
+Train_1802.jpg,rust,rust,T
+Train_1803.jpg,scab,healthy,F
+Train_1804.jpg,complex,scab,F
+Train_1805.jpg,rust,rust,T
+Train_1806.jpg,scab,scab,T
+Train_1807.jpg,rust,healthy,F
+Train_1808.jpg,powdery_mildew,healthy,F
+Train_1809.jpg,complex,scab,F
+Train_1810.jpg,healthy,healthy,T
+Train_1811.jpg,rust,rust,T
+Train_1812.jpg,complex,scab,F
+Train_1813.jpg,rust,rust,T
+Train_1814.jpg,powdery_mildew,healthy,F
+Train_1815.jpg,complex,multiple_diseases,M
+Train_1816.jpg,scab,scab,T
+Train_1817.jpg,scab,healthy,F
+Train_1818.jpg,healthy,healthy,T
+Train_1819.jpg,rust,rust,T
+Train_1820.jpg,rust complex,scab,F

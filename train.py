@@ -1,13 +1,14 @@
 """
 Train:
 Modify:
-    - Line 44-56 cfg
-    - Line 397 create_test_model
-    - Line 549 model location
-    - Line 361 create_model
-    - Line 379 lr
-    - Line 371 Model struct
-    - Line 365 Loss
+    - Line 43-55 cfg
+    - Line 393 create_test_model
+    - Line 545 model location
+    - Line 357 create_model
+    - Line 380 lr
+    - Line 360 Model Backbone
+    - Line 367 Model struct
+    - Line 387 Loss
 """
 
 import random
@@ -29,7 +30,7 @@ from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
 from sklearn.metrics import f1_score
 
 # 是否仅测试
-test_only = False
+test_only = True
 
 gpus = tf.config.experimental.list_physical_devices('GPU')
 for gpu in gpus:
@@ -71,7 +72,7 @@ WIDTH_T = cfg['data_params']['test_img_shape'][1]
 SEED = 2021
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 TRAIN_DATA_ROOT = "./train_images"
-TEST_DATA_ROOT = "./test_images"
+TEST_DATA_ROOT = "./plant-pathology-2020-fgvc7/train"
 train_data = pd.read_csv("./train_without_rep.csv", encoding='utf-8')
 data_count = train_data["labels"].value_counts()
 train_img_lists = os.listdir(TRAIN_DATA_ROOT)
@@ -372,12 +373,12 @@ def create_model():
         GroupNormalization(group=32),
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(CLASS_N, bias_initializer=tf.keras.initializers.Constant(-2.), activation='sigmoid')])
-    optimizer = tfa.optimizers.RectifiedAdam(lr=2e-4,
-                                             total_steps=cfg['model_params']['iteration_per_epoch'] *
-                                                         cfg['model_params']['epoch'],
-                                             warmup_proportion=0.1,
-                                             min_lr=1e-6)
-    # optimizer = tf.keras.optimizers.Adam(lr=5e-5, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+    # optimizer = tfa.optimizers.RectifiedAdam(lr=1e-4,
+    #                                          total_steps=cfg['model_params']['iteration_per_epoch'] *
+    #                                                      cfg['model_params']['epoch'],
+    #                                          warmup_proportion=0.1,
+    #                                          min_lr=1e-6)
+    optimizer = tf.keras.optimizers.Adam(lr=1e-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
     # 使用FacalLoss
     # tfa.metrics.F1Score计算F1-Score时依据本epoch见过的所有数据, 与batch_size无关
     # TODO
@@ -391,7 +392,7 @@ def create_model():
 
 
 def create_test_model():
-    backbone = tf.keras.applications.ResNet50(
+    backbone = efn.EfficientNetB0(
         include_top=False,
         input_shape=(HEIGHT_T, WIDTH_T, 3),
         weights=None,
@@ -406,12 +407,12 @@ def create_test_model():
         GroupNormalization(group=32),
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(CLASS_N, bias_initializer=tf.keras.initializers.Constant(-2.), activation='sigmoid')])
-    # optimizer = tfa.optimizers.RectifiedAdam(lr=1e-4,
-    #                                          total_steps=cfg['model_params']['iteration_per_epoch'] *
-    #                                                      cfg['model_params']['epoch'],
-    #                                          warmup_proportion=0.1,
-    #                                          min_lr=1e-6)
-    optimizer = tf.keras.optimizers.Adam(lr=5e-5, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+    optimizer = tfa.optimizers.RectifiedAdam(lr=5e-5,
+                                             total_steps=cfg['model_params']['iteration_per_epoch'] *
+                                                         cfg['model_params']['epoch'],
+                                             warmup_proportion=0.1,
+                                             min_lr=1e-6)
+    # optimizer = tf.keras.optimizers.Adam(lr=1e-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
     # 使用FacalLoss
     # tfa.metrics.F1Score计算F1-Score时依据本epoch见过的所有数据, 与batch_size无关
     # TODO
@@ -494,7 +495,7 @@ def submission_writer(path):
         prob = np.around(np.array(row[1:CLASS_N + 1], dtype=np.float32))
         prob = prob.astype('bool')
         label = ' '.join(classes[prob])
-        # 很重要，视为疾病检测模型，没有检测到疾病但又没有很大把握为健康时仍视为健康
+        # 很重要，视为疾病检测模型，没有检测到疾病时视为健康
         if label == '':
             label = 'healthy'
         labels.append(label)
@@ -528,12 +529,12 @@ def train(splits, split_id):
                                 monitor='val_f1_score_sk',
                                 mode='max',
                                 save_best_only=True),
-                            tf.keras.callbacks.ReduceLROnPlateau(monitor='val_f1_score_sk',
-                                                                 mode='max',
-                                                                 verbose=1,
-                                                                 patience=5,
-                                                                 factor=0.5,
-                                                                 min_lr=1e-6)
+                            # tf.keras.callbacks.ReduceLROnPlateau(monitor='val_f1_score_sk',
+                            #                                      mode='max',
+                            #                                      verbose=1,
+                            #                                      patience=5,
+                            #                                      factor=0.5,
+                            #                                      min_lr=1e-6)
                         ])
     plot_history(history, 'history_%d.png' % split_id)
 
@@ -542,4 +543,4 @@ if not test_only:
     for i in range(5):
         train(splits, i)
 
-submission_writer("./model/ResNet50-0408-ImageNet")
+submission_writer("./model/EfficientNetB4-0407-Noisy-student-kaggle")

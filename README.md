@@ -27,18 +27,22 @@
 &emsp;'rust complex': [0, 0, 1, 1, 0], <br/>
 &emsp;'powdery_mildew complex': [0, 0, 0, 1, 1] <br/>
 }<br/>
-* F1-Score的计算应该基于'scab'、'healthy'、'frog_eye_leaf_spot‘等而非'rust complex' <br/>
-* 所以之前的训练集上的F1-Score都只能达到~50％ <br/>
+* F1-Score的计算应该基于 'scab'、'healthy'、'frog_eye_leaf_spot‘等而非'rust complex' <br/>
+* 所以之前的训练集上的 F1-Score 都只能达到~50％ <br/>
 
-## EfficientNetB0 Train
+## EfficientNet Train
 
-* 学习率lr ∈ [1e-4, 2e-4] for batch_size = 16 <br/>
-* 学习率lr = 1e-3 for batch_size = 128 or 64 <br/>
-* 应用学习率衰减，val_f1_score连续5个epoch不下降就降低学习率 <br/>
-* EfficientNetB0 - EfficientNetB7均采用相同参数，使用 noisy-student 权重作为初始权重 <br/>
-* metric = ~86％ for batch_size = 128 <br/>
-* F1-Score = ~82％ for batch_size = 128 <br/>
-* Use FocalLoss (处理数据集不平衡)<br/>
+* 学习率 lr ∈ [1e-4, 2e-4] for batch_size = 16 <br/>
+* 学习率 lr = 1e-3 for batch_size = 128 or 64 <br/>
+* 应用学习率衰减，val_f1_score 连续 5 个 epoch 不下降就降低学习率 <br/>
+* EfficientNetB0 - EfficientNetB7 均采用相同参数，使用 noisy-student 权重作为初始权重 <br/>
+* EfficientNet B4 metric = ~86％ for batch_size = 128 <br/>
+* EfficientNet B4 F1-Score = ~85％ for batch_size = 128 <br/>
+* EfficientNet B7 metric = ~82％ for batch_size = 128 <br/>
+* EfficientNet B7 F1-Score = ~84％ for batch_size = 128 <br/>
+* Use FocalLoss (处理数据集不平衡) <br/>
+* EfficientNet B7 single model (th = 0.5) LB = 0.638 <br/>
+* EfficientNet B4 single model (th = 0.5) LB = 0.585 <br/>
 
 ## ResNet50 Train
 
@@ -63,7 +67,8 @@
 * 训练集上增加 随机遮挡 数据增强 <br/>
 * 训练集上使用 MixUp 数据增强 <br/>
 * 训练集上使用 labelsmooth <br/>
-* ~~试试看做异常检出问题, 标签中删除healthy, 没有疾病检出时即为healthy~~ (程序写了, 没试效果) <br/>
+* 改成两个模型，第一个分辨是 'healthy' 还是 'ill' , 第二个分辨具体是哪种疾病 <br/>
+* ~~试试看做异常检出问题, 标签中删除healthy, 没有疾病检出时即为healthy~~  <br/>
 * TTA（测试时增强）(TTA步长不能太大，容易超时) <br/>
 * 试试余弦学习率衰减? <br/>
 * ~~清洗训练集中的标签错误标签数据（imagehash）~~ <br/>
