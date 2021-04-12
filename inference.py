@@ -1,8 +1,10 @@
 """
 Inference on k-fold Model:
 Modify:
-    - Set var K
-    - Line 150 model location
+    - Line 22 K
+    - Line 24 USE_TTA
+    - Line 27 TTA_STEP
+    - Line 197 model location
 """
 
 import tensorflow as tf
@@ -14,12 +16,23 @@ import pandas as pd
 from tqdm import tqdm
 import os
 import numpy as np
+import math
+import random
 
 # k-fold number
 K = 1
+# TTA(测试时增强)
+USE_TTA = True
+# TTA增强测试次数
+if USE_TTA:
+    TTA_STEP = 4
+else:
+    TTA_STEP = 1
+SEED = 2021
 
 mean = [124.23002308, 159.76066492, 104.05509866]
 std = [47.84116963, 41.94039282, 49.85093766]
+
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 
 cfg = {
@@ -31,11 +44,11 @@ cfg = {
     'model_params': {
         'batchsize_per_gpu': 128,
         'iteration_per_epoch': 128,
-        'batchsize_in_test': 1,
+        'batchsize_in_test': 2,
         'epoch': 30
     }
 }
-CLASS_N = cfg['data_params']['class_type']
+
 classes = np.array([
     'scab',
     # 'healthy',
@@ -44,6 +57,18 @@ classes = np.array([
     'complex',
     'powdery_mildew'])
 
+CLASS_N = cfg['data_params']['class_type']
+
+
+def seed_everything(seed):
+    random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    np.random.seed(seed)
+    tf.random.set_seed(seed)
+
+
+seed_everything(SEED)
+
 probability = [5704, 4350, 2027, 2124, 1271]
 probability = np.array(probability, dtype=np.float32) / sum(probability)
 print(probability)
@@ -51,6 +76,7 @@ print(probability)
 gpus = tf.config.experimental.list_physical_devices('GPU')
 for gpu in gpus:
     tf.config.experimental.set_memory_growth(gpu, True)
+
 HEIGHT_T, WIDTH_T= cfg['data_params']['test_img_shape']
 TEST_DATA_ROOT = "./plant-pathology-2020-fgvc7/train"
 test_img_lists = os.listdir(TEST_DATA_ROOT)
@@ -66,6 +92,22 @@ def _preprocess_image_test_function(name, path):
     i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
     i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
     image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
+    if USE_TTA:
+        # 高斯噪声的标准差为0.3
+        gau = tf.keras.layers.GaussianNoise(0.3)
+        # 以50％的概率为图像添加高斯噪声
+        image = tf.cond(tf.random.uniform([]) < 0.5, lambda: gau(image), lambda: image)
+        image = tf.image.random_contrast(image, lower=0.8, upper=1.2)
+        image = tf.image.random_saturation(image, lower=0.8, upper=1.2)
+        # brightness随机调整
+        image = tf.image.random_brightness(image, 0.2)
+        # random left right flip
+        image = tf.image.random_flip_left_right(image)
+        # random up down flip
+        image = tf.image.random_flip_up_down(image)
+        rand_k = tf.random.uniform([], minval=0, maxval=4, dtype=tf.int32, seed=SEED)
+        # 以50％的概率随机翻转图像
+        image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tf.image.rot90(image, k=rand_k), lambda: image)
     return image, name
 
 
@@ -114,7 +156,7 @@ def inference(count, path):
     cprobs = np.concatenate(probs)
     sub_with_prob = pd.DataFrame({
         'name': list(map(lambda x: x.decode(), crec_ids.tolist())),
-        **{id2label[i]: cprobs[:, i] / K for i in range(CLASS_N)}
+        **{id2label[i]: cprobs[:, i] / (K * TTA_STEP) for i in range(CLASS_N)}
     })
     sub_with_prob = sub_with_prob.sort_values('name')
     return sub_with_prob
@@ -127,7 +169,7 @@ def submission_writer(path, USE_PROBABILITY):
     sub_with_prob = sum(
         map(
             lambda j:
-            inference(j, path).set_index('name'), range(K)
+            inference(math.floor(j / TTA_STEP), path).set_index('name'), range(K * TTA_STEP)
         )
     ).reset_index()
 
@@ -156,5 +198,5 @@ def submission_writer(path, USE_PROBABILITY):
 
 
 if __name__ == "__main__":
-    USE_PROBABILITY = True
+    USE_PROBABILITY = False
     submission_writer("./model/EfficientNetB7-0410-Noisy-student-Less-FC-kaggle", USE_PROBABILITY)
