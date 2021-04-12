@@ -6,6 +6,7 @@ multiple_diseases     91
 
 -EfficientNet-B7 1-fold without 'healthy'
 --USE_PROBABILITY OFF
+--TTA OFF
 
 T    1160
 F     555
@@ -18,7 +19,22 @@ rust                  34
 multiple_diseases     21
 
 -EfficientNet-B7 1-fold without 'healthy'
+--USE_PROBABILITY OFF
+--TTA ON
+
+T    1256
+F     488
+M      65
+P      12
+
+scab                 359
+healthy               96
+multiple_diseases     26
+rust                   7
+
+-EfficientNet-B7 1-fold without 'healthy'
 --USE_PROBABILITY ON
+--TTA OFF
 
 T    601
 F    598
@@ -34,6 +50,7 @@ LB 0.601
 
 -EfficientNet-B4 5-fold with 'healthy'
 --USE_PROBABILITY OFF
+--TTA OFF
 
 T    973
 F    635
