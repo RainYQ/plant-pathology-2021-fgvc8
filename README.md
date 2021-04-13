@@ -123,24 +123,20 @@ $$ \{F1} = 2 * \frac{{\overline {P}  * \overline {R} }}{{\overline {P}  + \overl
 #### Samples-F1
 ##### Sample-Wise Multilabel Confusion Matrix
 $$
- \left[
- \begin{matrix}
+ \begin{bmatrix}
    TN & FP \\
    FN & TP \\
-  \end{matrix}
-  \right]
+  \end{bmatrix}
 $$
 * Example: <br/>
   * y_true: [[1,1,0,0,0,0]] <br/>
   * y_pred: [[0,1,1,0,0,0]] <br/>
 * MCM: <br/>
 $$
- \left[
- \begin{matrix}
+ \begin{bmatrix}
    3 & 1 \\
    1 & 1 \\
-  \end{matrix}
-  \right]
+  \end{bmatrix}
 $$
 * Calculate P R in sample_wise:  <br/>
 $$ \{P_1} = \frac{1}{{1 + 1}}\ $$
