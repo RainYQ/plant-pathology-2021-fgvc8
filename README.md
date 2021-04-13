@@ -68,7 +68,7 @@
 * 训练集上增加 随机遮挡 数据增强 <br/>
 * 训练集上使用 MixUp 数据增强 <br/>
 * 训练集上使用 labelsmooth <br/>
-* Use Soft-Macro-F1 Loss <br/>
+* ~~Use Soft-Macro-F1 Loss~~ 感觉效果不错 LB 0.641 <br/>
 * 改成两个模型，第一个分辨是 'healthy' 还是 'ill' , 第二个分辨具体是哪种疾病 <br/>
 * ~~试试看做异常检出问题, 标签中删除 'healthy' , 没有疾病检出时即为 healthy~~  <br/>
 * ~~TTA (测试时增强) (TTA 步长不能太大，容易超时) (需要加速 Inference)~~ <br/>
