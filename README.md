@@ -124,8 +124,8 @@ $$ \{F1} = 2 * \frac{{\overline {P}  * \overline {R} }}{{\overline {P}  + \overl
 ##### Sample-Wise Multilabel Confusion Matrix
 $$
  \begin{bmatrix}
-   TN & FP \\
-   FN & TP \\
+   TN & FP \\\\
+   FN & TP \\\\
   \end{bmatrix}
 $$
 * Example: <br/>
@@ -134,8 +134,8 @@ $$
 * MCM: <br/>
 $$
  \begin{bmatrix}
-   3 & 1 \\
-   1 & 1 \\
+   3 & 1 \\\\
+   1 & 1 \\\\
   \end{bmatrix}
 $$
 * Calculate P R in sample_wise:  <br/>
