@@ -1,3 +1,5 @@
+# MathJax Need!
+* https://chrome.google.com/webstore/detail/mathjax-plugin-for-github/ioemnmodlmafdkllaclgeombjnmnbima/related
 # plant-pathology-2021-fgvc8
 ## ~~See as a multi-classification problem~~
 1. ~~'scab'~~
