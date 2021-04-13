@@ -126,7 +126,7 @@ $$
  \left[
  \begin{matrix}
    TN & FP \\
-   FN & TP 
+   FN & TP \\
   \end{matrix}
   \right]
 $$
@@ -138,7 +138,7 @@ $$
  \left[
  \begin{matrix}
    3 & 1 \\
-   1 & 1
+   1 & 1 \\
   \end{matrix}
   \right]
 $$
