@@ -68,11 +68,12 @@
 * 训练集上增加 随机遮挡 数据增强 <br/>
 * 训练集上使用 MixUp 数据增强 <br/>
 * 训练集上使用 labelsmooth <br/>
+* Use Soft-Macro-F1 Loss <br/>
 * 改成两个模型，第一个分辨是 'healthy' 还是 'ill' , 第二个分辨具体是哪种疾病 <br/>
 * ~~试试看做异常检出问题, 标签中删除 'healthy' , 没有疾病检出时即为 healthy~~  <br/>
-* TTA (测试时增强) (TTA 步长不能太大，容易超时) (需要加速 Inference) <br/>
-* **加速 Inference 为 Test Dataset 生成 tfrecords <br/>
-* 试试不使用 Focal Loss 时的准确率 <br/>
+* ~~TTA (测试时增强) (TTA 步长不能太大，容易超时) (需要加速 Inference)~~ <br/>
+* ~~**加速 Inference 为 Test Dataset 生成 tfrecords~~ <br/>
+* ~~试试不使用 Focal Loss 时的准确率~~ <br/>
 * 试试余弦学习率衰减 <br/>
 * ~~清洗训练集中的标签错误标签数据（imagehash）~~ <br/>
 * ~~生成tfrecords的时候移除重复图片~~ <br/>
@@ -83,3 +84,67 @@
 * Adam优化器在训练快结束的时候效果不是很好，看看有没有更合适的优化器 <br/>
 * 默认的 F1-Score 计算方法是每个 Batch 计算一次然后取均值, 应该改成每个 Epoch 结束时计算一次更合适, 
   reference: https://zhuanlan.zhihu.com/p/51356820 (不能在 tensorflow 2.0 以上使用) <br/>
+
+## Kaggle
+### DataSet
+* https://www.kaggle.com/rainyq/tfrecords-rainyq-600 Train DataSet (600x600) <br/>
+* https://www.kaggle.com/rainyq/tfrecords-rainyq-512 Train DataSet (512x512) <br/>
+### Model
+* https://www.kaggle.com/rainyq/efficientnetb4tpu <br/>
+### Code
+* https://www.kaggle.com/rainyq/tfrecords-generator <br/>
+* https://www.kaggle.com/rainyq/tfrecords-600 <br/>
+* https://www.kaggle.com/rainyq/inference <br/>
+* https://www.kaggle.com/rainyq/train <br/>
+### Others
+* https://www.kaggle.com/rainyq/train-data-without-rep <br/>
+* https://www.kaggle.com/rainyq/offiline-pip-package <br/>
+
+## Information
+### Train
+* Time Limit: ~32400s <br/>
+* ~7000s per one fold for Epoch 30 EfficientNet-B7 600x600 <br/>
+* ~4400s per one fold for Epoch 30 EfficientNet-B7 512x512 <br/>
+* ~2480s per one fold for Epoch 30 EfficientNet-B4 512x512 <br/>
+### Inference
+* Test TFRecords Generate ~20 minutes <br/>
+* Efficient-B7 Model Predict ~3 minutes per model (512x512) <br/>
+* Run Inference ~37.5 minutes in K=1 TTA_STEP=4 (512x512) <br/>
+* Commit Inference ~42 minutes in K=1 TTA_STEP=4 (600x600) <br/>
+### F1-Score
+#### Micro-F1
+$$ \{P} = \frac{{\overline {TP} }}{{\overline {TP}  + \overline {FP} }}\ $$
+$$ \{R} = \frac{{\overline {TP} }}{{\overline {TP}  + \overline {FN} }}\ $$
+$$ \{F1} = 2 * \frac{{P * R}}{{P + R}}\ $$
+#### Macro-F1
+$$ \{P_i} = \frac{{{TP_i}}}{{{TP_i} + {FP_i}}}\ $$
+$$ \{R_i} = \frac{{{TP_i}}}{{{TP_i} + {FN_i}}}\ $$
+$$ \{F1} = 2 * \frac{{\overline {P}  * \overline {R} }}{{\overline {P}  + \overline {R} }}\ $$
+#### Samples-F1
+##### Sample-Wise Multilabel Confusion Matrix
+$$
+ \left[
+ \begin{matrix}
+   TN & FP \\
+   FN & TP 
+  \end{matrix}
+  \right]
+$$
+* Example: <br/>
+  * y_true: [[1,1,0,0,0,0]] <br/>
+  * y_pred: [[0,1,1,0,0,0]] <br/>
+* MCM: <br/>
+$$
+ \left[
+ \begin{matrix}
+   3 & 1 \\
+   1 & 1
+  \end{matrix}
+  \right]
+$$
+* Calculate P R in sample_wise:  <br/>
+$$ \{P_1} = \frac{1}{{1 + 1}}\ $$
+$$ \{R_1} = \frac{1}{{1 + 1}}\  $$
+$$ \{F1_1} = 2 * \frac{{0.5 * 0.5}}{{0.5 + 0.5}}\ $$
+* Calculate Average P R F1 in sample_wise <br/>
+$$ \{F1} = 0.5$$
