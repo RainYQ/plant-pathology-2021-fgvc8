@@ -1,10 +1,10 @@
 """
 Inference on k-fold Model:
 Modify:
-    - Line 22 K
-    - Line 24 USE_TTA
-    - Line 27 TTA_STEP
-    - Line 197 model location
+    - Line 23 K
+    - Line 25 USE_TTA
+    - Line 28 TTA_STEP
+    - Line 198 model location
 """
 
 import tensorflow as tf
@@ -127,12 +127,7 @@ def create_test_model():
         # GroupNormalization(group=32),
         tf.keras.layers.BatchNormalization(),
         tf.keras.layers.Dropout(0.5),
-        tf.keras.layers.Dense(CLASS_N, bias_initializer=tf.keras.initializers.Constant(-2.), activation='sigmoid')])
-    optimizer = tf.keras.optimizers.Adam(lr=1e-3, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
-    model.compile(optimizer=optimizer,
-                  loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=False),
-                  metrics=['accuracy',
-                           tfa.metrics.F1Score(num_classes=CLASS_N, threshold=0.5, average='macro')])
+        tf.keras.layers.Dense(CLASS_N, kernel_initializer=tf.keras.initializers.he_normal(), activation='sigmoid')])
     return model
 
 
@@ -163,6 +158,7 @@ def inference(count, path):
 
 
 model = create_test_model()
+model.summary()
 
 
 def submission_writer(path, USE_PROBABILITY):
@@ -199,4 +195,4 @@ def submission_writer(path, USE_PROBABILITY):
 
 if __name__ == "__main__":
     USE_PROBABILITY = False
-    submission_writer("./model/EfficientNetB7-0410-Noisy-student-Less-FC-kaggle", USE_PROBABILITY)
+    submission_writer("./model/EfficientNetB7-0413-Noisy-student-Soft_F1_Loss", USE_PROBABILITY)

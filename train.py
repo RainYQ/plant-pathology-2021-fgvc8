@@ -1,14 +1,14 @@
 """
 Train:
 Modify:
-    - Line 43-55 cfg
-    - Line 393 create_test_model
-    - Line 545 model location
-    - Line 357 create_model
-    - Line 380 lr
-    - Line 360 Model Backbone
-    - Line 367 Model struct
-    - Line 387 Loss
+    - Line 45-57 cfg
+    - Line 408 create_test_model
+    - Line 560 model location
+    - Line 371 create_model
+    - Line 394 lr
+    - Line 374 Model Backbone
+    - Line 381 Model struct
+    - Line 401 Loss
 """
 
 import random
@@ -27,6 +27,7 @@ import efficientnet.tfkeras as efn
 from PIL import Image
 from Preprocess import id2label
 from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
+from tensorflow.keras import backend as K
 from sklearn.metrics import f1_score
 
 # 是否仅测试
@@ -355,6 +356,18 @@ def f1_score_sk(y_true, y_pred):
     return tf.py_function(cal_f1_score, [y_true, y_pred], tf.float32)
 
 
+def f1_loss(y_true, y_pred):
+    tp = K.sum(K.cast(y_true*y_pred, 'float'), axis=0)
+    tn = K.sum(K.cast((1-y_true)*(1-y_pred), 'float'), axis=0)
+    fp = K.sum(K.cast((1-y_true)*y_pred, 'float'), axis=0)
+    fn = K.sum(K.cast(y_true*(1-y_pred), 'float'), axis=0)
+    p = tp / (tp + fp + K.epsilon())
+    r = tp / (tp + fn + K.epsilon())
+    f1 = 2*p*r / (p+r+K.epsilon())
+    f1 = tf.where(tf.math.is_nan(f1), tf.zeros_like(f1), f1)
+    return 1 - K.mean(f1)
+
+
 def create_model():
     # backbone = tf.keras.applications.ResNet50(weights="imagenet", include_top=False,
     #                                           input_shape=(HEIGHT, WIDTH, 3), classes=CLASS_N)
@@ -367,12 +380,12 @@ def create_model():
 
     model = tf.keras.Sequential([
         backbone,
+        # GroupNormalization(group=32),
+        # tf.keras.layers.Dropout(0.5),
+        # tf.keras.layers.Dense(512, activation='relu', kernel_initializer=tf.keras.initializers.he_normal()),
         GroupNormalization(group=32),
         tf.keras.layers.Dropout(0.5),
-        tf.keras.layers.Dense(512, activation='relu', kernel_initializer=tf.keras.initializers.he_normal()),
-        GroupNormalization(group=32),
-        tf.keras.layers.Dropout(0.5),
-        tf.keras.layers.Dense(CLASS_N, bias_initializer=tf.keras.initializers.Constant(-2.), activation='sigmoid')])
+        tf.keras.layers.Dense(CLASS_N, kernel_initializer=tf.keras.initializers.he_normal(), activation='sigmoid')])
     # optimizer = tfa.optimizers.RectifiedAdam(lr=1e-4,
     #                                          total_steps=cfg['model_params']['iteration_per_epoch'] *
     #                                                      cfg['model_params']['epoch'],
@@ -384,7 +397,8 @@ def create_model():
     # TODO
     # sklearn.metrics.f1_score根据每个batch计算F1-Score, 需要修改
     model.compile(optimizer=optimizer,
-                  loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=False),
+                  # loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=False),
+                  loss=f1_loss,
                   metrics=['accuracy',
                            tfa.metrics.F1Score(num_classes=CLASS_N, threshold=0.5, average='macro'),
                            f1_score_sk])
