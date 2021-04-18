@@ -1,14 +1,18 @@
 """
 Train:
+-- Use EfficientNet-B0 on local machine
+-- Use Soft_F1_Loss
+-- Use tfa.metrics.F1Score(num_classes=CLASS_N, threshold=0.5, average='macro')
+-- Use Adam
+-- 0418 Write Model Predict Result over Val_dataset
 Modify:
-    - Line 45-57 cfg
-    - Line 408 create_test_model
-    - Line 560 model location
-    - Line 371 create_model
-    - Line 394 lr
-    - Line 374 Model Backbone
-    - Line 381 Model struct
-    - Line 401 Loss
+    - Line 53-65 cfg
+    - Line 394 create_model
+    - Line 417 lr
+    - Line 397 Model Backbone
+    - Line 404 Model struct
+    - Line 424 Loss
+    - Line 39 k-fold number
 """
 
 import random
@@ -30,8 +34,12 @@ from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
 from tensorflow.keras import backend as K
 from sklearn.metrics import f1_score
 
-# 是否仅测试
-test_only = True
+USE_PROBABILITY = False
+# k-fold number
+k_fold = 5
+
+probability = [5704, 4350, 2027, 2124, 1271]
+probability = np.array(probability, dtype=np.float32) / sum(probability)
 
 gpus = tf.config.experimental.list_physical_devices('GPU')
 for gpu in gpus:
@@ -50,9 +58,9 @@ cfg = {
     },
     'model_params': {
         'batchsize_per_gpu': 16,
-        'iteration_per_epoch': 128,
+        'iteration_per_epoch': 1,
         'batchsize_in_test': 16,
-        'epoch': 100
+        'epoch': 1
     }
 }
 
@@ -263,10 +271,12 @@ def _remove_idx(i, single_photo):
 
 
 def _create_annot(single_photo):
-    # targ = tf.one_hot(single_photo["label"], CLASS_N, off_value=0)
-    # targ = tf.cast(targ, tf.float32)
     targ = tf.io.decode_raw(single_photo['labels'], tf.float32)
     return single_photo['data'], targ
+
+
+def _create_annot_val(single_photo):
+    return single_photo['data'], single_photo['name']
 
 
 # parsed_image_dataset = (raw_image_dataset.map(_parse_image_function, num_parallel_calls=AUTOTUNE)
@@ -282,39 +292,38 @@ def _create_annot(single_photo):
 #     # filename, extension = os.path.splitext(image_features['name'].numpy().decode())
 #     # image.save("./preprocess/" + filename + ".png")
 
-if not test_only:
-    indices = []
-    name = []
-    label = []
-    preprocess_dataset = (raw_image_dataset.map(_parse_image_function, num_parallel_calls=AUTOTUNE)
-                          .prefetch(AUTOTUNE)
-                          .enumerate())
-    for i, sample in tqdm(preprocess_dataset):
-        indices.append(i.numpy())
-        mul_label = list(tf.io.decode_raw(sample['labels'], tf.float32).numpy())
-        label.append(mul_label)
-        name.append(sample['name'].numpy().decode())
+indices = []
+name = []
+label = []
+preprocess_dataset = (raw_image_dataset.map(_parse_image_function, num_parallel_calls=AUTOTUNE)
+                      .prefetch(AUTOTUNE)
+                      .enumerate())
+for i, sample in tqdm(preprocess_dataset):
+    indices.append(i.numpy())
+    mul_label = list(tf.io.decode_raw(sample['labels'], tf.float32).numpy())
+    label.append(mul_label)
+    name.append(sample['name'].numpy().decode())
 
-    table = pd.DataFrame({'indices': indices, 'name': name, 'label': label})
-    skf = MultilabelStratifiedKFold(n_splits=5, random_state=SEED, shuffle=True)
-    X = np.array(table.index)
-    Y = np.array(list(table.label.values), dtype=np.uint8).reshape(len(train_data), CLASS_N)
-    splits = list(skf.split(X, Y))
-    print("DataSet Split Successful.")
-    print("origin: ", np.sum(np.array(list(table["label"].values), dtype=np.uint8), axis=0))
-    for j in range(5):
-        print("Train Fold", j, ":", np.sum(np.array(list(table["label"][splits[j][0]].values), dtype=np.uint8), axis=0))
-        print("Val Fold", j, ":", np.sum(np.array(list(table["label"][splits[j][1]].values), dtype=np.uint8), axis=0))
-    for j in range(5):
-        with open("./k-fold_" + str(j) + ".txt", 'w') as writer:
-            writer.write("Train:\n")
-            indic_str = "\n".join([str(l) for l in list(splits[j][0])])
-            writer.write(indic_str)
-            writer.write("\n")
-            writer.write("Val:\n")
-            indic_str = "\n".join([str(l) for l in list(splits[j][1])])
-            writer.write(indic_str)
-        writer.close()
+table = pd.DataFrame({'indices': indices, 'name': name, 'label': label})
+skf = MultilabelStratifiedKFold(n_splits=5, random_state=SEED, shuffle=True)
+X = np.array(table.index)
+Y = np.array(list(table.label.values), dtype=np.uint8).reshape(len(train_data), CLASS_N)
+splits = list(skf.split(X, Y))
+print("DataSet Split Successful.")
+print("origin: ", np.sum(np.array(list(table["label"].values), dtype=np.uint8), axis=0))
+for j in range(5):
+    print("Train Fold", j, ":", np.sum(np.array(list(table["label"][splits[j][0]].values), dtype=np.uint8), axis=0))
+    print("Val Fold", j, ":", np.sum(np.array(list(table["label"][splits[j][1]].values), dtype=np.uint8), axis=0))
+for j in range(5):
+    with open("./k-fold_" + str(j) + ".txt", 'w') as writer:
+        writer.write("Train:\n")
+        indic_str = "\n".join([str(l) for l in list(splits[j][0])])
+        writer.write(indic_str)
+        writer.write("\n")
+        writer.write("Val:\n")
+        indic_str = "\n".join([str(l) for l in list(splits[j][1])])
+        writer.write(indic_str)
+    writer.close()
 
 
 def create_train_dataset(batchsize, train_idx):
@@ -347,6 +356,20 @@ def create_val_dataset(batchsize, val_idx):
     return dataset
 
 
+def create_val_extra_dataset(batchsize, val_idx):
+    global preprocess_dataset
+    parsed_val = (preprocess_dataset
+                  .filter(create_idx_filter(val_idx))
+                  .map(_remove_idx))
+    dataset = (parsed_val
+               .map(_decode_image_function, num_parallel_calls=AUTOTUNE)
+               .map(_preprocess_image_val_function, num_parallel_calls=AUTOTUNE)
+               .map(_create_annot_val, num_parallel_calls=AUTOTUNE)
+               .batch(batchsize)
+               .cache())
+    return dataset
+
+
 def cal_f1_score(y_true, y_pred):
     y_pred = np.around(y_pred)
     return f1_score(y_true, y_pred, average='samples', zero_division=0)
@@ -357,13 +380,13 @@ def f1_score_sk(y_true, y_pred):
 
 
 def f1_loss(y_true, y_pred):
-    tp = K.sum(K.cast(y_true*y_pred, 'float'), axis=0)
-    tn = K.sum(K.cast((1-y_true)*(1-y_pred), 'float'), axis=0)
-    fp = K.sum(K.cast((1-y_true)*y_pred, 'float'), axis=0)
-    fn = K.sum(K.cast(y_true*(1-y_pred), 'float'), axis=0)
+    tp = K.sum(K.cast(y_true * y_pred, 'float'), axis=0)
+    tn = K.sum(K.cast((1 - y_true) * (1 - y_pred), 'float'), axis=0)
+    fp = K.sum(K.cast((1 - y_true) * y_pred, 'float'), axis=0)
+    fn = K.sum(K.cast(y_true * (1 - y_pred), 'float'), axis=0)
     p = tp / (tp + fp + K.epsilon())
     r = tp / (tp + fn + K.epsilon())
-    f1 = 2*p*r / (p+r+K.epsilon())
+    f1 = 2 * p * r / (p + r + K.epsilon())
     f1 = tf.where(tf.math.is_nan(f1), tf.zeros_like(f1), f1)
     return 1 - K.mean(f1)
 
@@ -405,40 +428,6 @@ def create_model():
     return model
 
 
-def create_test_model():
-    backbone = efn.EfficientNetB0(
-        include_top=False,
-        input_shape=(HEIGHT_T, WIDTH_T, 3),
-        weights=None,
-        pooling='avg'
-    )
-
-    model = tf.keras.Sequential([
-        backbone,
-        GroupNormalization(group=32),
-        tf.keras.layers.Dropout(0.5),
-        tf.keras.layers.Dense(512, activation='relu', kernel_initializer=tf.keras.initializers.he_normal()),
-        GroupNormalization(group=32),
-        tf.keras.layers.Dropout(0.5),
-        tf.keras.layers.Dense(CLASS_N, bias_initializer=tf.keras.initializers.Constant(-2.), activation='sigmoid')])
-    optimizer = tfa.optimizers.RectifiedAdam(lr=5e-5,
-                                             total_steps=cfg['model_params']['iteration_per_epoch'] *
-                                                         cfg['model_params']['epoch'],
-                                             warmup_proportion=0.1,
-                                             min_lr=1e-6)
-    # optimizer = tf.keras.optimizers.Adam(lr=1e-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
-    # 使用FacalLoss
-    # tfa.metrics.F1Score计算F1-Score时依据本epoch见过的所有数据, 与batch_size无关
-    # TODO
-    # sklearn.metrics.f1_score根据每个batch计算F1-Score, 需要修改
-    model.compile(optimizer=optimizer,
-                  loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=False),
-                  metrics=['accuracy',
-                           tfa.metrics.F1Score(num_classes=CLASS_N, threshold=0.5, average='macro'),
-                           f1_score_sk])
-    return model
-
-
 def plot_history(history, name):
     plt.figure(figsize=(24, 4))
     plt.subplot(1, 4, 1)
@@ -467,17 +456,19 @@ def plot_history(history, name):
 tdataset = (tf.data.Dataset.from_tensor_slices((test_img_lists, test_img_path_lists))
             .map(_preprocess_image_test_function, num_parallel_calls=AUTOTUNE)
             .batch(cfg['model_params']['batchsize_in_test']).prefetch(AUTOTUNE))
-if test_only:
-    model = create_test_model()
-else:
-    model = create_model()
+
+model = create_model()
 
 
-def inference(count, path):
+# Run Inference On Val Dataset.
+# Save as "./submission_val_i.csv"&"./submission_with_prob_val_i.csv"
+def inference(count, path, USE_PROBABILITY):
+    idx_val_tf = tf.cast(tf.constant(splits[count][1]), tf.int64)
+    vdataset = create_val_extra_dataset(cfg['model_params']['batchsize_per_gpu'], idx_val_tf)
     model.load_weights(path + "/model_best_%d.h5" % count)
     rec_ids = []
     probs = []
-    for data, name in tqdm(tdataset):
+    for data, name in tqdm(vdataset):
         pred = model.predict_on_batch(tf.reshape(data, [-1, HEIGHT_T, WIDTH_T, 3]))
         rec_id_stack = tf.reshape(name, [-1, 1])
         for rec in name.numpy():
@@ -488,25 +479,18 @@ def inference(count, path):
     cprobs = np.concatenate(probs)
     sub_with_prob = pd.DataFrame({
         'name': list(map(lambda x: x.decode(), crec_ids.tolist())),
-        **{id2label[i]: cprobs[:, i] / 5 for i in range(CLASS_N)}
+        **{classes[i]: cprobs[:, i] / k_fold for i in range(CLASS_N)}
     })
     sub_with_prob = sub_with_prob.sort_values('name')
-    return sub_with_prob
-
-
-def submission_writer(path):
-    sub_with_prob = sum(
-        map(
-            lambda j:
-            inference(j, path).set_index('name'), range(5)
-        )
-    ).reset_index()
-
     labels = []
     names = []
     for index, row in sub_with_prob.iterrows():
         names.append(row[0])
-        prob = np.around(np.array(row[1:CLASS_N + 1], dtype=np.float32))
+        probs = np.array(row[1:CLASS_N + 1], dtype=np.float32)
+        if USE_PROBABILITY:
+            prob = probs > probability
+        else:
+            prob = np.around(probs)
         prob = prob.astype('bool')
         label = ' '.join(classes[prob])
         # 很重要，视为疾病检测模型，没有检测到疾病时视为健康
@@ -517,9 +501,11 @@ def submission_writer(path):
     sub = pd.DataFrame({
         'image': names,
         'labels': labels})
-    sub.to_csv('submission.csv', index=False)
+    sub.to_csv('submission_val_' + str(count) + '.csv', index=False)
     sub_with_prob.describe()
-    sub_with_prob.to_csv("submission_with_prob.csv", index=False)
+    sub_with_prob.to_csv("submission_with_prob_val_" + str(count) + ".csv", index=False)
+    sub_with_prob.set_index('name')
+    return sub_with_prob
 
 
 def train(splits, split_id):
@@ -543,18 +529,16 @@ def train(splits, split_id):
                                 monitor='val_f1_score_sk',
                                 mode='max',
                                 save_best_only=True),
-                            # tf.keras.callbacks.ReduceLROnPlateau(monitor='val_f1_score_sk',
-                            #                                      mode='max',
-                            #                                      verbose=1,
-                            #                                      patience=5,
-                            #                                      factor=0.5,
-                            #                                      min_lr=1e-6)
+                            tf.keras.callbacks.ReduceLROnPlateau(monitor='val_f1_score_sk',
+                                                                 mode='max',
+                                                                 verbose=1,
+                                                                 patience=5,
+                                                                 factor=0.5,
+                                                                 min_lr=1e-6)
                         ])
     plot_history(history, 'history_%d.png' % split_id)
 
 
-if not test_only:
-    for i in range(5):
-        train(splits, i)
-
-submission_writer("./model/EfficientNetB4-0407-Noisy-student-kaggle")
+for i in range(k_fold):
+    train(splits, i)
+    inference(i, "./model", USE_PROBABILITY)

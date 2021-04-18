@@ -29,7 +29,7 @@
 &emsp;'rust complex': [0, 0, 1, 1, 0], <br/>
 &emsp;'powdery_mildew complex': [0, 0, 0, 1, 1] <br/>
 }<br/>
-* F1-Score 的计算应该基于 'scab'、'healthy'、'frog_eye_leaf_spot‘等而非'rust complex' <br/>
+* F1-Score 的计算应该基于 'scab'、'healthy'、'frog_eye_leaf_spot‘ 等而非 'rust complex' <br/>
 * 所以之前的训练集上的 F1-Score 都只能达到~50％ <br/>
 
 ## EfficientNet Train
@@ -70,10 +70,10 @@
 * 训练集上增加 随机遮挡 数据增强 <br/>
 * 训练集上使用 MixUp 数据增强 <br/>
 * 训练集上使用 labelsmooth <br/>
-* ~~Use Soft-Macro-F1 Loss~~ 感觉效果不错 LB 0.641 <br/>
+* ~~**Use Soft-Macro-F1 Loss**~~ 感觉效果不错 LB 0.641 <br/>
 * 改成两个模型，第一个分辨是 'healthy' 还是 'ill' , 第二个分辨具体是哪种疾病 <br/>
 * ~~试试看做异常检出问题, 标签中删除 'healthy' , 没有疾病检出时即为 healthy~~  <br/>
-* ~~TTA (测试时增强) (TTA 步长不能太大，容易超时) (需要加速 Inference)~~ <br/>
+* ~~**TTA** (测试时增强) (TTA 步长不能太大，容易超时) (需要加速 Inference)~~ <br/>
 * ~~**加速 Inference 为 Test Dataset 生成 tfrecords~~ <br/>
 * ~~试试不使用 Focal Loss 时的准确率~~ <br/>
 * 试试余弦学习率衰减 <br/>
@@ -123,7 +123,7 @@ $$ \{P_i} = \frac{{{TP_i}}}{{{TP_i} + {FP_i}}}\ $$
 $$ \{R_i} = \frac{{{TP_i}}}{{{TP_i} + {FN_i}}}\ $$
 $$ \{F1} = 2 * \frac{{\overline {P}  * \overline {R} }}{{\overline {P}  + \overline {R} }}\ $$
 #### Samples-F1
-##### Sample-Wise Multilabel Confusion Matrix
+* Sample-Wise Multilabel Confusion Matrix <br/>
 $$
  \begin{bmatrix}
    TN & FP \\\\
