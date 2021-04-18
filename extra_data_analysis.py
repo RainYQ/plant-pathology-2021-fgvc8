@@ -7,7 +7,7 @@ Extra Dataset has { 'healthy' 'multiple_diseases' 'rust' 'scab' }
     - T: Predict Label = True Extra Data Label
     - F: Predict Label != True Extra Data Label
     - M: When True Extra Data Label is 'multiple_diseases' and our model predict label is in not 'healthy'
-    - H: Predict Label is a part of True Extra Data Label
+    - P: Predict Label is a part of True Extra Data Label
 Use the submission.csv to calculate model generalization
 """
 

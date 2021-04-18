@@ -67,6 +67,7 @@
 ## TODO
 
 **说明优先级高 <br/>
+**加粗**说明效果优秀 <br/> 
 * 训练集上增加 随机遮挡 数据增强 <br/>
 * 训练集上使用 MixUp 数据增强 <br/>
 * 训练集上使用 labelsmooth <br/>
@@ -105,9 +106,9 @@
 ## Information
 ### Train
 * Time Limit: ~32400s <br/>
-* ~7000s per one fold for Epoch 30 EfficientNet-B7 600x600 <br/>
-* ~4400s per one fold for Epoch 30 EfficientNet-B7 512x512 <br/>
-* ~2480s per one fold for Epoch 30 EfficientNet-B4 512x512 <br/>
+* ~7000s per 1-fold train for EfficientNet-B7 (Epoch = 30, size = 600x600) <br/>
+* ~4400s per 1-fold train for EfficientNet-B7 (Epoch = 30, size = 512x512) <br/>
+* ~2480s per 1-fold train for EfficientNet-B4 (Epoch = 30, size = 512x512) <br/>
 ### Inference
 * Test TFRecords Generate ~20 minutes <br/>
 * Efficient-B7 Model Predict ~3 minutes per model (512x512) <br/>

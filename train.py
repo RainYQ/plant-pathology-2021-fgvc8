@@ -25,6 +25,7 @@ import threading
 import tensorflow_addons as tfa
 from GroupNormalization import GroupNormalization
 from sklearn.model_selection import StratifiedKFold
+import tensorflow_probability as tfp
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 import efficientnet.tfkeras as efn
@@ -58,9 +59,10 @@ cfg = {
     },
     'model_params': {
         'batchsize_per_gpu': 16,
-        'iteration_per_epoch': 1,
+        'iteration_per_epoch': 128,
         'batchsize_in_test': 16,
-        'epoch': 1
+        'epoch': 100,
+        'mix-up': True
     }
 }
 
@@ -230,16 +232,16 @@ def _preprocess_image_function(single_photo):
     gau = tf.keras.layers.GaussianNoise(0.3)
     # 以50％的概率为图像添加高斯噪声
     image = tf.cond(tf.random.uniform([]) < 0.5, lambda: gau(image), lambda: image)
-    image = tf.image.random_contrast(image, lower=0.8, upper=1.2)
-    image = tf.image.random_saturation(image, lower=0.8, upper=1.2)
+    image = tf.image.random_contrast(image, lower=0.5, upper=1.5)
+    image = tf.image.random_saturation(image, lower=0.5, upper=1.5)
     # brightness随机调整
-    image = tf.image.random_brightness(image, 0.2)
+    image = tf.image.random_brightness(image, 0.5)
     # random left right flip
     image = tf.image.random_flip_left_right(image)
     # random up down flip
     image = tf.image.random_flip_up_down(image)
     rand_k = tf.random.uniform([], minval=0, maxval=4, dtype=tf.int32, seed=SEED)
-    # 以50％的概率随机翻转图像
+    # 以50％的概率随机旋转图像
     image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tf.image.rot90(image, k=rand_k), lambda: image)
     single_photo['data'] = image
     return single_photo
@@ -277,6 +279,23 @@ def _create_annot(single_photo):
 
 def _create_annot_val(single_photo):
     return single_photo['data'], single_photo['name']
+
+
+def _mixup(data, targ):
+    # 打乱batch顺序
+    indice = tf.range(len(data))
+    indice = tf.random.shuffle(indice)
+    sinp = tf.gather(data, indice, axis=0)
+    starg = tf.gather(targ, indice, axis=0)
+    # 生成beta分布
+    alpha = 0.2
+    t = tfp.distributions.Beta(alpha, alpha).sample([len(data)])
+    tx = tf.reshape(t, [-1, 1, 1, 1])
+    ty = tf.reshape(t, [-1, 1])
+    x = data * tx + sinp * (1 - tx)
+    y = targ * ty + starg * (1 - ty)
+    return x, y
+
 
 
 # parsed_image_dataset = (raw_image_dataset.map(_parse_image_function, num_parallel_calls=AUTOTUNE)
@@ -337,8 +356,12 @@ def create_train_dataset(batchsize, train_idx):
                .map(_decode_image_function, num_parallel_calls=AUTOTUNE)
                .map(_preprocess_image_function, num_parallel_calls=AUTOTUNE)
                .map(_create_annot, num_parallel_calls=AUTOTUNE)
-               .batch(batchsize)
-               .prefetch(AUTOTUNE))
+               .batch(batchsize))
+    if cfg['model_params']['mix-up']:
+        dataset = (dataset.map(_mixup, num_parallel_calls=AUTOTUNE)
+                   .prefetch(AUTOTUNE))
+    else:
+        dataset = dataset.prefetch(AUTOTUNE)
     return dataset
 
 
@@ -372,6 +395,7 @@ def create_val_extra_dataset(batchsize, val_idx):
 
 def cal_f1_score(y_true, y_pred):
     y_pred = np.around(y_pred)
+    y_true = np.around(y_true)
     return f1_score(y_true, y_pred, average='samples', zero_division=0)
 
 
@@ -380,10 +404,12 @@ def f1_score_sk(y_true, y_pred):
 
 
 def f1_loss(y_true, y_pred):
-    tp = K.sum(K.cast(y_true * y_pred, 'float'), axis=0)
-    tn = K.sum(K.cast((1 - y_true) * (1 - y_pred), 'float'), axis=0)
-    fp = K.sum(K.cast((1 - y_true) * y_pred, 'float'), axis=0)
-    fn = K.sum(K.cast(y_true * (1 - y_pred), 'float'), axis=0)
+    # axis=0 时 计算出的f1为'macro'
+    # axis=1 时 计算出的f1为'samples'
+    tp = K.sum(K.cast(y_true * y_pred, 'float'), axis=1)
+    tn = K.sum(K.cast((1 - y_true) * (1 - y_pred), 'float'), axis=1)
+    fp = K.sum(K.cast((1 - y_true) * y_pred, 'float'), axis=1)
+    fn = K.sum(K.cast(y_true * (1 - y_pred), 'float'), axis=1)
     p = tp / (tp + fp + K.epsilon())
     r = tp / (tp + fn + K.epsilon())
     f1 = 2 * p * r / (p + r + K.epsilon())
@@ -414,7 +440,7 @@ def create_model():
     #                                                      cfg['model_params']['epoch'],
     #                                          warmup_proportion=0.1,
     #                                          min_lr=1e-6)
-    optimizer = tf.keras.optimizers.Adam(lr=1e-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+    optimizer = tf.keras.optimizers.Adam(lr=2e-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
     # 使用FacalLoss
     # tfa.metrics.F1Score计算F1-Score时依据本epoch见过的所有数据, 与batch_size无关
     # TODO
@@ -526,10 +552,10 @@ def train(splits, split_id):
                             tf.keras.callbacks.ModelCheckpoint(
                                 filepath='./model/model_best_%d.h5' % split_id,
                                 save_weights_only=True,
-                                monitor='val_f1_score_sk',
+                                monitor='val_f1_score',
                                 mode='max',
                                 save_best_only=True),
-                            tf.keras.callbacks.ReduceLROnPlateau(monitor='val_f1_score_sk',
+                            tf.keras.callbacks.ReduceLROnPlateau(monitor='val_f1_score',
                                                                  mode='max',
                                                                  verbose=1,
                                                                  patience=5,

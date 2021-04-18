@@ -1,4 +1,14 @@
--Extra Dataset Label
+-Extra Dataset
+
+Extra Dataset has { 'healthy' 'multiple_diseases' 'rust' 'scab' }
+
+    - T: Predict Label = True Extra Data Label
+    - F: Predict Label != True Extra Data Label
+    - M: When True Extra Data Label is 'multiple_diseases' and our model predict label is in not 'healthy'
+    - P: Predict Label is a part of True Extra Data Label
+
+Use the submission.csv to calculate model generalization
+
 rust                 622
 scab                 592
 healthy              516
@@ -21,6 +31,8 @@ scab                 413
 healthy               81
 multiple_diseases     24
 rust                  16
+
+LB 0.675
 
 ##############################################################
 
