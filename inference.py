@@ -151,7 +151,7 @@ def inference(count, path):
     cprobs = np.concatenate(probs)
     sub_with_prob = pd.DataFrame({
         'name': list(map(lambda x: x.decode(), crec_ids.tolist())),
-        **{id2label[i]: cprobs[:, i] / (K * TTA_STEP) for i in range(CLASS_N)}
+        **{classes[i]: cprobs[:, i] / (K * TTA_STEP) for i in range(CLASS_N)}
     })
     sub_with_prob = sub_with_prob.sort_values('name')
     return sub_with_prob
@@ -195,4 +195,4 @@ def submission_writer(path, USE_PROBABILITY):
 
 if __name__ == "__main__":
     USE_PROBABILITY = False
-    submission_writer("./model/EfficientNetB7-0413-Noisy-student-Soft_F1_Loss", USE_PROBABILITY)
+    submission_writer("./model/EfficientNetB7-0418-Noisy-student-Soft_F1_Loss_Long_Epochs", USE_PROBABILITY)

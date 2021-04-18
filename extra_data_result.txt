@@ -4,9 +4,30 @@ scab                 592
 healthy              516
 multiple_diseases     91
 
+##############################################################
+
 -EfficientNet-B7 1-fold without 'healthy'
+--USE Soft_F1_Loss
 --USE_PROBABILITY OFF
---TTA OFF
+--TTA ON
+--Long Epochs
+
+T    1217
+F     534
+M      67
+P       3
+
+scab                 413
+healthy               81
+multiple_diseases     24
+rust                  16
+
+##############################################################
+
+-EfficientNet-B7 1-fold without 'healthy'
+--USE Soft_F1_Loss
+--USE_PROBABILITY OFF
+--TTA ON
 
 T    1160
 F     555
@@ -18,9 +39,14 @@ healthy              157
 rust                  34
 multiple_diseases     21
 
+LB 0.641
+
+##############################################################
+
 -EfficientNet-B7 1-fold without 'healthy'
 --USE_PROBABILITY OFF
 --TTA ON
+--Use FocalLoss
 
 T    1256
 F     488
@@ -32,9 +58,14 @@ healthy               96
 multiple_diseases     26
 rust                   7
 
+LB 0.654
+
+##############################################################
+
 -EfficientNet-B7 1-fold without 'healthy'
 --USE_PROBABILITY ON
 --TTA OFF
+--Use FocalLoss
 
 T    601
 F    598
@@ -48,9 +79,12 @@ multiple_diseases      1
 
 LB 0.601
 
+##############################################################
+
 -EfficientNet-B4 5-fold with 'healthy'
 --USE_PROBABILITY OFF
 --TTA OFF
+--Use FocalLoss
 
 T    973
 F    635
@@ -64,3 +98,4 @@ multiple_diseases      2
 
 LB 0.573
 
+##############################################################
