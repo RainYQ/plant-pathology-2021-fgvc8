@@ -37,7 +37,7 @@ from sklearn.metrics import f1_score
 
 USE_PROBABILITY = False
 # k-fold number
-k_fold = 5
+k_fold = 1
 
 probability = [5704, 4350, 2027, 2124, 1271]
 probability = np.array(probability, dtype=np.float32) / sum(probability)
@@ -297,7 +297,6 @@ def _mixup(data, targ):
     return x, y
 
 
-
 # parsed_image_dataset = (raw_image_dataset.map(_parse_image_function, num_parallel_calls=AUTOTUNE)
 #                         .map(_decode_image_function, num_parallel_calls=AUTOTUNE)
 #                         .map(_preprocess_image_function, num_parallel_calls=AUTOTUNE)
@@ -400,21 +399,65 @@ def cal_f1_score(y_true, y_pred):
 
 
 def f1_score_sk(y_true, y_pred):
+    # 将 ‘healthy' 补充到 metrics 函数中
+    y_true_addon = tf.cast(~(K.sum(y_true, axis=1) > 0), tf.float32)
+    y_true_addon = tf.reshape(y_true_addon, [len(y_true_addon), -1])
+    y_true = tf.concat([y_true, y_true_addon], 1)
+    y_pred_addon = 1 - K.max(y_pred, axis=1)
+    y_pred_addon = tf.reshape(y_pred_addon, [len(y_pred_addon), -1])
+    y_pred = tf.concat([y_pred, y_pred_addon], 1)
     return tf.py_function(cal_f1_score, [y_true, y_pred], tf.float32)
 
 
 def f1_loss(y_true, y_pred):
     # axis=0 时 计算出的f1为'macro'
     # axis=1 时 计算出的f1为'samples'
+    # 将 ‘healthy' 补充到 loss 函数中
+    y_true_addon = tf.cast(~(K.sum(y_true, axis=1) > 0), tf.float32)
+    y_true_addon = tf.reshape(y_true_addon, [len(y_true_addon), -1])
+    y_true = tf.concat([y_true, y_true_addon], 1)
+    y_pred_addon = 1 - K.max(y_pred, axis=1)
+    y_pred_addon = tf.reshape(y_pred_addon, [len(y_pred_addon), -1])
+    y_pred = tf.concat([y_pred, y_pred_addon], 1)
     tp = K.sum(K.cast(y_true * y_pred, 'float'), axis=1)
     tn = K.sum(K.cast((1 - y_true) * (1 - y_pred), 'float'), axis=1)
     fp = K.sum(K.cast((1 - y_true) * y_pred, 'float'), axis=1)
     fn = K.sum(K.cast(y_true * (1 - y_pred), 'float'), axis=1)
+    # tp = K.sum(K.cast(y_true * y_pred + y_true_addon * y_pred_addon, 'float'), axis=1)
+    # tn = K.sum(K.cast((1 - y_true) * (1 - y_pred) + (1 - y_true_addon) * (1 - y_pred_addon), 'float'), axis=1)
+    # fp = K.sum(K.cast((1 - y_true) * y_pred + (1 - y_true_addon) * y_pred_addon, 'float'), axis=1)
+    # fn = K.sum(K.cast(y_true * (1 - y_pred) + y_true_addon * (1 - y_pred_addon), 'float'), axis=1)
     p = tp / (tp + fp + K.epsilon())
     r = tp / (tp + fn + K.epsilon())
     f1 = 2 * p * r / (p + r + K.epsilon())
     f1 = tf.where(tf.math.is_nan(f1), tf.zeros_like(f1), f1)
     return 1 - K.mean(f1)
+
+
+def f1_loss(y_true, y_pred):
+    # axis=0 时 计算出的f1为'macro'
+    # axis=1 时 计算出的f1为'samples'
+    # 将 ‘healthy' 补充到 loss 函数中
+    y_true_addon = tf.cast(~(K.sum(y_true, axis=1) > 0), tf.float32)
+    y_true_addon = tf.reshape(y_true_addon, [len(y_true_addon), -1])
+    y_true = tf.concat([y_true, y_true_addon], 1)
+    y_pred_addon = 1 - K.max(y_pred, axis=1)
+    y_pred_addon = tf.reshape(y_pred_addon, [len(y_pred_addon), -1])
+    y_pred = tf.concat([y_pred, y_pred_addon], 1)
+    tp = K.sum(K.cast(y_true * y_pred, 'float'), axis=1)
+    tn = K.sum(K.cast((1 - y_true) * (1 - y_pred), 'float'), axis=1)
+    fp = K.sum(K.cast((1 - y_true) * y_pred, 'float'), axis=1)
+    fn = K.sum(K.cast(y_true * (1 - y_pred), 'float'), axis=1)
+    # tp = K.sum(K.cast(y_true * y_pred + y_true_addon * y_pred_addon, 'float'), axis=1)
+    # tn = K.sum(K.cast((1 - y_true) * (1 - y_pred) + (1 - y_true_addon) * (1 - y_pred_addon), 'float'), axis=1)
+    # fp = K.sum(K.cast((1 - y_true) * y_pred + (1 - y_true_addon) * y_pred_addon, 'float'), axis=1)
+    # fn = K.sum(K.cast(y_true * (1 - y_pred) + y_true_addon * (1 - y_pred_addon), 'float'), axis=1)
+    p = tp / (tp + fp + K.epsilon())
+    r = tp / (tp + fn + K.epsilon())
+    f1 = 2 * p * r / (p + r + K.epsilon())
+    f1 = tf.where(tf.math.is_nan(f1), tf.zeros_like(f1), f1)
+    return 1 - K.mean(f1)
+
 
 
 def create_model():
@@ -443,8 +486,6 @@ def create_model():
     optimizer = tf.keras.optimizers.Adam(lr=8e-5, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
     # 使用FacalLoss
     # tfa.metrics.F1Score计算F1-Score时依据本epoch见过的所有数据, 与batch_size无关
-    # TODO
-    # sklearn.metrics.f1_score根据每个batch计算F1-Score, 需要修改
     model.compile(optimizer=optimizer,
                   # loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=False),
                   loss=f1_loss,
@@ -566,5 +607,5 @@ def train(splits, split_id):
 
 
 for i in range(k_fold):
-    train(splits, i)
+    # train(splits, i)
     inference(i, "./model", USE_PROBABILITY)
