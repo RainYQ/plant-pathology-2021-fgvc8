@@ -434,6 +434,32 @@ def f1_loss(y_true, y_pred):
     return 1 - K.mean(f1)
 
 
+def f1_loss(y_true, y_pred):
+    # axis=0 时 计算出的f1为'macro'
+    # axis=1 时 计算出的f1为'samples'
+    # 将 ‘healthy' 补充到 loss 函数中
+    y_true_addon = tf.cast(~(K.sum(y_true, axis=1) > 0), tf.float32)
+    y_true_addon = tf.reshape(y_true_addon, [len(y_true_addon), -1])
+    y_true = tf.concat([y_true, y_true_addon], 1)
+    y_pred_addon = 1 - K.max(y_pred, axis=1)
+    y_pred_addon = tf.reshape(y_pred_addon, [len(y_pred_addon), -1])
+    y_pred = tf.concat([y_pred, y_pred_addon], 1)
+    tp = K.sum(K.cast(y_true * y_pred, 'float'), axis=1)
+    tn = K.sum(K.cast((1 - y_true) * (1 - y_pred), 'float'), axis=1)
+    fp = K.sum(K.cast((1 - y_true) * y_pred, 'float'), axis=1)
+    fn = K.sum(K.cast(y_true * (1 - y_pred), 'float'), axis=1)
+    # tp = K.sum(K.cast(y_true * y_pred + y_true_addon * y_pred_addon, 'float'), axis=1)
+    # tn = K.sum(K.cast((1 - y_true) * (1 - y_pred) + (1 - y_true_addon) * (1 - y_pred_addon), 'float'), axis=1)
+    # fp = K.sum(K.cast((1 - y_true) * y_pred + (1 - y_true_addon) * y_pred_addon, 'float'), axis=1)
+    # fn = K.sum(K.cast(y_true * (1 - y_pred) + y_true_addon * (1 - y_pred_addon), 'float'), axis=1)
+    p = tp / (tp + fp + K.epsilon())
+    r = tp / (tp + fn + K.epsilon())
+    f1 = 2 * p * r / (p + r + K.epsilon())
+    f1 = tf.where(tf.math.is_nan(f1), tf.zeros_like(f1), f1)
+    return 1 - K.mean(f1)
+
+
+
 def create_model():
     # backbone = tf.keras.applications.ResNet50(weights="imagenet", include_top=False,
     #                                           input_shape=(HEIGHT, WIDTH, 3), classes=CLASS_N)
@@ -460,8 +486,6 @@ def create_model():
     optimizer = tf.keras.optimizers.Adam(lr=8e-5, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
     # 使用FacalLoss
     # tfa.metrics.F1Score计算F1-Score时依据本epoch见过的所有数据, 与batch_size无关
-    # TODO
-    # sklearn.metrics.f1_score根据每个batch计算F1-Score, 需要修改
     model.compile(optimizer=optimizer,
                   # loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=False),
                   loss=f1_loss,
