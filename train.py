@@ -59,9 +59,9 @@ cfg = {
     },
     'model_params': {
         'batchsize_per_gpu': 16,
-        'iteration_per_epoch': 128,
+        'iteration_per_epoch': 1024,
         'batchsize_in_test': 16,
-        'epoch': 100,
+        'epoch': 50,
         'mix-up': True
     }
 }
@@ -440,7 +440,7 @@ def create_model():
     #                                                      cfg['model_params']['epoch'],
     #                                          warmup_proportion=0.1,
     #                                          min_lr=1e-6)
-    optimizer = tf.keras.optimizers.Adam(lr=2e-4, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
+    optimizer = tf.keras.optimizers.Adam(lr=8e-5, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
     # 使用FacalLoss
     # tfa.metrics.F1Score计算F1-Score时依据本epoch见过的所有数据, 与batch_size无关
     # TODO
@@ -552,10 +552,10 @@ def train(splits, split_id):
                             tf.keras.callbacks.ModelCheckpoint(
                                 filepath='./model/model_best_%d.h5' % split_id,
                                 save_weights_only=True,
-                                monitor='val_f1_score',
+                                monitor='val_f1_score_sk',
                                 mode='max',
                                 save_best_only=True),
-                            tf.keras.callbacks.ReduceLROnPlateau(monitor='val_f1_score',
+                            tf.keras.callbacks.ReduceLROnPlateau(monitor='val_f1_score_sk',
                                                                  mode='max',
                                                                  verbose=1,
                                                                  patience=5,
