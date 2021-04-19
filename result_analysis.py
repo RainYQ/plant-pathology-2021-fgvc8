@@ -60,6 +60,8 @@ for name in names:
     pred.append(1 - max(pred))
     pred = np.around(np.array(pred))
     p_label.append(pred)
+    if max(pred) < 0.5:
+        print('here')
     t_label.append(id2array[int(label)])
     t_label_name.append(id2label[int(label)])
     prob = pred.astype('bool')
