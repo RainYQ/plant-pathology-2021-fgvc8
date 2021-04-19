@@ -37,15 +37,15 @@ AUTOTUNE = tf.data.experimental.AUTOTUNE
 
 cfg = {
     'data_params': {
-        'img_shape': (512, 512),
-        'test_img_shape': (512, 512),
+        'img_shape': (256, 256),
+        'test_img_shape': (256, 256),
         'class_type': 5
     },
     'model_params': {
-        'batchsize_per_gpu': 128,
-        'iteration_per_epoch': 128,
-        'batchsize_in_test': 2,
-        'epoch': 30
+        'batchsize_per_gpu': 16,
+        'iteration_per_epoch': 1024,
+        'batchsize_in_test': 16,
+        'epoch': 50
     }
 }
 
@@ -112,7 +112,7 @@ def _preprocess_image_test_function(name, path):
 
 
 def create_test_model():
-    backbone = efn.EfficientNetB7(
+    backbone = efn.EfficientNetB0(
         include_top=False,
         input_shape=(HEIGHT_T, WIDTH_T, 3),
         weights=None,
@@ -125,7 +125,7 @@ def create_test_model():
         # tf.keras.layers.Dropout(0.5),
         # tf.keras.layers.Dense(512, activation='relu', kernel_initializer=tf.keras.initializers.he_normal()),
         # GroupNormalization(group=32),
-        tf.keras.layers.BatchNormalization(),
+        GroupNormalization(group=32),
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(CLASS_N, kernel_initializer=tf.keras.initializers.he_normal(), activation='sigmoid')])
     return model
@@ -195,4 +195,4 @@ def submission_writer(path, USE_PROBABILITY):
 
 if __name__ == "__main__":
     USE_PROBABILITY = False
-    submission_writer("./model/EfficientNetB7-0418-Noisy-student-Soft_F1_Loss_Long_Epochs", USE_PROBABILITY)
+    submission_writer("./model", USE_PROBABILITY)
