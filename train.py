@@ -6,13 +6,7 @@ Train:
 -- Use Adam
 -- 0418 Write Model Predict Result over Val_dataset
 Modify:
-    - Line 53-65 cfg
-    - Line 394 create_model
-    - Line 417 lr
-    - Line 397 Model Backbone
-    - Line 404 Model struct
-    - Line 424 Loss
-    - Line 39 k-fold number
+    - Line 38 k-fold number
 """
 
 import random
@@ -24,16 +18,15 @@ import pandas as pd
 import threading
 import tensorflow_addons as tfa
 from GroupNormalization import GroupNormalization
-from sklearn.model_selection import StratifiedKFold
 import tensorflow_probability as tfp
 from matplotlib import pyplot as plt
 from tqdm import tqdm
 import efficientnet.tfkeras as efn
 from PIL import Image
-from Preprocess import id2label
 from iterstrat.ml_stratifiers import MultilabelStratifiedKFold
 from tensorflow.keras import backend as K
 from sklearn.metrics import f1_score
+from config import cfg, classes
 
 USE_PROBABILITY = False
 # k-fold number
@@ -50,29 +43,6 @@ for gpu in gpus:
 # range 0 - 255
 mean = [124.23002308, 159.76066492, 104.05509866]
 std = [47.84116963, 41.94039282, 49.85093766]
-
-cfg = {
-    'data_params': {
-        'img_shape': (256, 256),
-        'test_img_shape': (256, 256),
-        'class_type': 5
-    },
-    'model_params': {
-        'batchsize_per_gpu': 16,
-        'iteration_per_epoch': 1024,
-        'batchsize_in_test': 16,
-        'epoch': 50,
-        'mix-up': True
-    }
-}
-
-classes = np.array([
-    'scab',
-    # 'healthy',
-    'frog_eye_leaf_spot',
-    'rust',
-    'complex',
-    'powdery_mildew'])
 
 CLASS_N = cfg['data_params']['class_type']
 
@@ -398,6 +368,7 @@ def cal_f1_score(y_true, y_pred):
     return f1_score(y_true, y_pred, average='samples', zero_division=0)
 
 
+# Use sklearn verify metrics
 def f1_score_sk(y_true, y_pred):
     # 将 ‘healthy' 补充到 metrics 函数中
     y_true_addon = tf.cast(~(K.sum(y_true, axis=1) > 0), tf.float32)
@@ -409,6 +380,7 @@ def f1_score_sk(y_true, y_pred):
     return tf.py_function(cal_f1_score, [y_true, y_pred], tf.float32)
 
 
+# Our loss (soft sample-wise f1 loss)
 def f1_loss(y_true, y_pred):
     # axis=0 时 计算出的f1为'macro'
     # axis=1 时 计算出的f1为'samples'
@@ -423,10 +395,6 @@ def f1_loss(y_true, y_pred):
     tn = K.sum(K.cast((1 - y_true) * (1 - y_pred), 'float'), axis=1)
     fp = K.sum(K.cast((1 - y_true) * y_pred, 'float'), axis=1)
     fn = K.sum(K.cast(y_true * (1 - y_pred), 'float'), axis=1)
-    # tp = K.sum(K.cast(y_true * y_pred + y_true_addon * y_pred_addon, 'float'), axis=1)
-    # tn = K.sum(K.cast((1 - y_true) * (1 - y_pred) + (1 - y_true_addon) * (1 - y_pred_addon), 'float'), axis=1)
-    # fp = K.sum(K.cast((1 - y_true) * y_pred + (1 - y_true_addon) * y_pred_addon, 'float'), axis=1)
-    # fn = K.sum(K.cast(y_true * (1 - y_pred) + y_true_addon * (1 - y_pred_addon), 'float'), axis=1)
     p = tp / (tp + fp + K.epsilon())
     r = tp / (tp + fn + K.epsilon())
     f1 = 2 * p * r / (p + r + K.epsilon())
@@ -434,30 +402,66 @@ def f1_loss(y_true, y_pred):
     return 1 - K.mean(f1)
 
 
-def f1_loss(y_true, y_pred):
+# Our metrics (equals to sklearn.metrics.f1_score('samples'))
+def f1_score_ours(y_true, y_pred):
     # axis=0 时 计算出的f1为'macro'
     # axis=1 时 计算出的f1为'samples'
-    # 将 ‘healthy' 补充到 loss 函数中
+    # 将 ‘healthy' 补充到 metrics 函数中
     y_true_addon = tf.cast(~(K.sum(y_true, axis=1) > 0), tf.float32)
     y_true_addon = tf.reshape(y_true_addon, [len(y_true_addon), -1])
     y_true = tf.concat([y_true, y_true_addon], 1)
     y_pred_addon = 1 - K.max(y_pred, axis=1)
     y_pred_addon = tf.reshape(y_pred_addon, [len(y_pred_addon), -1])
     y_pred = tf.concat([y_pred, y_pred_addon], 1)
+    y_pred = tf.round(y_pred)
     tp = K.sum(K.cast(y_true * y_pred, 'float'), axis=1)
     tn = K.sum(K.cast((1 - y_true) * (1 - y_pred), 'float'), axis=1)
     fp = K.sum(K.cast((1 - y_true) * y_pred, 'float'), axis=1)
     fn = K.sum(K.cast(y_true * (1 - y_pred), 'float'), axis=1)
-    # tp = K.sum(K.cast(y_true * y_pred + y_true_addon * y_pred_addon, 'float'), axis=1)
-    # tn = K.sum(K.cast((1 - y_true) * (1 - y_pred) + (1 - y_true_addon) * (1 - y_pred_addon), 'float'), axis=1)
-    # fp = K.sum(K.cast((1 - y_true) * y_pred + (1 - y_true_addon) * y_pred_addon, 'float'), axis=1)
-    # fn = K.sum(K.cast(y_true * (1 - y_pred) + y_true_addon * (1 - y_pred_addon), 'float'), axis=1)
     p = tp / (tp + fp + K.epsilon())
     r = tp / (tp + fn + K.epsilon())
     f1 = 2 * p * r / (p + r + K.epsilon())
     f1 = tf.where(tf.math.is_nan(f1), tf.zeros_like(f1), f1)
-    return 1 - K.mean(f1)
+    return K.mean(f1)
 
+
+class CosineAnnealing(tf.keras.optimizers.schedules.LearningRateSchedule):
+    def __init__(
+            self,
+            global_steps,
+            learning_rate_max,
+            learning_rate_min,
+            cycle):
+        super().__init__()
+        self.global_steps = tf.cast(global_steps, dtype=tf.float32)
+        self.learning_rate_max = tf.cast(learning_rate_max, dtype=tf.float32)
+        self.learning_rate_min = tf.cast(learning_rate_min, dtype=tf.float32)
+        self.cycle = tf.cast(cycle, dtype=tf.float32)
+        self.learning_rate = tf.Variable(0., tf.float32)
+
+    def __call__(self, step):
+        learning_rate = self.learning_rate_min + 0.5 * (self.learning_rate_max - self.learning_rate_min) * \
+                        (1 + tf.math.cos(tf.constant(math.pi, tf.float32) *
+                                         (tf.cast(step, tf.float32) / self.cycle)))
+        self.learning_rate.assign(learning_rate)
+        return learning_rate
+
+    def get_config(self):
+        return {
+            "global_steps": self.global_steps,
+            "learning_rate_max": self.learning_rate_max,
+            "learning_rate_min": self.learning_rate_min,
+            "cycle": self.cycle
+        }
+
+    def return_lr(self):
+        return self.learning_rate
+
+
+class ShowLR(tf.keras.callbacks.Callback):
+    def on_epoch_end(self, epoch, logs=None):
+        lr = self.model.optimizer.lr.return_lr()
+        print("lr:", lr.numpy())
 
 
 def create_model():
@@ -472,26 +476,22 @@ def create_model():
 
     model = tf.keras.Sequential([
         backbone,
-        # GroupNormalization(group=32),
-        # tf.keras.layers.Dropout(0.5),
-        # tf.keras.layers.Dense(512, activation='relu', kernel_initializer=tf.keras.initializers.he_normal()),
         GroupNormalization(group=32),
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(CLASS_N, kernel_initializer=tf.keras.initializers.he_normal(), activation='sigmoid')])
-    # optimizer = tfa.optimizers.RectifiedAdam(lr=1e-4,
-    #                                          total_steps=cfg['model_params']['iteration_per_epoch'] *
-    #                                                      cfg['model_params']['epoch'],
-    #                                          warmup_proportion=0.1,
-    #                                          min_lr=1e-6)
-    optimizer = tf.keras.optimizers.Adam(lr=8e-5, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0)
-    # 使用FacalLoss
-    # tfa.metrics.F1Score计算F1-Score时依据本epoch见过的所有数据, 与batch_size无关
+    learning_rate = CosineAnnealing(global_steps=cfg['model_params']['epoch'] * cfg['model_params']['iteration_per_epoch'],
+                                    learning_rate_max=1e-3,
+                                    learning_rate_min=1e-6,
+                                    cycle=5 * cfg['model_params']['iteration_per_epoch'])
+    optimizer = tf.keras.optimizers.Adam(learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0001)
     model.compile(optimizer=optimizer,
                   # loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=False),
                   loss=f1_loss,
                   metrics=['accuracy',
                            tfa.metrics.F1Score(num_classes=CLASS_N, threshold=0.5, average='macro'),
-                           f1_score_sk])
+                           f1_score_sk,
+                           f1_score_ours
+                           ])
     return model
 
 
@@ -506,12 +506,12 @@ def plot_history(history, name):
     plt.plot(history.history["f1_score"])
     plt.plot(history.history["val_f1_score"])
     plt.legend(['Train', 'Val'], loc='upper left')
-    plt.title("F1-Score")
+    plt.title("Macro F1-Score")
     plt.subplot(1, 4, 3)
-    plt.plot(history.history["f1_score_sk"])
-    plt.plot(history.history["val_f1_score_sk"])
+    plt.plot(history.history["f1_score_ours"])
+    plt.plot(history.history["val_f1_score_ours"])
     plt.legend(['Train', 'Val'], loc='upper left')
-    plt.title("F1-Score-Sklearn")
+    plt.title("Sample F1-Score")
     plt.subplot(1, 4, 4)
     plt.plot(history.history["accuracy"])
     plt.plot(history.history["val_accuracy"])
@@ -519,10 +519,6 @@ def plot_history(history, name):
     plt.title("metric")
     plt.savefig(name)
 
-
-tdataset = (tf.data.Dataset.from_tensor_slices((test_img_lists, test_img_path_lists))
-            .map(_preprocess_image_test_function, num_parallel_calls=AUTOTUNE)
-            .batch(cfg['model_params']['batchsize_in_test']).prefetch(AUTOTUNE))
 
 model = create_model()
 
@@ -596,16 +592,17 @@ def train(splits, split_id):
                                 monitor='val_f1_score_sk',
                                 mode='max',
                                 save_best_only=True),
-                            tf.keras.callbacks.ReduceLROnPlateau(monitor='val_f1_score_sk',
-                                                                 mode='max',
-                                                                 verbose=1,
-                                                                 patience=5,
-                                                                 factor=0.5,
-                                                                 min_lr=1e-6)
+                            ShowLR()
+                            # tf.keras.callbacks.ReduceLROnPlateau(monitor='val_f1_score_sk',
+                            #                                      mode='max',
+                            #                                      verbose=1,
+                            #                                      patience=5,
+                            #                                      factor=0.5,
+                            #                                      min_lr=1e-6)
                         ])
     plot_history(history, 'history_%d.png' % split_id)
 
 
 for i in range(k_fold):
-    # train(splits, i)
+    train(splits, i)
     inference(i, "./model", USE_PROBABILITY)

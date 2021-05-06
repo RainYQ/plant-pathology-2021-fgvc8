@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 from tqdm import tqdm
 import threading
 import math
+from config import label2id, label2array, id2label
 
 Visualization = False
 NUMBER_IN_TFRECORD = 128
@@ -24,40 +25,6 @@ TEST_DATA_ROOT = "./test_images"
 train_data = pd.read_csv("./train_without_rep.csv", encoding='utf-8')
 test_data = os.listdir(TEST_DATA_ROOT)
 print("label type:", len(set(train_data["labels"])))
-
-label2id = {
-    'scab': 0,
-    'healthy': 1,
-    'frog_eye_leaf_spot': 2,
-    'rust': 3,
-    'complex': 4,
-    'powdery_mildew': 5,
-    'scab frog_eye_leaf_spot': 6,
-    'scab frog_eye_leaf_spot complex': 7,
-    'frog_eye_leaf_spot complex': 8,
-    'rust frog_eye_leaf_spot': 9,
-    'rust complex': 10,
-    'powdery_mildew complex': 11
-}
-
-label2array = {
-    0: np.array([1, 0, 0, 0, 0], dtype=np.float32),
-    1: np.array([0, 0, 0, 0, 0], dtype=np.float32),
-    2: np.array([0, 1, 0, 0, 0], dtype=np.float32),
-    3: np.array([0, 0, 1, 0, 0], dtype=np.float32),
-    4: np.array([0, 0, 0, 1, 0], dtype=np.float32),
-    5: np.array([0, 0, 0, 0, 1], dtype=np.float32),
-    6: np.array([1, 1, 0, 0, 0], dtype=np.float32),
-    7: np.array([1, 1, 0, 1, 0], dtype=np.float32),
-    8: np.array([0, 1, 0, 1, 0], dtype=np.float32),
-    9: np.array([0, 1, 1, 0, 0], dtype=np.float32),
-    10: np.array([0, 0, 1, 1, 0], dtype=np.float32),
-    11: np.array([0, 0, 0, 1, 1], dtype=np.float32)
-}
-
-# id2label用于输入0-11, 查找label原始名称
-id2label = dict([(value, key) for key, value in label2id.items()])
-# print(id2label)
 # 替换label到0-11
 train_data["labels"] = train_data["labels"].map(label2id)
 # 统计不同label的数量

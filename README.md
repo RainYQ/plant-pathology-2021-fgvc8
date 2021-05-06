@@ -30,28 +30,27 @@
 &emsp;'powdery_mildew complex': [0, 0, 0, 1, 1] <br/>
 }<br/>
 * F1-Score 的计算应该基于 'scab'、'healthy'、'frog_eye_leaf_spot‘ 等而非 'rust complex' <br/>
-* 所以之前的训练集上的 F1-Score 都只能达到~50％ <br/>
+* 所以之前的训练集上的 F1-Score 都只能达到 ~50％ <br/>
 
 ## EfficientNet Train
 
 * 学习率 lr ∈ [1e-4, 2e-4] for batch_size = 16 <br/>
 * 学习率 lr = 1e-3 for batch_size = 128 or 64 <br/>
-* 应用学习率衰减，val_f1_score 连续 5 个 epoch 不下降就降低学习率 <br/>
+* ~~应用学习率衰减，val_f1_score 连续 5 个 epoch 不下降就降低学习率~~ <br/>
+* 应用余弦退火学习率调整策略，调整周期为 10 epochs <br/>
 * EfficientNet-B0 - EfficientNet-B7 均采用相同参数，使用 noisy-student 权重作为初始权重 <br/>
-* EfficientNet-B4 metric = ~86％ for batch_size = 128 <br/>
-* EfficientNet-B4 F1-Score = ~85％ for batch_size = 128 <br/>
-* EfficientNet-B7 metric = ~82％ for batch_size = 128 <br/>
-* EfficientNet-B7 F1-Score = ~84％ for batch_size = 128 <br/>
-* Use FocalLoss (处理数据集不平衡) <br/>
-* EfficientNet B7 single model (th = 0.5) LB = 0.638 <br/>
-* EfficientNet B4 single model (th = 0.5) LB = 0.585 <br/>
+* EfficientNet-B4 (batch_size = 128) Macro F1-Score = ~85％  <br/>
+* EfficientNet-B7 (batch_size = 128) Macro F1-Score = ~84％  <br/>
+* ~~Use Focal Loss (处理数据集不平衡)~~ <br/>
+* Use Soft Sample-Wise F1 Loss <br/>  
+* EfficientNet B7 single model (th = 0.5) LB = 0.789 <br/>
+* EfficientNet B4 single model (th = 0.5) LB = 0.736 <br/>
 
 ## ResNet50 Train
 
-* 学习率lr = 5e-5 for batch_size = 16 <br/>
+* 学习率 lr = 5e-5 for batch_size = 16 <br/>
 * 应用学习率衰减，val_f1_score 连续 5 个 epoch 不下降就降低学习率 <br/>
-* metric = ~78％ for batch_size = 16 <br/>
-* F1-Score = ~62％ for batch_size = 16 <br/>
+* Macro F1-Score = ~62％ for batch_size = 16 <br/>
 * Use FocalLoss (处理数据集不平衡)<br/>
 
 ## 训练集上采用的图像增强方法
@@ -68,25 +67,26 @@
 
 **说明优先级高 <br/>
 **加粗**说明效果优秀 <br/> 
-* 训练集上增加 随机遮挡 数据增强 <br/>
-* 训练集上使用 MixUp 数据增强 <br/>
-* 训练集上使用 labelsmooth <br/>
-* ~~**Use Soft-Macro-F1 Loss**~~ 感觉效果不错 LB 0.641 <br/>
+* **训练集上增加 随机遮挡 数据增强 <br/>
 * 改成两个模型，第一个分辨是 'healthy' 还是 'ill' , 第二个分辨具体是哪种疾病 <br/>
+* 训练集上使用 labelsmooth <br/>
+* 不平衡数据处理 过采样/欠采样 <br/>
+* ~~试试余弦学习率衰减/周期学习率衰减/Warmup~~ <br/>
+* ~~Adam优化器在训练快结束的时候效果不是很好，看看有没有更合适的优化器~~ <br/>
+* ~~训练集上使用 MixUp 数据增强~~ 写了但是没观察到性能提升 <br/>
+* ~~**Use Soft-Samples-Wise F1 Loss**~~ 感觉效果不错 LB 0.789 <br/>
 * ~~试试看做异常检出问题, 标签中删除 'healthy' , 没有疾病检出时即为 healthy~~  <br/>
 * ~~**TTA** (测试时增强) (TTA 步长不能太大，容易超时) (需要加速 Inference)~~ <br/>
 * ~~**加速 Inference 为 Test Dataset 生成 tfrecords~~ <br/>
 * ~~试试不使用 Focal Loss 时的准确率~~ <br/>
-* 试试余弦学习率衰减 <br/>
 * ~~清洗训练集中的标签错误标签数据（imagehash）~~ <br/>
 * ~~生成tfrecords的时候移除重复图片~~ <br/>
-* 不平衡数据处理 过采样/欠采样 <br/>
 * ~~试 ResNet 系列~~ <br/>
 * ~~tfa.metrics.F1Score 只支持 { 'none' 'macro' 'micro' 'weighted' } , 不支持{ 'sample' },
   需要重写或者使用 scikit-learn 中的 F1-Score~~ <br/>
-* Adam优化器在训练快结束的时候效果不是很好，看看有没有更合适的优化器 <br/>
-* 默认的 F1-Score 计算方法是每个 Batch 计算一次然后取均值, 应该改成每个 Epoch 结束时计算一次更合适, 
-  reference: https://zhuanlan.zhihu.com/p/51356820 (不能在 tensorflow 2.0 以上使用) <br/>
+* ~~默认的 F1-Score 计算方法是每个 Batch 计算一次然后取均值, 应该改成每个 Epoch 结束时计算一次更合适, 
+  reference: https://zhuanlan.zhihu.com/p/51356820 (不能在 tensorflow 2.0 以上使用)~~ 
+  Sample Wise F1-Score 与 batch_size 无关, 不需要考虑 <br/>
 
 ## Kaggle
 ### DataSet

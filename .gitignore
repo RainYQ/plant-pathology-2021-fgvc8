@@ -15,3 +15,5 @@
 /__pycache__/
 /plant-pathology-2020-fgvc7/
 /train_extra_tfrecords/
+/model_attention_after/
+/model_attention_before/

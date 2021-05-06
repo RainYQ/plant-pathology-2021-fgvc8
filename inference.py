@@ -1,15 +1,13 @@
 """
 Inference on k-fold Model:
 Modify:
-    - Line 23 K
-    - Line 25 USE_TTA
-    - Line 28 TTA_STEP
-    - Line 198 model location
+    - Line 22 K
+    - Line 24 USE_TTA
+    - Line 27 TTA_STEP
+    - Line 171 model location
 """
 
 import tensorflow as tf
-from Preprocess import id2label
-import tensorflow_addons as tfa
 from GroupNormalization import GroupNormalization
 import efficientnet.tfkeras as efn
 import pandas as pd
@@ -18,6 +16,7 @@ import os
 import numpy as np
 import math
 import random
+from config import classes, cfg
 
 # k-fold number
 K = 1
@@ -34,28 +33,6 @@ mean = [124.23002308, 159.76066492, 104.05509866]
 std = [47.84116963, 41.94039282, 49.85093766]
 
 AUTOTUNE = tf.data.experimental.AUTOTUNE
-
-cfg = {
-    'data_params': {
-        'img_shape': (256, 256),
-        'test_img_shape': (256, 256),
-        'class_type': 5
-    },
-    'model_params': {
-        'batchsize_per_gpu': 16,
-        'iteration_per_epoch': 1024,
-        'batchsize_in_test': 16,
-        'epoch': 50
-    }
-}
-
-classes = np.array([
-    'scab',
-    # 'healthy',
-    'frog_eye_leaf_spot',
-    'rust',
-    'complex',
-    'powdery_mildew'])
 
 CLASS_N = cfg['data_params']['class_type']
 
@@ -121,10 +98,6 @@ def create_test_model():
 
     model = tf.keras.Sequential([
         backbone,
-        # GroupNormalization(group=32),
-        # tf.keras.layers.Dropout(0.5),
-        # tf.keras.layers.Dense(512, activation='relu', kernel_initializer=tf.keras.initializers.he_normal()),
-        # GroupNormalization(group=32),
         GroupNormalization(group=32),
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(CLASS_N, kernel_initializer=tf.keras.initializers.he_normal(), activation='sigmoid')])
