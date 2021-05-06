@@ -13,18 +13,13 @@ Use the submission.csv to calculate model generalization
 
 import pandas as pd
 import numpy as np
-
-classes = np.array([
-    'healthy',
-    'multiple_diseases',
-    'rust',
-    'scab'])
+from config import classes_extra
 
 extra_train_data = pd.read_csv("./plant-pathology-2020-fgvc7/train.csv", encoding='utf-8')
 image_name = [id + ".jpg" for id in list(extra_train_data['image_id'])]
 labels = []
 for indexs in extra_train_data.index:
-    label = ' '.join(classes[np.array(list(extra_train_data.loc[indexs].values[1:])).astype('bool')])
+    label = ' '.join(classes_extra[np.array(list(extra_train_data.loc[indexs].values[1:])).astype('bool')])
     labels.append(label)
 extra_data_table = pd.DataFrame({'image': image_name, 'labels': labels})
 predict_data_table = pd.read_csv("./submission.csv", encoding='utf-8')
