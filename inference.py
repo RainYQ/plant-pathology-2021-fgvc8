@@ -1,10 +1,10 @@
 """
 Inference on k-fold Model:
 Modify:
-    - Line 22 K
-    - Line 24 USE_TTA
-    - Line 27 TTA_STEP
-    - Line 171 model location
+    - Line 23 K
+    - Line 25 USE_TTA
+    - Line 28 TTA_STEP
+    - Line 181 model location
 """
 
 import tensorflow as tf
@@ -16,12 +16,13 @@ import os
 import numpy as np
 import math
 import random
+import tensorflow_addons as tfa
 from config import classes, cfg
 
 # k-fold number
 K = 1
 # TTA(测试时增强)
-USE_TTA = True
+USE_TTA = False
 # TTA增强测试次数
 if USE_TTA:
     TTA_STEP = 4
@@ -65,10 +66,10 @@ def _preprocess_image_test_function(name, path):
     image = tf.image.convert_image_dtype(image, tf.float32)
     image = tf.image.resize(images=image, size=[HEIGHT_T, WIDTH_T])
     # image = tf.image.per_image_standardization(image)
-    i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
-    i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
-    i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
-    image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
+    # i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
+    # i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
+    # i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
+    # image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
     if USE_TTA:
         # 高斯噪声的标准差为0.3
         gau = tf.keras.layers.GaussianNoise(0.3)
@@ -85,6 +86,12 @@ def _preprocess_image_test_function(name, path):
         rand_k = tf.random.uniform([], minval=0, maxval=4, dtype=tf.int32, seed=SEED)
         # 以50％的概率随机翻转图像
         image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tf.image.rot90(image, k=rand_k), lambda: image)
+        image = tf.expand_dims(image, axis=0)
+        image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tfa.image.random_cutout(image, [20, 20]), lambda: image)
+        image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tfa.image.random_cutout(image, [20, 20]), lambda: image)
+        image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tfa.image.random_cutout(image, [20, 20]), lambda: image)
+        image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tfa.image.random_cutout(image, [20, 20]), lambda: image)
+        image = tf.squeeze(image, axis=0)
     return image, name
 
 
@@ -98,6 +105,9 @@ def create_test_model():
 
     model = tf.keras.Sequential([
         backbone,
+        GroupNormalization(group=32),
+        tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.Dense(128, kernel_initializer=tf.keras.initializers.he_normal(), activation='relu'),
         GroupNormalization(group=32),
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(CLASS_N, kernel_initializer=tf.keras.initializers.he_normal(), activation='sigmoid')])

@@ -36,22 +36,18 @@
 
 * 学习率 lr ∈ [1e-4, 2e-4] for batch_size = 16 <br/>
 * 学习率 lr = 1e-3 for batch_size = 128 or 64 <br/>
-* ~~应用学习率衰减，val_f1_score 连续 5 个 epoch 不下降就降低学习率~~ <br/>
 * 应用余弦退火学习率调整策略，调整周期为 10 epochs <br/>
 * EfficientNet-B0 - EfficientNet-B7 均采用相同参数，使用 noisy-student 权重作为初始权重 <br/>
-* EfficientNet-B4 (batch_size = 128) Macro F1-Score = ~85％  <br/>
-* EfficientNet-B7 (batch_size = 128) Macro F1-Score = ~84％  <br/>
-* ~~Use Focal Loss (处理数据集不平衡)~~ <br/>
 * Use Soft Sample-Wise F1 Loss <br/>  
-* EfficientNet B7 single model (th = 0.5) LB = 0.789 <br/>
+* EfficientNet B7 single model (th = 0.5) LB = 0.803 <br/>
 * EfficientNet B4 single model (th = 0.5) LB = 0.736 <br/>
 
 ## ResNet50 Train
 
 * 学习率 lr = 5e-5 for batch_size = 16 <br/>
 * 应用学习率衰减，val_f1_score 连续 5 个 epoch 不下降就降低学习率 <br/>
-* Macro F1-Score = ~62％ for batch_size = 16 <br/>
-* Use FocalLoss (处理数据集不平衡)<br/>
+* (batch_size = 16) Macro F1-Score = ~62％<br/>
+* Use FocalLoss (处理数据集不平衡) <br/>
 
 ## 训练集上采用的图像增强方法
 
@@ -62,25 +58,29 @@
 * tf.image.random_flip_left_right() <br/>
 * tf.image.random_flip_up_down() <br/>
 * tf.image.rot90() <br/>
+* tfa.image.random_cutout() <br/>
 
 ## TODO
 
 **说明优先级高 <br/>
-**加粗**说明效果优秀 <br/> 
-* **训练集上增加 随机遮挡 数据增强 <br/>
-* 改成两个模型，第一个分辨是 'healthy' 还是 'ill' , 第二个分辨具体是哪种疾病 <br/>
+**加粗**说明效果优秀 <br/>
 * 训练集上使用 labelsmooth <br/>
 * 不平衡数据处理 过采样/欠采样 <br/>
-* ~~试试余弦学习率衰减/周期学习率衰减/Warmup~~ <br/>
+* 关注 'complex' 这个过于 noisy 的类 <br/>  
+* 移除错误标签 <br/> 
+* 尝试一下去除图像标准化 <br/>
+* ~~阈值选择~~ LB 0.799 更糟糕了 <br/>  
+* ~~训练集上使用 cutout 数据增强~~ 该死的 TPU 和 tfa.image.random_cutout 不兼容, 把整个函数 copy 过来结束战斗, 
+  可以正常运行在 TPU <br/>
+* ~~**试试余弦学习率衰减/周期学习率衰减/Warmup**~~ 效果很好 <br/>
 * ~~Adam优化器在训练快结束的时候效果不是很好，看看有没有更合适的优化器~~ <br/>
-* ~~训练集上使用 MixUp 数据增强~~ 写了但是没观察到性能提升 <br/>
-* ~~**Use Soft-Samples-Wise F1 Loss**~~ 感觉效果不错 LB 0.789 <br/>
+* ~~训练集上使用 MixUp 数据增强~~ 本地写了但是没观察到性能提升, 有空可以放到 https://www.kaggle.com/rainyq/train 试试  <br/>
+* ~~**Use Soft-Samples-Wise F1 Loss**~~ 感觉效果不错 Single Model LB 0.803 <br/>
 * ~~试试看做异常检出问题, 标签中删除 'healthy' , 没有疾病检出时即为 healthy~~  <br/>
-* ~~**TTA** (测试时增强) (TTA 步长不能太大，容易超时) (需要加速 Inference)~~ <br/>
+* ~~TTA (测试时增强) (TTA 步长不能太大，容易超时) (需要加速 Inference)~~ TTA 效果不稳定, 容易将图片误分类到 'healthy' <br/>
 * ~~**加速 Inference 为 Test Dataset 生成 tfrecords~~ <br/>
 * ~~试试不使用 Focal Loss 时的准确率~~ <br/>
-* ~~清洗训练集中的标签错误标签数据（imagehash）~~ <br/>
-* ~~生成tfrecords的时候移除重复图片~~ <br/>
+* ~~生成 tfrecords 的时候移除重复图片和错误标签~~ <br/>
 * ~~试 ResNet 系列~~ <br/>
 * ~~tfa.metrics.F1Score 只支持 { 'none' 'macro' 'micro' 'weighted' } , 不支持{ 'sample' },
   需要重写或者使用 scikit-learn 中的 F1-Score~~ <br/>
