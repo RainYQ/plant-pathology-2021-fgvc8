@@ -6,7 +6,7 @@ Train:
 -- Use Adam
 -- 0418 Write Model Predict Result over Val_dataset
 Modify:
-    - Line 38 k-fold number
+    - Line 33 k-fold number
 """
 
 import random
@@ -192,11 +192,11 @@ def _preprocess_image_test_function(name, path):
 def _preprocess_image_function(single_photo):
     image = tf.image.convert_image_dtype(single_photo['data'], tf.float32)
     image = tf.image.resize(images=image, size=[HEIGHT, WIDTH])
-    i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
-    i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
-    i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
+    # i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
+    # i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
+    # i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
     # use the all dataset data
-    image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
+    # image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
     # image = tf.image.per_image_standardization(image)
     # 高斯噪声的标准差为0.3
     gau = tf.keras.layers.GaussianNoise(0.3)
@@ -213,6 +213,14 @@ def _preprocess_image_function(single_photo):
     rand_k = tf.random.uniform([], minval=0, maxval=4, dtype=tf.int32, seed=SEED)
     # 以50％的概率随机旋转图像
     image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tf.image.rot90(image, k=rand_k), lambda: image)
+    # cutout ~2 patches / image
+    # width / height 20
+    image = tf.expand_dims(image, axis=0)
+    image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tfa.image.random_cutout(image, [20, 20]), lambda: image)
+    image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tfa.image.random_cutout(image, [20, 20]), lambda: image)
+    image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tfa.image.random_cutout(image, [20, 20]), lambda: image)
+    image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tfa.image.random_cutout(image, [20, 20]), lambda: image)
+    image = tf.squeeze(image, axis=0)
     single_photo['data'] = image
     return single_photo
 
@@ -222,11 +230,11 @@ def _preprocess_image_val_function(single_photo):
     image = tf.image.convert_image_dtype(single_photo['data'], tf.float32)
     image = tf.image.resize(images=image, size=[HEIGHT, WIDTH])
     # image = tf.image.per_image_standardization(image)
-    i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
-    i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
-    i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
+    # i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
+    # i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
+    # i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
     # use the all dataset data
-    image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
+    # image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
     single_photo['data'] = image
     return single_photo
 
@@ -479,10 +487,11 @@ def create_model():
         GroupNormalization(group=32),
         tf.keras.layers.Dropout(0.5),
         tf.keras.layers.Dense(CLASS_N, kernel_initializer=tf.keras.initializers.he_normal(), activation='sigmoid')])
-    learning_rate = CosineAnnealing(global_steps=cfg['model_params']['epoch'] * cfg['model_params']['iteration_per_epoch'],
-                                    learning_rate_max=1e-3,
-                                    learning_rate_min=1e-6,
-                                    cycle=5 * cfg['model_params']['iteration_per_epoch'])
+    learning_rate = CosineAnnealing(
+        global_steps=cfg['model_params']['epoch'] * cfg['model_params']['iteration_per_epoch'],
+        learning_rate_max=1e-3,
+        learning_rate_min=1e-6,
+        cycle=5 * cfg['model_params']['iteration_per_epoch'])
     optimizer = tf.keras.optimizers.Adam(learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0001)
     model.compile(optimizer=optimizer,
                   # loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=False),

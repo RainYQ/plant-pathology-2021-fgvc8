@@ -32,9 +32,8 @@ from GroupNormalization import GroupNormalization
 import efficientnet.tfkeras as efn
 import pandas as pd
 import os
-from Preprocess import label2id, id2label
 from tqdm import tqdm
-from config import classes
+from config import classes, label2id, id2label
 
 gpus = tf.config.experimental.list_physical_devices('GPU')
 for gpu in gpus:
@@ -138,8 +137,8 @@ def attention(model, pathstr):
 model = create_model()
 train_data = pd.read_csv("./train_without_rep.csv", encoding='utf-8')
 train_data["labels"] = train_data["labels"].map(label2id)
-# print('Before Train:')
-# attention(model, './model_attention_before/')
+print('Before Train:')
+attention(model, './model_attention_before/')
 model.load_weights("./model/EfficientNetB7-0418-Noisy-student-Soft_F1_Loss_Long_Epochs/model_best_0.h5")
 print('After Train:')
 attention(model, './model_attention_after/')
