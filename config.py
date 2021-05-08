@@ -71,7 +71,7 @@ cfg = {
         'iteration_per_epoch': 1024,
         'batchsize_in_test': 16,
         'epoch': 50,
-        'mix-up': False
+        'mix-up': True
     }
 }
 
