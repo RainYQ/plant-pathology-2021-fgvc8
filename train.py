@@ -191,7 +191,7 @@ def _preprocess_image_test_function(name, path):
 
 def _preprocess_image_function(single_photo):
     image = tf.image.convert_image_dtype(single_photo['data'], tf.float32)
-    image = tf.image.resize(images=image, size=[HEIGHT, WIDTH])
+    image = tf.image.resize(images=image, size=[600, 600])
     # i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
     # i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
     # i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
@@ -226,6 +226,7 @@ def _preprocess_image_function(single_photo):
     image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tfa.image.random_cutout(image, [20, 20]), lambda: image)
     image = tf.squeeze(image, axis=0)
     image = tf.image.random_jpeg_quality(image, 80, 100)
+    image = tf.image.random_crop(image, [512, 512, 3])
     single_photo['data'] = image
     return single_photo
 
