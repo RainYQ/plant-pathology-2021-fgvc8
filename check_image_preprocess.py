@@ -177,7 +177,7 @@ image = tf.image.decode_jpeg(img_raw)
 image = tf.image.convert_image_dtype(image, tf.float32)
 plt.figure()
 plt.imshow(image.numpy())
-image = tf.image.resize(images=image, size=[512, 512])
+image = tf.image.resize(images=image, size=[600, 600])
 # i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
 # i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
 # i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
@@ -191,7 +191,7 @@ image = tf.cond(tf.random.uniform([]) < 0.5, lambda: gau(image), lambda: image)
 image = tf.image.random_contrast(image, lower=0.7, upper=1.3)
 image = tf.image.random_saturation(image, lower=0.7, upper=1.3)
 # brightness随机调整
-image = tf.image.random_brightness(image, 0.3)
+image = tf.image.random_brightness(image, 0.2)
 # random left right flip
 image = tf.image.random_flip_left_right(image)
 # random up down flip
@@ -212,6 +212,7 @@ image = tf.cond(tf.random.uniform([]) < 0.5, lambda: random_cutout(image, [20, 2
 image = tf.cond(tf.random.uniform([]) < 0.5, lambda: random_cutout(image, [20, 20]), lambda: image)
 image = tf.squeeze(image, axis=0)
 image = tf.image.random_jpeg_quality(image, 80, 100)
+image = tf.image.random_crop(image, [512, 512, 3])
 plt.figure()
 print(image.shape)
 plt.imshow(image.numpy())
