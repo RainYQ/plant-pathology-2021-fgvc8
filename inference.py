@@ -65,33 +65,42 @@ def _preprocess_image_test_function(name, path):
     image = tf.image.decode_jpeg(image, channels=3)
     image = tf.image.convert_image_dtype(image, tf.float32)
     image = tf.image.resize(images=image, size=[HEIGHT_T, WIDTH_T])
-    # image = tf.image.per_image_standardization(image)
-    # i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
-    # i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
-    # i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
-    # image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
+    if cfg['model_params']['standardization']:
+        image = tf.image.per_image_standardization(image)
+        i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
+        i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
+        i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
+        image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
     if USE_TTA:
-        # 高斯噪声的标准差为0.3
+        # 高斯噪声的标准差为 0.3
         gau = tf.keras.layers.GaussianNoise(0.3)
-        # 以50％的概率为图像添加高斯噪声
+        # 以 50％ 的概率为图像添加高斯噪声
         image = tf.cond(tf.random.uniform([]) < 0.5, lambda: gau(image), lambda: image)
-        image = tf.image.random_contrast(image, lower=0.8, upper=1.2)
-        image = tf.image.random_saturation(image, lower=0.8, upper=1.2)
+        image = tf.image.random_contrast(image, lower=0.7, upper=1.3)
+        image = tf.image.random_saturation(image, lower=0.7, upper=1.3)
         # brightness随机调整
-        image = tf.image.random_brightness(image, 0.2)
+        image = tf.image.random_brightness(image, 0.3)
         # random left right flip
         image = tf.image.random_flip_left_right(image)
         # random up down flip
         image = tf.image.random_flip_up_down(image)
-        rand_k = tf.random.uniform([], minval=0, maxval=4, dtype=tf.int32, seed=SEED)
-        # 以50％的概率随机翻转图像
-        image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tf.image.rot90(image, k=rand_k), lambda: image)
+        # cutout ~2 patches / image
+        # width / height 20
         image = tf.expand_dims(image, axis=0)
         image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tfa.image.random_cutout(image, [20, 20]), lambda: image)
         image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tfa.image.random_cutout(image, [20, 20]), lambda: image)
         image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tfa.image.random_cutout(image, [20, 20]), lambda: image)
         image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tfa.image.random_cutout(image, [20, 20]), lambda: image)
         image = tf.squeeze(image, axis=0)
+        # 随机旋转图片 0 ~ 30°
+        angle = tf.random.uniform([], minval=0, maxval=30)
+        image = tfa.image.rotate(image, angle)
+        image = tf.expand_dims(image, axis=0)
+        image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tfa.image.random_cutout(image, [20, 20]), lambda: image)
+        image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tfa.image.random_cutout(image, [20, 20]), lambda: image)
+        image = tf.squeeze(image, axis=0)
+        image = tf.image.random_jpeg_quality(image, 80, 100)
+        image = tf.image.random_crop(image, [512, 512, 3])
     return image, name
 
 

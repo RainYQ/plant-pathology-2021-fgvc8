@@ -12,7 +12,7 @@ import tensorflow.keras.backend as K
 from config import id2array, label2id, cfg
 
 CLASS_N = cfg['data_params']['class_type']
-CSV_LOCATION = "./model/EfficientNetB7-0507-Long_Epochs/"
+CSV_LOCATION = "./model/EfficientNetB7-0508-Mixup/"
 
 train_data = pd.read_csv("./train_without_rep.csv", encoding='utf-8')
 result = pd.read_csv(CSV_LOCATION + "submission_with_prob_val_0.csv", encoding='utf-8')
