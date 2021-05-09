@@ -48,6 +48,8 @@ CLASS_N = cfg['data_params']['class_type']
 
 HEIGHT = cfg['data_params']['img_shape'][0]
 WIDTH = cfg['data_params']['img_shape'][1]
+HEIGHT_LARGE = cfg['data_params']['over_bound_img_shape'][0]
+WIDTH_LARGE = cfg['data_params']['over_bound_img_shape'][1]
 HEIGHT_T = cfg['data_params']['test_img_shape'][0]
 WIDTH_T = cfg['data_params']['test_img_shape'][1]
 SEED = 2021
@@ -181,23 +183,26 @@ def _preprocess_image_test_function(name, path):
     image = tf.image.decode_jpeg(image, channels=3)
     image = tf.image.convert_image_dtype(image, tf.float32)
     image = tf.image.resize(images=image, size=[HEIGHT_T, WIDTH_T])
-    # image = tf.image.per_image_standardization(image)
-    i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
-    i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
-    i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
-    image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
+    if cfg['model_params']['standardization']:
+        i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
+        i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
+        i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
+        image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
     return image, name
 
 
 def _preprocess_image_function(single_photo):
     image = tf.image.convert_image_dtype(single_photo['data'], tf.float32)
-    image = tf.image.resize(images=image, size=[600, 600])
-    # i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
-    # i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
-    # i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
-    # use the all dataset data
-    # image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
-    # image = tf.image.per_image_standardization(image)
+    if cfg['model_params']['random_resize']:
+        tf.image.resize(images=image, size=[HEIGHT_LARGE, WIDTH_LARGE])
+    else:
+        image = tf.image.resize(images=image, size=[HEIGHT, WIDTH])
+    if cfg['model_params']['standardization']:
+        i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
+        i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
+        i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
+        image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
+    image = tf.image.random_jpeg_quality(image, 80, 100)
     # 高斯噪声的标准差为 0.3
     gau = tf.keras.layers.GaussianNoise(0.3)
     # 以 50％ 的概率为图像添加高斯噪声
@@ -218,29 +223,27 @@ def _preprocess_image_function(single_photo):
     image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tfa.image.random_cutout(image, [20, 20]), lambda: image)
     image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tfa.image.random_cutout(image, [20, 20]), lambda: image)
     image = tf.squeeze(image, axis=0)
-    # 随机旋转图片 0 ~ 30°
-    angle = tf.random.uniform([], minval=0, maxval=30)
+    # 随机旋转图片 -30° ~ 30°
+    angle = tf.random.uniform([], minval=-30, maxval=30)
     image = tfa.image.rotate(image, angle)
     image = tf.expand_dims(image, axis=0)
     image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tfa.image.random_cutout(image, [20, 20]), lambda: image)
     image = tf.cond(tf.random.uniform([]) < 0.5, lambda: tfa.image.random_cutout(image, [20, 20]), lambda: image)
     image = tf.squeeze(image, axis=0)
-    image = tf.image.random_jpeg_quality(image, 80, 100)
-    image = tf.image.random_crop(image, [512, 512, 3])
+    if cfg['model_params']['random_resize']:
+        image = tf.image.random_crop(image, [HEIGHT, WIDTH, 3])
     single_photo['data'] = image
     return single_photo
 
 
 def _preprocess_image_val_function(single_photo):
-    # image = tf.expand_dims(single_photo['data'], axis=0)
     image = tf.image.convert_image_dtype(single_photo['data'], tf.float32)
     image = tf.image.resize(images=image, size=[HEIGHT, WIDTH])
-    # image = tf.image.per_image_standardization(image)
-    # i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
-    # i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
-    # i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
-    # use the all dataset data
-    # image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
+    if cfg['model_params']['standardization']:
+        i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
+        i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
+        i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
+        image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
     single_photo['data'] = image
     return single_photo
 
@@ -479,14 +482,19 @@ class ShowLR(tf.keras.callbacks.Callback):
 
 
 def create_model():
-    # backbone = tf.keras.applications.ResNet50(weights="imagenet", include_top=False,
-    #                                           input_shape=(HEIGHT, WIDTH, 3), classes=CLASS_N)
-    backbone = efn.EfficientNetB0(
+    backbone = tf.keras.applications.ResNet50(
+        weights="imagenet",
         include_top=False,
         input_shape=(HEIGHT, WIDTH, 3),
-        weights='noisy-student',
+        classes=CLASS_N,
         pooling='avg'
     )
+    # backbone = efn.EfficientNetB0(
+    #     include_top=False,
+    #     input_shape=(HEIGHT, WIDTH, 3),
+    #     weights='noisy-student',
+    #     pooling='avg'
+    # )
 
     model = tf.keras.Sequential([
         backbone,

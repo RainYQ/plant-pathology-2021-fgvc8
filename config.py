@@ -30,6 +30,21 @@ label2array = {
     11: np.array([0, 0, 0, 1, 1], dtype=np.float32)
 }
 
+id2index_list = {
+    0: [0],
+    1: [],
+    2: [1],
+    3: [2],
+    4: [3],
+    5: [4],
+    6: [0, 1],
+    7: [0, 1, 3],
+    8: [1, 3],
+    9: [1, 2],
+    10: [2, 3],
+    11: [3, 4]
+}
+
 id2array = {
     0: np.array([1, 0, 0, 0, 0], dtype=np.float32),
     1: np.array([0, 0, 0, 0, 0], dtype=np.float32),
@@ -62,16 +77,19 @@ id2array_with_healthy = {
 
 cfg = {
     'data_params': {
-        'img_shape': (256, 256),
-        'test_img_shape': (256, 256),
+        'img_shape': (512, 512),
+        'over_bound_img_shape': (600, 600),
+        'test_img_shape': (512, 512),
         'class_type': 5
     },
     'model_params': {
-        'batchsize_per_gpu': 16,
-        'iteration_per_epoch': 1024,
-        'batchsize_in_test': 16,
+        'batchsize_per_gpu': 128,
+        'iteration_per_epoch': 128,
+        'batchsize_in_test': 128,
         'epoch': 50,
-        'mix-up': True
+        'mix-up': True,
+        'standardization': False,
+        'random_resize': True
     }
 }
 
