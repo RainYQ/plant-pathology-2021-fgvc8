@@ -17,3 +17,4 @@
 /train_extra_tfrecords/
 /model_attention_after/
 /model_attention_before/
+*.7z.*
