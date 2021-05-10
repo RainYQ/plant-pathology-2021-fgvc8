@@ -77,19 +77,20 @@ id2array_with_healthy = {
 
 cfg = {
     'data_params': {
-        'img_shape': (512, 512),
-        'over_bound_img_shape': (600, 600),
-        'test_img_shape': (512, 512),
+        'img_shape': (256, 256),
+        'over_bound_img_shape': (300, 300),
+        'test_img_shape': (256, 256),
         'class_type': 5
     },
     'model_params': {
-        'batchsize_per_gpu': 128,
-        'iteration_per_epoch': 128,
-        'batchsize_in_test': 128,
-        'epoch': 50,
+        'batchsize_per_gpu': 16,
+        'iteration_per_epoch': 16,
+        'batchsize_in_test': 16,
+        'epoch': 80,
         'mix-up': True,
         'standardization': False,
-        'random_resize': True
+        'random_resize': False,
+        'label_smooth': True
     }
 }
 

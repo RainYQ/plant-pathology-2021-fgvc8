@@ -17,6 +17,7 @@ import tensorflow as tf
 import pandas as pd
 import threading
 import tensorflow_addons as tfa
+from datetime import datetime
 from GroupNormalization import GroupNormalization
 import tensorflow_probability as tfp
 from matplotlib import pyplot as plt
@@ -45,6 +46,7 @@ mean = [124.23002308, 159.76066492, 104.05509866]
 std = [47.84116963, 41.94039282, 49.85093766]
 
 CLASS_N = cfg['data_params']['class_type']
+ls = 0.1
 
 HEIGHT = cfg['data_params']['img_shape'][0]
 WIDTH = cfg['data_params']['img_shape'][1]
@@ -266,8 +268,6 @@ def _create_annot(single_photo):
 
 def _create_annot_val(single_photo):
     return single_photo['data'], single_photo['name']
-
-
 def _mixup(data, targ):
     # 打乱batch顺序
     indice = tf.range(len(data))
@@ -301,7 +301,6 @@ indices = []
 name = []
 label = []
 preprocess_dataset = (raw_image_dataset.map(_parse_image_function, num_parallel_calls=AUTOTUNE)
-                      .prefetch(AUTOTUNE)
                       .enumerate())
 for i, sample in tqdm(preprocess_dataset):
     indices.append(i.numpy())
@@ -405,6 +404,8 @@ def f1_loss(y_true, y_pred):
     y_true_addon = tf.cast(~(K.sum(y_true, axis=1) > 0), tf.float32)
     y_true_addon = tf.reshape(y_true_addon, [len(y_true_addon), -1])
     y_true = tf.concat([y_true, y_true_addon], 1)
+    if cfg['model_params']['label_smooth']:
+         y_true = (1 - ls) * y_true + ls / CLASS_N
     y_pred_addon = 1 - K.max(y_pred, axis=1)
     y_pred_addon = tf.reshape(y_pred_addon, [len(y_pred_addon), -1])
     y_pred = tf.concat([y_pred, y_pred_addon], 1)
@@ -482,19 +483,19 @@ class ShowLR(tf.keras.callbacks.Callback):
 
 
 def create_model():
-    backbone = tf.keras.applications.ResNet50(
-        weights="imagenet",
-        include_top=False,
-        input_shape=(HEIGHT, WIDTH, 3),
-        classes=CLASS_N,
-        pooling='avg'
-    )
-    # backbone = efn.EfficientNetB0(
+    # backbone = tf.keras.applications.ResNet50(
+    #     weights="imagenet",
     #     include_top=False,
     #     input_shape=(HEIGHT, WIDTH, 3),
-    #     weights='noisy-student',
+    #     classes=CLASS_N,
     #     pooling='avg'
     # )
+    backbone = efn.EfficientNetB0(
+        include_top=False,
+        input_shape=(HEIGHT, WIDTH, 3),
+        weights='noisy-student',
+        pooling='avg'
+    )
 
     model = tf.keras.Sequential([
         backbone,
@@ -603,6 +604,8 @@ def train(splits, split_id):
     # 生成训练集和验证集
     dataset = create_train_dataset(batchsize, idx_train_tf)
     vdataset = create_val_dataset(batchsize, idx_val_tf)
+    log_dir = "logs/profile/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1, profile_batch=2)
     history = model.fit(dataset,
                         batch_size=cfg['model_params']['batchsize_per_gpu'],
                         steps_per_epoch=cfg['model_params']['iteration_per_epoch'],
@@ -615,7 +618,8 @@ def train(splits, split_id):
                                 monitor='val_f1_score_sk',
                                 mode='max',
                                 save_best_only=True),
-                            ShowLR()
+                            ShowLR(),
+                            tensorboard_callback
                             # tf.keras.callbacks.ReduceLROnPlateau(monitor='val_f1_score_sk',
                             #                                      mode='max',
                             #                                      verbose=1,

@@ -18,3 +18,4 @@
 /model_attention_after/
 /model_attention_before/
 *.7z.*
+/logs/
