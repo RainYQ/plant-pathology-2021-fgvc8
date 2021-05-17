@@ -42,13 +42,7 @@
 * Loss : Use Soft Sample-Wise F1 Loss <br/> 
 * Metrics : Use Sample-Wise F1 Score <br/> 
 * EfficientNet B7 single model (th = 0.5) LB = 0.830 <br/>
-
-## ResNet50 Train
-
-* 学习率 lr = 5e-5 for batch_size = 16 <br/>
-* 应用学习率衰减，val_f1_score 连续 5 个 epoch 不下降就降低学习率 <br/>
-* (batch_size = 16) Macro F1-Score = ~62％<br/>
-* Use FocalLoss (处理数据集不平衡) <br/>
+* EfficientNet B7 5-fold model (th = 0.5) TTA_STEP = 4 LB = 0.847 <br/>
 
 ## 训练集上采用的图像增强方法
 
@@ -67,13 +61,27 @@
 
 **说明优先级高 <br/>
 **加粗**说明效果优秀 <br/>
-* 训练集上使用 labelsmooth 按照上次比赛的经验, labelsmooth 一般不会对性能有提升但也不会下降 <br/>
+* ~~训练集上使用 labelsmooth 按照上次比赛的经验, labelsmooth 一般不会对性能有提升但也不会下降~~ 
+  有的 fold 提升大约 1%, 但很多时候几乎没有提升 <br/>
 * 不平衡数据处理 过采样/欠采样 <br/>
-* **ResNet 用当前的优化器和学习率策略无法正常收敛 <br/>
-* 关注 'complex' 这个过于 noisy 的类 <br/>  
+* ~~Pseudo Labeling~~ 现在采用的策略是:
+  - plant-pathology-2020-fgvc8/train 中的图像直接使用 train.csv 中的标记
+  , 将 ’multiple_diseases‘ 视为 ‘complex’, 'scab'、'rust'、'healthy' 保持不变, 'powdery_mildew'、
+  'frog_eye_leaf_spot' 视为没有 <br/> 
+  - plant-pathology-2020-fgvc8/test 中的图像使用 plant-pathology-2020-fgvc8 能找到的最高 Score 的 submission.csv
+     一样按照上述方法处理, 除此之外不做其他处理, 直接作为 soft labels, 将这两份 labels 合并作为 Ground Truth Label <br/> 
+  - 获取EfficientNetB7-5Fold-4TTA_STEP 的预测 ( LB 0.847 ), 不做其他处理, 作为 soft labels <br/> 
+  - 上述两份 Label 按照 0.7 * Ground Truth Labels + 0.3 * Model Predict Labels 作为 pscudo labels <br/> 
+  - 暂时没做置信度过滤, 因为考虑到 'rust' 类的泛化性特别差, 经常以高置信度判断错误, 做置信度过滤应该没啥大作用并且可靠性差 <br/> 
+  - 仅将这个额外的数据集合入训练集, 验证集中不包含此数据集 <br/> 
+  - 代码已经合入本地的 train.py 和 https://www.kaggle.com/rainyq/train-pseudo , 
+    在 EfficientNetB7 Fold 0 上测试, 没有任何性能提升 <br/> 
+* ~~ResNet 用当前的优化器和学习率策略无法正常收敛~~ ResNet 学习率调整至 5e-4, 其他各模型均为 1e-3 <br/>
+* 关注 'complex' 这个过于 noisy 的类 <br/> 
+* 模型没办法找到准确的 boundary for 'scab' and 'rust', 在去年的数据集中存在大量将其他类型误判为 'rust' 的错误 
 * **移除错误标签 没试, 但是从预测结果来看模型没被错误标签带偏, 都很信任自己的判断结果 <br/> 
-* ~~**尝试一下去除图像标准化**~~ 效果优秀 <br/>
-* ~~阈值选择~~ 没有效果, 全部都是更糟糕了 <br/>  
+* ~~**尝试一下去除图像标准化**~~ 效果优秀, 但是不知道怎么解释这个现象 <br/>
+* ~~阈值选择~~ 没有效果, 全部都是更糟糕了, **但有必要将 'rust' 的阈值调高** <br/>  
 * ~~训练集上使用 cutout 数据增强~~ 该死的 TPU 和 tfa.image.random_cutout 不兼容, 把整个函数 copy 过来结束战斗, 
   可以正常运行在 TPU <br/>
 * ~~**试试余弦学习率衰减/周期学习率衰减/Warmup**~~ 效果优秀, 中后期能稳定提高准确率 ( **仅在 EfficientNet 系列中有效 ) <br/>
@@ -81,7 +89,7 @@
 * ~~**训练集上使用 MixUp 数据增强**~~ 效果优秀 LB 0.830  <br/>
 * ~~**Use Soft-Samples-Wise F1 Loss**~~ 感觉效果不错 Single Model LB 0.803 <br/>
 * ~~试试看做异常检出问题, 标签中删除 'healthy' , 没有疾病检出时即为 healthy~~  <br/>
-* ~~TTA (测试时增强) (TTA 步长不能太大，容易超时) (需要加速 Inference)~~ TTA 效果不稳定, 无法稳定提高准确率, 一般都会变差 <br/>
+* ~~TTA (测试时增强) (TTA 步长不能太大，容易超时) (需要加速 Inference)~~ TTA STEP >= 4 时有稳定的提升 <br/>
 * ~~**加速 Inference 为 Test Dataset 生成 tfrecords~~ <br/>
 * ~~试试不使用 Focal Loss 时的准确率~~ <br/>
 * ~~生成 tfrecords 的时候移除重复图片和错误标签~~ <br/>
@@ -96,6 +104,7 @@
 ### DataSet
 * https://www.kaggle.com/rainyq/tfrecords-rainyq-600 Train DataSet (600x600) <br/>
 * https://www.kaggle.com/rainyq/tfrecords-rainyq-512 Train DataSet (512x512) <br/>
+* https://www.kaggle.com/rainyq/extra-train-dateset Pseudo Labels
 ### Model
 * https://www.kaggle.com/rainyq/efficientnetb4tpu <br/>
 ### Code
@@ -103,6 +112,7 @@
 * https://www.kaggle.com/rainyq/tfrecords-600 <br/>
 * https://www.kaggle.com/rainyq/inference <br/>
 * https://www.kaggle.com/rainyq/train <br/>
+* https://www.kaggle.com/rainyq/train-pseudo <br/>
 ### Others
 * https://www.kaggle.com/rainyq/train-data-without-rep <br/>
 * https://www.kaggle.com/rainyq/offiline-pip-package <br/>
@@ -110,14 +120,14 @@
 ## Information
 ### Train
 * Time Limit: ~32400s <br/>
-* ~7000s per 1-fold train for EfficientNet-B7 (Epoch = 30, size = 600x600) <br/>
-* ~4400s per 1-fold train for EfficientNet-B7 (Epoch = 30, size = 512x512) <br/>
-* ~2480s per 1-fold train for EfficientNet-B4 (Epoch = 30, size = 512x512) <br/>
+* ~11000s 1-fold for EfficientNet-B7 Add pseudo labels (Epoch = 80, size = 512x512) <br/>
+* ~12304s 2-fold  for InceptionResNetV2 (Epoch = 80, size = 512x512) <br/>
+* ~9329s 2-fold for ResNet50 (Epoch = 80, size = 512x512) <br/>
 ### Inference
-* Test TFRecords Generate ~20 minutes <br/>
+* Test TFRecords Generate ~5.3 minutes ( Use GPU Speed up )<br/>
 * Efficient-B7 Model Predict ~4 minutes per model (512x512) <br/>
-* Run Inference ~40 minutes in K=1 TTA_STEP=4 (512x512) <br/>
-* Commit Inference ~42 minutes in K=1 TTA_STEP=4 (600x600) <br/>
+* InceptionResNetV2 Model Predict ~3 minutes per model (512x512) <br/>
+* ResNet50 Model Predict ~2 minutes per model (512x512) <br/>
 ### F1-Score
 #### Micro-F1
 $$ \{P} = \frac{{\overline {TP} }}{{\overline {TP}  + \overline {FP} }}\ $$
