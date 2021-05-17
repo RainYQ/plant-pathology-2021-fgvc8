@@ -22,7 +22,7 @@ for indexs in extra_train_data.index:
     label = ' '.join(classes_extra[np.array(list(extra_train_data.loc[indexs].values[1:])).astype('bool')])
     labels.append(label)
 extra_data_table = pd.DataFrame({'image': image_name, 'labels': labels})
-predict_data_table = pd.read_csv("./submission.csv", encoding='utf-8')
+predict_data_table = pd.read_csv("submission.csv", encoding='utf-8')
 label_true = list(extra_data_table["labels"])
 print(extra_data_table["labels"].value_counts())
 label_pre = []

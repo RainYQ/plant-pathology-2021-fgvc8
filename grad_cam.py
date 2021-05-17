@@ -21,7 +21,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE."""
 
 
-# For 'healthy' Use all label add
+# For 'healthy' Use all label's heatmap add
 
 
 import tensorflow as tf
@@ -150,7 +150,7 @@ train_data = pd.read_csv("./train_without_rep.csv", encoding='utf-8')
 train_data["labels"] = train_data["labels"].map(label2id)
 # print('Before Train:')
 # attention(model, './model_attention_before/')
-model.load_weights("./model/EfficientNetB7-0508-Mixup/model_best_0.h5")
+model.load_weights("./model/EfficientNetB7-0510-Mixup-Fold1/model_best_1.h5")
 x = tf.keras.Input((None, None, 3))
 conv_y = model.get_layer(index=0)(x, training=False)
 y = model.get_layer(index=1)(conv_y, training=False)
