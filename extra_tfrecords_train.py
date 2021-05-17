@@ -7,7 +7,7 @@ Extra Datset TFRecords Generator:
 - Move all 'Train_' images to ./plant-pathology-2020-fgvc7/train
 - Make dir './train_extra_tfrecords'
 Modify:
-    - Line 77-82 可能需要限制多线程并发数量
+    - Line 73-78 可能需要限制多线程并发数量
 """
 
 import numpy as np
@@ -44,10 +44,6 @@ extra_data_table["labels"] = extra_data_table["labels"].map(label2id)
 
 def pares_image(pic_name):
     label = extra_data_table.loc[extra_data_table["image"] == pic_name]["labels"]
-    # Using Tensorflow io
-    # img_raw = open(TRAIN_DATA_ROOT + str(pic_name), 'rb').read()
-    # img_shape = tf.image.decode_jpeg(img_raw).shape
-    # Using Image
     img = Image.open(TRAIN_DATA_ROOT + str(pic_name))
     img = img.convert('RGB')
     img = img.resize((512, 512), Image.ANTIALIAS)
@@ -56,7 +52,7 @@ def pares_image(pic_name):
 
 
 def create_dataset(train_data, i):
-    with tf.io.TFRecordWriter(r'./train_extra_tfrecords/train_extra' + '_' + str(int(i)) + '.tfrecords') as writer:
+    with tf.io.TFRecordWriter(r'./plant-pathology-2020-fgvc7/train_extra_tfrecords/train_extra' + '_' + str(int(i)) + '.tfrecords') as writer:
         for data in tqdm(train_data["image"]):
             raw, labels, label, label_name = pares_image(data)
             exam = tf.train.Example(

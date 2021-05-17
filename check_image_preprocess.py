@@ -1,8 +1,12 @@
 # -*- coding: utf-8 -*-
+import os
 
+import numpy as np
 import tensorflow as tf
 import tensorflow_addons as tfa
 from matplotlib import pyplot as plt
+import math
+import random
 
 mean = [124.23002308, 159.76066492, 104.05509866]
 std = [47.84116963, 41.94039282, 49.85093766]
@@ -171,6 +175,15 @@ def random_cutout(
     offset = tf.transpose([cutout_center_height, cutout_center_width], [1, 0])
     return cutout(images, mask_size, offset, constant_values)
 
+def seed_everything(seed):
+    random.seed(seed)
+    os.environ['PYTHONHASHSEED'] = str(seed)
+    np.random.seed(seed)
+    tf.random.set_seed(seed)
+
+SEED = 2021
+
+seed_everything(SEED)
 
 img_raw = open("./test_images/85f8cb619c66b863.jpg", 'rb').read()
 image = tf.image.decode_jpeg(img_raw)
@@ -184,6 +197,7 @@ image = tf.image.resize(images=image, size=[600, 600])
 # # use the all dataset data
 # image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
 # image = tf.image.per_image_standardization(image)
+image = tf.image.random_jpeg_quality(image, 80, 100)
 # 高斯噪声的标准差为 0.3
 gau = tf.keras.layers.GaussianNoise(0.3)
 # 以 50％ 的概率为图像添加高斯噪声
@@ -204,14 +218,15 @@ image = tf.cond(tf.random.uniform([]) < 0.5, lambda: random_cutout(image, [20, 2
 image = tf.cond(tf.random.uniform([]) < 0.5, lambda: random_cutout(image, [20, 20]), lambda: image)
 image = tf.cond(tf.random.uniform([]) < 0.5, lambda: random_cutout(image, [20, 20]), lambda: image)
 image = tf.squeeze(image, axis=0)
-# 随机旋转图片 0 ~ 30°
-angle = tf.random.uniform([], minval=0, maxval=30)
+# 随机旋转图片 -30° ~ 30°
+angle = tf.random.uniform([], minval=-math.pi / 6, maxval=math.pi / 6)
+print(angle)
 image = tfa.image.rotate(image, angle)
 image = tf.expand_dims(image, axis=0)
 image = tf.cond(tf.random.uniform([]) < 0.5, lambda: random_cutout(image, [20, 20]), lambda: image)
 image = tf.cond(tf.random.uniform([]) < 0.5, lambda: random_cutout(image, [20, 20]), lambda: image)
 image = tf.squeeze(image, axis=0)
-image = tf.image.random_jpeg_quality(image, 80, 100)
+
 image = tf.image.random_crop(image, [512, 512, 3])
 plt.figure()
 print(image.shape)

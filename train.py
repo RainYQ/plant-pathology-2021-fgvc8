@@ -6,7 +6,7 @@ Train:
 -- Use Adam
 -- 0418 Write Model Predict Result over Val_dataset
 Modify:
-    - Line 33 k-fold number
+    - Line 34 k-fold number
 """
 
 import random
@@ -48,12 +48,9 @@ std = [47.84116963, 41.94039282, 49.85093766]
 CLASS_N = cfg['data_params']['class_type']
 ls = 0.1
 
-HEIGHT = cfg['data_params']['img_shape'][0]
-WIDTH = cfg['data_params']['img_shape'][1]
-HEIGHT_LARGE = cfg['data_params']['over_bound_img_shape'][0]
-WIDTH_LARGE = cfg['data_params']['over_bound_img_shape'][1]
-HEIGHT_T = cfg['data_params']['test_img_shape'][0]
-WIDTH_T = cfg['data_params']['test_img_shape'][1]
+HEIGHT, WIDTH = cfg['data_params']['img_shape']
+HEIGHT_LARGE, WIDTH_LARGE = cfg['data_params']['over_bound_img_shape']
+HEIGHT_T, WIDTH_T = cfg['data_params']['test_img_shape']
 SEED = 2021
 AUTOTUNE = tf.data.experimental.AUTOTUNE
 TRAIN_DATA_ROOT = "./train_images"
@@ -158,6 +155,7 @@ def seed_everything(seed):
 
 seed_everything(SEED)
 tfrecs = tf.io.gfile.glob("./train_tfrecords/*.tfrecords")
+tfrecs_extra = tf.io.gfile.glob("./plant-pathology-2020-fgvc7/tfrecords/tfrecords_noresize/*.tfrecords")
 raw_image_dataset = tf.data.TFRecordDataset(tfrecs, num_parallel_reads=AUTOTUNE)
 
 # Create a dictionary describing the features.
@@ -189,7 +187,8 @@ def _preprocess_image_test_function(name, path):
         i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
         i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
         i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
-        image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
+        image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)],
+                          axis=2)
     return image, name
 
 
@@ -203,7 +202,8 @@ def _preprocess_image_function(single_photo):
         i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
         i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
         i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
-        image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
+        image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)],
+                          axis=2)
     image = tf.image.random_jpeg_quality(image, 80, 100)
     # 高斯噪声的标准差为 0.3
     gau = tf.keras.layers.GaussianNoise(0.3)
@@ -245,7 +245,8 @@ def _preprocess_image_val_function(single_photo):
         i1 = (image[:, :, 0] - mean[0] / 255.0) / std[0] * 255.0
         i2 = (image[:, :, 1] - mean[1] / 255.0) / std[1] * 255.0
         i3 = (image[:, :, 2] - mean[2] / 255.0) / std[2] * 255.0
-        image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)], axis=2)
+        image = tf.concat([tf.expand_dims(i1, axis=-1), tf.expand_dims(i2, axis=-1), tf.expand_dims(i3, axis=-1)],
+                          axis=2)
     single_photo['data'] = image
     return single_photo
 
@@ -268,6 +269,8 @@ def _create_annot(single_photo):
 
 def _create_annot_val(single_photo):
     return single_photo['data'], single_photo['name']
+
+
 def _mixup(data, targ):
     # 打乱batch顺序
     indice = tf.range(len(data))
@@ -332,11 +335,15 @@ for j in range(5):
 
 def create_train_dataset(batchsize, train_idx):
     global preprocess_dataset
+    extra_dataset = (tf.data.TFRecordDataset(tfrecs_extra, num_parallel_reads=AUTOTUNE)
+                     .map(_parse_image_function, num_parallel_calls=AUTOTUNE)
+                     .cache())
     parsed_train = (preprocess_dataset
                     .filter(create_idx_filter(train_idx))
                     .map(_remove_idx))
-    dataset = (parsed_train.cache()
-               .shuffle(len(train_idx))
+    dataset = (parsed_train.concatenate(extra_dataset)
+               .cache()
+               .shuffle(len(train_idx) + 3642)
                .repeat()
                .map(_decode_image_function, num_parallel_calls=AUTOTUNE)
                .map(_preprocess_image_function, num_parallel_calls=AUTOTUNE)
@@ -405,7 +412,7 @@ def f1_loss(y_true, y_pred):
     y_true_addon = tf.reshape(y_true_addon, [len(y_true_addon), -1])
     y_true = tf.concat([y_true, y_true_addon], 1)
     if cfg['model_params']['label_smooth']:
-         y_true = (1 - ls) * y_true + ls / CLASS_N
+        y_true = (1 - ls) * y_true + ls / CLASS_N
     y_pred_addon = 1 - K.max(y_pred, axis=1)
     y_pred_addon = tf.reshape(y_pred_addon, [len(y_pred_addon), -1])
     y_pred = tf.concat([y_pred, y_pred_addon], 1)
@@ -483,19 +490,19 @@ class ShowLR(tf.keras.callbacks.Callback):
 
 
 def create_model():
-    # backbone = tf.keras.applications.ResNet50(
-    #     weights="imagenet",
-    #     include_top=False,
-    #     input_shape=(HEIGHT, WIDTH, 3),
-    #     classes=CLASS_N,
-    #     pooling='avg'
-    # )
-    backbone = efn.EfficientNetB0(
+    backbone = tf.keras.applications.RE(
+        weights="imagenet",
         include_top=False,
         input_shape=(HEIGHT, WIDTH, 3),
-        weights='noisy-student',
+        classes=CLASS_N,
         pooling='avg'
     )
+    # backbone = efn.EfficientNetB0(
+    #     include_top=False,
+    #     input_shape=(HEIGHT, WIDTH, 3),
+    #     weights='noisy-student',
+    #     pooling='avg'
+    # )
 
     model = tf.keras.Sequential([
         backbone,
@@ -605,7 +612,7 @@ def train(splits, split_id):
     dataset = create_train_dataset(batchsize, idx_train_tf)
     vdataset = create_val_dataset(batchsize, idx_val_tf)
     log_dir = "logs/profile/" + datetime.now().strftime("%Y%m%d-%H%M%S")
-    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1, profile_batch=2)
+    # tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1, profile_batch=2)
     history = model.fit(dataset,
                         batch_size=cfg['model_params']['batchsize_per_gpu'],
                         steps_per_epoch=cfg['model_params']['iteration_per_epoch'],
@@ -619,7 +626,7 @@ def train(splits, split_id):
                                 mode='max',
                                 save_best_only=True),
                             ShowLR(),
-                            tensorboard_callback
+                            # tensorboard_callback
                             # tf.keras.callbacks.ReduceLROnPlateau(monitor='val_f1_score_sk',
                             #                                      mode='max',
                             #                                      verbose=1,
