@@ -65,13 +65,15 @@
   有的 fold 提升大约 1%, 但很多时候几乎没有提升 <br/>
 * 不平衡数据处理 过采样/欠采样 <br/>
 * ~~Pseudo Labeling~~ 现在采用的策略是:
-  - plant-pathology-2020-fgvc8/train 中的图像直接使用 train.csv 中的标记
+  - plant-pathology-2020-fgvc7/train 中的图像直接使用 train.csv 中的标记
   , 将 ’multiple_diseases‘ 视为 ‘complex’, 'scab'、'rust'、'healthy' 保持不变, 'powdery_mildew'、
   'frog_eye_leaf_spot' 视为没有 <br/> 
-  - plant-pathology-2020-fgvc8/test 中的图像使用 plant-pathology-2020-fgvc8 能找到的最高 Score 的 submission.csv
-     一样按照上述方法处理, 除此之外不做其他处理, 直接作为 soft labels, 将这两份 labels 合并作为 Ground Truth Label <br/> 
-  - 获取EfficientNetB7-5Fold-4TTA_STEP 的预测 ( LB 0.847 ), 不做其他处理, 作为 soft labels <br/> 
-  - 上述两份 Label 按照 0.7 * Ground Truth Labels + 0.3 * Model Predict Labels 作为 pscudo labels <br/> 
+  - plant-pathology-2020-fgvc7/test 中的图像使用 plant-pathology-2020-fgvc7 code 中能找到的最高 Score 的 submission.csv
+     一样按照上述方法进行标签映射, **不做阈值化处理**, 直接作为 Soft Labels, 将这两份 labels 合并记为 Ground Truth Labels <br/> 
+  - 获取 EfficientNetB7 - 5 Fold - 4 TTA STEP ( LB 0.847 ) 在整个 plant-pathology-2020-fgvc7/train + 
+    plant-pathology-2020-fgvc7/test 中的预测, 同样按照上述方法进行标签映射, **不做阈值化处理**, 直接作为 Soft Labels, 
+    记为 Model Predict Labels <br/> 
+  - 上述两份 Label 按照 0.7 * Ground Truth Labels + 0.3 * Model Predict Labels 记为 Pseudo Labels <br/> 
   - 暂时没做置信度过滤, 因为考虑到 'rust' 类的泛化性特别差, 经常以高置信度判断错误, 做置信度过滤应该没啥大作用并且可靠性差 <br/> 
   - 仅将这个额外的数据集合入训练集, 验证集中不包含此数据集 <br/> 
   - 代码已经合入本地的 train.py 和 https://www.kaggle.com/rainyq/train-pseudo , 
@@ -88,8 +90,8 @@
 * ~~Adam优化器在训练快结束的时候效果不是很好，看看有没有更合适的优化器~~ <br/>
 * ~~**训练集上使用 MixUp 数据增强**~~ 效果优秀 LB 0.830  <br/>
 * ~~**Use Soft-Samples-Wise F1 Loss**~~ 感觉效果不错 Single Model LB 0.803 <br/>
-* ~~试试看做异常检出问题, 标签中删除 'healthy' , 没有疾病检出时即为 healthy~~  <br/>
-* ~~TTA (测试时增强) (TTA 步长不能太大，容易超时) (需要加速 Inference)~~ TTA STEP >= 4 时有稳定的提升 <br/>
+* ~~**试试看做异常检出问题, 标签中删除 'healthy' , 没有疾病检出时即为 healthy**~~  <br/>
+* ~~TTA (测试时增强) (TTA 步数不能太多，容易超时) (需要加速 Inference)~~ TTA STEP >= 4 时有稳定的提升 <br/>
 * ~~**加速 Inference 为 Test Dataset 生成 tfrecords~~ <br/>
 * ~~试试不使用 Focal Loss 时的准确率~~ <br/>
 * ~~生成 tfrecords 的时候移除重复图片和错误标签~~ <br/>
