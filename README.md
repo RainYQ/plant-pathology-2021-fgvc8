@@ -34,14 +34,16 @@
 
 ## EfficientNet Train
 
-* 学习率 lr ∈ [1e-4, 2e-4] for batch_size = 16 <br/>
-* 学习率 lr = 1e-3 for batch_size = 128 or 64 <br/>
-* 应用余弦退火学习率调整策略，调整周期为 10 epochs <br/>
+* Adam 学习率 lr ∈ [1e-4, 2e-4] batch_size = 16 <br/>
+* Adam 学习率 lr = 1e-3 batch_size = 128 or 64 <br/>
+* SGD 学习率 lr_max = 6e-2 lr_min = 1e-4 Restart_Cycle = 10 epochs batch_size = 128 or 64 <br/>
+* 应用带重启机制的余弦退火学习率调整策略，调整周期为 10 epochs <br/>
 * EfficientNet-B0 - EfficientNet-B7 均采用相同参数
 * 使用 noisy-student 权重作为初始权重 <br/>
 * Loss : Use Soft Sample-Wise F1 Loss <br/> 
 * Metrics : Use Sample-Wise F1 Score <br/> 
 * EfficientNet B7 single model (th = 0.5) LB = 0.830 <br/>
+* EfficientNet B0 single model (th = 0.5) TTA_STEP = 8 LB = 0.831 <br/>
 * EfficientNet B7 5-fold model (th = 0.5) TTA_STEP = 4 LB = 0.847 <br/>
 
 ## 训练集上采用的图像增强方法
@@ -50,6 +52,7 @@
 * tf.keras.layers.GaussianNoise() <br/>
 * tf.image.random_contrast() <br/>
 * tf.image.random_saturation() <br/>
+* tf.image.random_hue() <br/>
 * tf.image.random_brightness() <br/>
 * tf.image.random_flip_left_right() <br/>
 * tf.image.random_flip_up_down() <br/>
