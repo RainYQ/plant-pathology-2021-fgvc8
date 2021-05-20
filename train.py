@@ -210,7 +210,9 @@ def _preprocess_image_function(single_photo):
     # 以 50％ 的概率为图像添加高斯噪声
     image = tf.cond(tf.random.uniform([]) < 0.5, lambda: gau(image), lambda: image)
     image = tf.image.random_contrast(image, lower=0.7, upper=1.3)
-    image = tf.image.random_saturation(image, lower=0.7, upper=1.3)
+    image = tf.cond(tf.random.uniform([]) < 0.5,
+                    lambda: tf.image.random_saturation(image, lower=0.7, upper=1.3),
+                    lambda: tf.image.random_hue(image, max_delta=0.3))
     # brightness随机调整
     image = tf.image.random_brightness(image, 0.3)
     # random left right flip
@@ -461,13 +463,16 @@ class CosineAnnealing(tf.keras.optimizers.schedules.LearningRateSchedule):
         self.global_steps = tf.cast(global_steps, dtype=tf.float32)
         self.learning_rate_max = tf.cast(learning_rate_max, dtype=tf.float32)
         self.learning_rate_min = tf.cast(learning_rate_min, dtype=tf.float32)
-        self.cycle = tf.cast(cycle, dtype=tf.float32)
+        self.cycle = tf.cast(cycle, dtype=tf.int32)
         self.learning_rate = tf.Variable(0., tf.float32)
 
     def __call__(self, step):
+        step_epoch = tf.cast(step, tf.float32) / tf.cast(cfg['model_params']['iteration_per_epoch'], tf.float32)
+        step_epoch = tf.cast(step_epoch, tf.int32)
         learning_rate = self.learning_rate_min + 0.5 * (self.learning_rate_max - self.learning_rate_min) * \
                         (1 + tf.math.cos(tf.constant(math.pi, tf.float32) *
-                                         (tf.cast(step, tf.float32) / self.cycle)))
+                                         (tf.cast(step_epoch % self.cycle, tf.float32) / tf.cast(self.cycle,
+                                                                                                 tf.float32))))
         self.learning_rate.assign(learning_rate)
         return learning_rate
 
@@ -490,19 +495,19 @@ class ShowLR(tf.keras.callbacks.Callback):
 
 
 def create_model():
-    backbone = tf.keras.applications.RE(
-        weights="imagenet",
-        include_top=False,
-        input_shape=(HEIGHT, WIDTH, 3),
-        classes=CLASS_N,
-        pooling='avg'
-    )
-    # backbone = efn.EfficientNetB0(
+    # backbone = tf.keras.applications.InceptionV3(
+    #     weights="imagenet",
     #     include_top=False,
     #     input_shape=(HEIGHT, WIDTH, 3),
-    #     weights='noisy-student',
+    #     classes=CLASS_N,
     #     pooling='avg'
     # )
+    backbone = efn.EfficientNetB0(
+        include_top=False,
+        input_shape=(HEIGHT, WIDTH, 3),
+        weights='noisy-student',
+        pooling='avg'
+    )
 
     model = tf.keras.Sequential([
         backbone,
@@ -511,10 +516,12 @@ def create_model():
         tf.keras.layers.Dense(CLASS_N, kernel_initializer=tf.keras.initializers.he_normal(), activation='sigmoid')])
     learning_rate = CosineAnnealing(
         global_steps=cfg['model_params']['epoch'] * cfg['model_params']['iteration_per_epoch'],
-        learning_rate_max=1e-3,
+        learning_rate_max=6e-2,
         learning_rate_min=1e-6,
-        cycle=5 * cfg['model_params']['iteration_per_epoch'])
-    optimizer = tf.keras.optimizers.Adam(learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0001)
+        cycle=10)
+    # optimizer = tf.keras.optimizers.Adam(learning_rate, beta_1=0.9, beta_2=0.999, epsilon=1e-08, decay=0.0001)
+    optimizer = tf.keras.optimizers.SGD(learning_rate, momentum=0.9, decay=0.0001)
+    # optimizer = tfa.optimizers.SWA(optimizer, start_averaging=0, average_period=10)
     model.compile(optimizer=optimizer,
                   # loss=tfa.losses.SigmoidFocalCrossEntropy(from_logits=False),
                   loss=f1_loss,
@@ -611,7 +618,7 @@ def train(splits, split_id):
     # 生成训练集和验证集
     dataset = create_train_dataset(batchsize, idx_train_tf)
     vdataset = create_val_dataset(batchsize, idx_val_tf)
-    log_dir = "logs/profile/" + datetime.now().strftime("%Y%m%d-%H%M%S")
+    # log_dir = "logs/profile/" + datetime.now().strftime("%Y%m%d-%H%M%S")
     # tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1, profile_batch=2)
     history = model.fit(dataset,
                         batch_size=cfg['model_params']['batchsize_per_gpu'],
@@ -619,11 +626,12 @@ def train(splits, split_id):
                         epochs=cfg['model_params']['epoch'],
                         validation_data=vdataset,
                         callbacks=[
+                            # tfa.callbacks.AverageModelCheckpoint
                             tf.keras.callbacks.ModelCheckpoint(
                                 filepath='./model/model_best_%d.h5' % split_id,
                                 save_weights_only=True,
-                                monitor='val_f1_score_sk',
-                                mode='max',
+                                monitor=' val_loss',
+                                mode='min',
                                 save_best_only=True),
                             ShowLR(),
                             # tensorboard_callback
