@@ -77,9 +77,9 @@ id2array_with_healthy = {
 
 cfg = {
     'data_params': {
-        'img_shape': (256, 256),
-        'over_bound_img_shape': (300, 300),
-        'test_img_shape': (256, 256),
+        'img_shape': (512, 512),
+        'over_bound_img_shape': (600, 600),
+        'test_img_shape': (512, 512),
         'class_type': 5
     },
     'model_params': {

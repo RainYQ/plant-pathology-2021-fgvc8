@@ -19,3 +19,9 @@
 /model_attention_before/
 *.7z.*
 /logs/
+/extra_dataset/
+/source code package/tfrecords_512/
+/source code package/tfrecords_512_extra/
+/source code package/tfrecords_600/
+/source code package/tfrecords_600_extra/
+/source code package/model/
