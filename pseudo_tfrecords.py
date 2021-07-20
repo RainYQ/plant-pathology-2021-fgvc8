@@ -32,7 +32,7 @@ def pares_image(pic_name):
     label = np.array(pseudo_data.loc[pseudo_data["image"] == pic_name].iloc[:, 1:6], dtype=np.float32)[0]
     # image = tf.io.read_file("./plant-pathology-2020-fgvc7/all/" + str(pic_name))
     # image = tf.image.decode_jpeg(image, channels=3)
-    # tf.image.convert_image_dtype(image, tf.float32)
+    # image = tf.image.convert_image_dtype(image, tf.float32)
     # if cfg['model_params']['random_resize'] & USE_TTA:
     #     image = tf.image.resize(image, [HEIGHT_LARGE, WIDTH_LARGE])
     # else:

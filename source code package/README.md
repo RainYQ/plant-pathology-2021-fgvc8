@@ -7,6 +7,10 @@ py -3.8 ./tfrecords_generator.py --train_images './train_images/' --number_in_tf
 ```commandline
 py -3.8 ./tfrecords_generator.py --train_images './train_images/' --number_in_tfrecord 128 --label './train_without_rep.csv' --visualization --njob 16
 ```
+# pseudo labels generate
+```commandline
+py -3.8 ./pseudo_tfrecords.py --extra_train_images './plant-pathology-2020-fgvc7/all/' --number_in_tfrecord 128 --pseudo_labels './pseudo_data.csv'
+```
 # train
 - Default
 ```commandline
