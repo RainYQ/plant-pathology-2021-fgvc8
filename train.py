@@ -502,7 +502,7 @@ def create_model():
     #     classes=CLASS_N,
     #     pooling='avg'
     # )
-    backbone = efn.EfficientNetB0(
+    backbone = efn.EfficientNetB7(
         include_top=False,
         input_shape=(HEIGHT, WIDTH, 3),
         weights='noisy-student',
@@ -511,9 +511,13 @@ def create_model():
 
     model = tf.keras.Sequential([
         backbone,
-        GroupNormalization(group=32),
+        tf.keras.layers.BatchNormalization(),
         tf.keras.layers.Dropout(0.5),
-        tf.keras.layers.Dense(CLASS_N, kernel_initializer=tf.keras.initializers.he_normal(), activation='sigmoid')])
+        tf.keras.layers.Dense(128, kernel_initializer=tf.keras.initializers.he_normal(), activation='relu'),
+        tf.keras.layers.BatchNormalization(),
+        tf.keras.layers.Dropout(0.5),
+        tf.keras.layers.Dense(CLASS_N, kernel_initializer=tf.keras.initializers.he_normal(), activation='sigmoid')
+    ])
     learning_rate = CosineAnnealing(
         global_steps=cfg['model_params']['epoch'] * cfg['model_params']['iteration_per_epoch'],
         learning_rate_max=6e-2,
@@ -559,7 +563,11 @@ def plot_history(history, name):
 
 
 model = create_model()
-
+model.summary()
+tf.keras.utils.plot_model(model,
+                          to_file='model.png',  # 模型结构图保存名字
+                          show_layer_names=True,  # 是否显示层名
+                          show_shapes=True)  # 是否显示层形状
 
 # Run Inference On Val Dataset.
 # Save as "./submission_val_i.csv"&"./submission_with_prob_val_i.csv"
@@ -630,7 +638,7 @@ def train(splits, split_id):
                             tf.keras.callbacks.ModelCheckpoint(
                                 filepath='./model/model_best_%d.h5' % split_id,
                                 save_weights_only=True,
-                                monitor=' val_loss',
+                                monitor='val_loss',
                                 mode='min',
                                 save_best_only=True),
                             ShowLR(),

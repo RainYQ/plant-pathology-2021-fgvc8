@@ -175,15 +175,15 @@ def random_cutout(
     offset = tf.transpose([cutout_center_height, cutout_center_width], [1, 0])
     return cutout(images, mask_size, offset, constant_values)
 
-def seed_everything(seed):
-    random.seed(seed)
-    os.environ['PYTHONHASHSEED'] = str(seed)
-    np.random.seed(seed)
-    tf.random.set_seed(seed)
+# def seed_everything(seed):
+#     random.seed(seed)
+#     os.environ['PYTHONHASHSEED'] = str(seed)
+#     np.random.seed(seed)
+#     tf.random.set_seed(seed)
+#
+# SEED = 2021
 
-SEED = 2021
-
-seed_everything(SEED)
+# seed_everything(SEED)
 
 img_raw = open("./test_images/85f8cb619c66b863.jpg", 'rb').read()
 image = tf.image.decode_jpeg(img_raw)
