@@ -1,3 +1,11 @@
+# environment
+- Python 3.8.10
+- CUDA 11.0
+- CuDNN 8.2.1
+- Install requirements
+```commandline
+py -3.8 -m pip install -r requirements.txt
+```
 # tfrecords generate
 - Default
 ```commandline
