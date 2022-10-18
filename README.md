@@ -135,34 +135,71 @@
 * ResNet50 Model Predict ~2 minutes per model (512x512) <br/>
 ### F1-Score
 #### Micro-F1
-$$ \{P} = \frac{{\overline {TP} }}{{\overline {TP}  + \overline {FP} }}\ $$
-$$ \{R} = \frac{{\overline {TP} }}{{\overline {TP}  + \overline {FN} }}\ $$
-$$ \{F1} = 2 * \frac{{P * R}}{{P + R}}\ $$
+
+$$
+\{P} = \frac{{\overline {TP} }}{{\overline {TP}  + \overline {FP} }}\
+$$
+
+$$
+\{R} = \frac{{\overline {TP} }}{{\overline {TP}  + \overline {FN} }}\
+$$
+
+$$
+\{F1} = 2 * \frac{{P * R}}{{P + R}}\
+$$
+
 #### Macro-F1
-$$ \{P_i} = \frac{{{TP_i}}}{{{TP_i} + {FP_i}}}\ $$
-$$ \{R_i} = \frac{{{TP_i}}}{{{TP_i} + {FN_i}}}\ $$
-$$ \{F1} = 2 * \frac{{\overline {P}  * \overline {R} }}{{\overline {P}  + \overline {R} }}\ $$
+
+$$
+\{P_i} = \frac{{{TP_i}}}{{{TP_i} + {FP_i}}}\
+$$
+
+$$
+\{R_i} = \frac{{{TP_i}}}{{{TP_i} + {FN_i}}}\
+$$
+
+$$
+\{F1} = 2 * \frac{{\overline {P}  * \overline {R} }}{{\overline {P}  + \overline {R} }}\
+$$
+
 #### Samples-F1
 * Sample-Wise Multilabel Confusion Matrix <br/>
+
 $$
  \begin{bmatrix}
    TN & FP \\\\
    FN & TP \\\\
   \end{bmatrix}
 $$
+
 * Example: <br/>
   * y_true: [[1,1,0,0,0,0]] <br/>
   * y_pred: [[0,1,1,0,0,0]] <br/>
 * MCM: <br/>
+
 $$
  \begin{bmatrix}
    3 & 1 \\\\
    1 & 1 \\\\
   \end{bmatrix}
 $$
+
 * Calculate P R in sample_wise:  <br/>
-$$ \{P_1} = \frac{1}{{1 + 1}}\ $$
-$$ \{R_1} = \frac{1}{{1 + 1}}\  $$
-$$ \{F1_1} = 2 * \frac{{0.5 * 0.5}}{{0.5 + 0.5}}\ $$
+
+$$
+\{P_1} = \frac{1}{{1 + 1}}\
+$$
+
+$$
+\{R_1} = \frac{1}{{1 + 1}}\ 
+$$
+
+$$
+\{F1_1} = 2 * \frac{{0.5 * 0.5}}{{0.5 + 0.5}}\
+$$
+
 * Calculate Average P R F1 in sample_wise <br/>
-$$ \{F1} = 0.5$$
+
+$$
+\{F1} = 0.5
+$$
