@@ -167,8 +167,8 @@ $$
 
 $$
  \begin{bmatrix}
-   TN & FP \\\\
-   FN & TP \\\\
+   TN & FP \\
+   FN & TP \\
   \end{bmatrix}
 $$
 
@@ -179,8 +179,8 @@ $$
 
 $$
  \begin{bmatrix}
-   3 & 1 \\\\
-   1 & 1 \\\\
+   3 & 1 \\
+   1 & 1 \\
   \end{bmatrix}
 $$
 
